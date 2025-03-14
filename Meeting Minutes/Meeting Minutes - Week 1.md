@@ -18,8 +18,8 @@ Attendees:
 
 ## Conclusions
 1. Based on everyone's availability, weekly meetings are tentatively scheduled for:
-- Thursday 3:00-4:00 PM (Primary preference)
-- Friday 10:00-11:00 AM (Secondary preference)
+   - Thursday 3:00-4:00 PM (Primary preference)
+   - Friday 10:00-11:00 AM (Secondary preference)
 2. Development will initially focus on the web application, with potential iOS refactoring if time permits
 
 ## Action Items

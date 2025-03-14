@@ -5,7 +5,7 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 
 ## Project Scope
 - The project addresses the gap between AI optimization solutions and practical implementation
-- We'll be developing a visualization tool to guide workers in following AI-recommended packing arrangements
+- We'll be developing a web application to guide workers in following AI-recommended packing arrangements
 
 ## Team Structure
 - **Supervisor:** Lia Song
