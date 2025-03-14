@@ -1,2 +1,21 @@
-# LS1
-Warehouse Packing
+# LS1 Warehouse Packing Project Overview
+
+## Project Goal
+We're creating a visualization tool to help warehouse workers optimize how they pack items, transforming what is currently an experience-based process into one guided by optimization algorithms.
+
+## Project Scope
+- The project addresses the gap between AI optimization solutions and practical implementation
+- We'll be developing a visualization tool to guide workers in following AI-recommended packing arrangements
+
+## Team Structure
+- **Supervisor:** Lia Song
+- **Team Members:**
+  - Feinan Guo
+  - Jiahui Huang
+  - Ruxin Ma
+  - Shiyu Zhao
+  - Xuran Chen
+  - Jiabo Ye (External)
+
+## Meeting Schedule
+- Weekly meetings on Fridays from 16:00 to 17:00

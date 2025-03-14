@@ -9,6 +9,7 @@ Attendees:
 - Ruxin Ma
 - Shiyu Zhao
 - Xuran Chen
+- Jiabao Ye (External)
 
 ## Meeting Agenda
 1. Self-introductions and meeting team members and tutor
