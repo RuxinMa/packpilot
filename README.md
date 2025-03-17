@@ -15,7 +15,7 @@ We're creating a visualization tool to help warehouse workers optimize how they 
   - Ruxin Ma
   - Shiyu Zhao
   - Xuran Chen
-  - Jiabo Ye (External)
+  - Jiabao Ye (External)
 
 ## Meeting Schedule
 - Weekly meetings on Fridays from 16:00 to 17:00
