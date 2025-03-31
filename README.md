@@ -33,10 +33,8 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 ...
 
 ## Meeting Schedule
-- Weekly team meetings on Fridays from 16:00 to 17:00
-- Daily standup: ...
-- Sprint planning: First Monday of each sprint
-- Sprint review: Last Thursday of each sprint
+- Client meetings: Every two weeks, on Friday 16:00 (Sprint review & Next Sprint planning) 
+- Daily standup / Team Discussion: 
 
 
 ## Branch Structure
