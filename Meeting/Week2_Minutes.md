@@ -2,7 +2,7 @@
 ### Thursday 13/3/2025
 
 - Chair: 		Ruxin Ma
-- Secretary: 	Jiahui Hang
+- Secretary: 	Jiahui Huang
 - Members: 	Feinan Guo / Shiyu Zhao / Xuran Chen / Jiabao Ye (External)
 - Apologies: None
 
