@@ -1,4 +1,5 @@
-# PackPilot Warehouse Management System Requirements Document
+# Product Requirements Document
+### AI-Driven Warehouse Packing and Visualization (PackPoilt)
 
 ## Table of Contents
 - [1. Overview](#1-overview)
@@ -76,7 +77,7 @@ Warehouse Workers:
 
 ## 2. User Journey
 
-User Journey draft by: Ruxin Ma
+User Journey draft by: **Ruxin Ma**
 
 ### 2.1 Journey 1: Manager Perspective
 #### Manager Console - Add item
