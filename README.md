@@ -7,7 +7,6 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 - The project addresses the gap between AI optimization solutions and practical implementation
 - We'll be developing a web application to guide workers in following AI-recommended packing arrangements
 
-
 ## Project Timeline
 
 | Sprint | Weeks | Phase | Key Deliverables |
@@ -30,7 +29,17 @@ We're creating a visualization tool to help warehouse workers optimize how they 
   - Jiabao Ye (External)
 
 ## Tech Stack
-...
+
+| Category | Technologies |
+|----------|--------------|
+| **Frontend** | Language: TypeScript<br>Fraework: React<br>CSS: Tailwind CSS|
+| **Backend** | Language: Python<br>Fraework: Flask<br>API: RESTful API |
+| **Database** | MySQL |
+| **Visualization** | Blender |
+| **Deployment** | Frontend: Netlify<br>Backend: Railway/Render<br>CI/CD: GitHub Actions |
+| **Version Control** | Git with GitHub |
+| **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
+
 
 ## Meeting Schedule
 - Client meetings: Every two weeks, on Friday 16:00 (Sprint review & Next Sprint planning) 
