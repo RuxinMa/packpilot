@@ -414,7 +414,6 @@ AC7: The system correctly handles item quantity limits and text overflow situati
 - Item names are formatted as "Item" plus a 4-digit serial number, e.g. "Item0001".
 
 
-
 ### 3.3 Manager - Assign Task and Task History
 
 Written by: **Jiabao Ye**
@@ -424,20 +423,30 @@ Written by: **Jiabao Ye**
 ##### Task Assignment
 a. The system shall allow the manager to assign packing tasks to warehouse workers.
 
-b. Each task will include specific item details (ID, size, direction, special notes (e.g., fragile)).
+b. Each task will include specific item details (Item Name, Size (Format: Length*Width*Height), Direction, and Note).
 
-c. The system can set the size of the container directly.
+c. The manager initiates task assignment by clicking the "Assign Task" button, which displays an item selection window.
 
-d. The manager can go ahead and tick the items in the task when assigning the task.
+d. The manager must select at least one item before proceeding; the "Continue" button remains disabled until selection.
 
-e. Prior to submitting a task assignment, a confirmation window should pop up to ensure the accuracy.
+e. Upon clicking "Continue", a task assignment popup appears with:
+  - Auto-generated Task Name (uneditable)
+  - Worker selection dropdown (mandatory)
+  - Container dimensions: Length, Width, Height (all mandatory fields)
+  - "Assign" button (enabled only when all required fields are completed)
+
+f. Clicking "Assign" confirms the task, saves it to the database, and removes assigned items from the item list.
 
 ##### Task History
-a. The system should allow the manager to see the history of previously assigned tasks and the manager should be able to view the details of each task.
+a. The system shall allow the manager to view the history of previously assigned tasks by clicking the "Task History" button.
 
-b. Managers can use this feature to delete or re-assign tasks.
+b. The Task History popup displays:
+  - Task Name
+  - Worker
+  - Workload
+  - Status (Completed/Assigned)
 
-c. Managers can see the progress of each task.
+c. Managers can monitor the progress and status of all tasks.
 
 ##### Console Area
 a. Assign Task: Once selected, a pop-up window displays available warehouse workers and packing task assignments.
@@ -446,10 +455,17 @@ b. Task History: Opens a pop-up window showing the assigned tasks and the progre
 
 #### 3.3.2 Non-functional Requirements
 
-##### User Experience and Usability
-a. The User interface should be intuitive with clear instructions for all task assignments and task history adjustments.
+##### Data Validation
+a. Container dimensions (length, width, height) must be positive numbers.
 
-b. The pop-up window should provide an error message for invalid inputs.
+b. Worker selection is mandatory and must be valid.
+
+##### User Experience and Usability
+a. The interface is intuitive and clear with dynamic effects and smooth interaction.
+
+b. Effective error messages for incorrect or incomplete input.
+
+c. Vertical scrolling if the list of tasks or items extends beyond the viewing area.
 
 ##### Security
 a. Only authorized manager-level users can access task assignments and task history.
@@ -457,14 +473,16 @@ a. Only authorized manager-level users can access task assignments and task hist
 b. Changes to task or task history will be logged for audit purposes.
 
 ##### Testing and Validation
-a. Test scenarios must include assigning tasks, adjusting task history and ensuring consistency after application.
+a. Verify task assignments to ensure that the selected items are correctly assigned and removed from the item list.
 
-b. Validate the inputs in the task assignment and task history pop-ups.
+b. Verify that the task history shows the correct up-to-date information.
 
 #### 3.3.3 User Stories
-- As a manager, I wish I could choose a worker to accomplish the tasks I assign so that I could better assign tasks.
-- As a manager, I would like to be able to view the task history to identify issues or change preview tasks.
+- As a manager, I would like to easily assign tasks by selecting items and workers to effectively manage warehouse operations.
+- As a manager, I would like to have a clear view of past task assignments and their status in order to effectively monitor and manage workload assignments.
 
+#### 3.3.4 System Limitations
+- Task Name is auto-generated and cannot be edited by users
 
 
 ### 3.4 Worker Console Page
