@@ -7,17 +7,6 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 - The project addresses the gap between AI optimization solutions and practical implementation
 - We'll be developing a web application to guide workers in following AI-recommended packing arrangements
 
-## Project Timeline
-
-| Sprint | Weeks | Phase | Key Deliverables |
-|--------|-------|-------|-----------------|
-| Sprint 1 | 3-4 | Project Plan | Requirements Doc, Pitch Presentation, User Stories, Project Demo |
-| Sprint 2 | 5-6 | Technical Design | Architecture Doc, Tech Stack Selection, Database & API Design |
-| Sprint 3 | 7-8 | Development | Front-End & Back-End Dev, Database Setup, Milestone Report |
-| Sprint 4 | 9-10 | Development | Testing Plan, Feature Implementation, Alpha Version |
-| Sprint 5 | 11-12 | Test & Review | User Acceptance Test, Bug Fix, Beta Release |
-| Sprint 6 | 13-14 | Final Launch | Product Release, Final Demo, Final Report |
-
 ## Team Structure
 - **Supervisor:** Lia Song
 - **Team Members:**
