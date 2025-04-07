@@ -36,14 +36,14 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 | **Backend** | Language: Python<br>Fraework: Flask<br>API: RESTful API |
 | **Database** | MySQL |
 | **Visualization** | Blender |
-| **Deployment** | Frontend: Netlify<br>Backend: Railway/Render<br>CI/CD: GitHub Actions |
+| **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions |
 | **Version Control** | Git with GitHub |
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
 
 
 ## Meeting Schedule
-- Client meetings: Every two weeks, on Friday 16:00 (Sprint review & Next Sprint planning) 
-- Daily standup / Team Discussion: 
+- Client Meetings: Every two weeks, on Friday 16:15-17:00 (Sprint review & Next Sprint planning) 
+- Team Meetings: Every week, on Friday 17:00-18:00 (Additional meetings as needed) 
 
 
 ## Branch Structure
