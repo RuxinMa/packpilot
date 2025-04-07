@@ -1,13 +1,11 @@
 import './App.css';
-import LoginPage from './pages/auth/LoginPage';
+import Routes from './routes';
 
 function App() {
   return (
-    <>
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <LoginPage />
-      </div>
-    </>
+    <div className="min-h-screen bg-gray-100">
+      <Routes />
+    </div>
   );
 }
 
