@@ -57,5 +57,5 @@ Supervisors confirmed the list of individual assignments for the production of t
 - **No student meeting this week**; focus on completing the **Week 5 Business Case & Draft Plan submission**.  
 - Future client meetings will follow a **bi-weekly sprint schedule**, occurring in **Sprint end weeks (Weeks 6, 8, and 10)**, covering **sprint reviews & next sprint plans**.  
 
-**Next meeting will be on 11 April.**
+**Next meeting will be at 16:45 on 11 April.**
 
