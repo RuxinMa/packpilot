@@ -46,9 +46,8 @@ Supervisors confirmed the list of individual assignments for the production of t
 
 - **Part 1:** - Xuran, Jiabao  
 - **Part 2:**
-- 
-   **2.1:** - Ruxin, Feinan  
-   **2.2:** - Shiyu 
+  - **2.1:** - Ruxin, Feinan  
+  - **2.2:** - Shiyu 
 - Individual task deadlines are this Friday, and the work will be summarized and uploaded on Saturday.
 
 
