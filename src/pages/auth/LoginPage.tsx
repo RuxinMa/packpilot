@@ -27,7 +27,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
         <h1 className="text-2xl font-bold text-center mb-6">
           {mode === 'login' ? 'Login to Your Account' : 'Create a New Account'}

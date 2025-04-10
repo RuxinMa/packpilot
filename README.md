@@ -17,7 +17,7 @@ We're creating a visualization tool to help warehouse workers optimize how they 
   - Xuran Chen 
   - Jiabao Ye (External)
 
-## Tech Stack
+## Technology Stack
 
 | Category | Technologies |
 |----------|--------------|
@@ -28,6 +28,17 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 | **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions |
 | **Version Control** | Git with GitHub |
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
+
+
+
+## Project Timeline
+
+- Sprint 1 (Week2-4): Requirements Gathering & Project Plan
+- Sprint 2 (Week5-6): Technical Design
+- Sprint 3 (Week7-8): Development
+- Sprint 4 (Week9-10): Development
+- Sprint 5 (Week11-12): Testing & Refinement
+- Sprint 6 (Week13-14): Final Launch
 
 
 ## Dev Setup Instructions
@@ -57,20 +68,31 @@ We're creating a visualization tool to help warehouse workers optimize how they 
    The application will be available at http://localhost:5173
 
 
-## Meeting Schedule
-- Client Meetings: Every two weeks, on Friday 16:15-17:00 (Sprint review & Next Sprint planning) 
-- Team Meetings: Every week, on Friday 17:00-18:00 (Additional meetings as needed) 
 
+## Development Workflow
 
-## Branch Structure
+### Branch Structure
 - **main**: Web application production code
 - **docs**: All project documentation (project docs, meetings and timesheets)
 - **feature/[feature-name]**: Individual feature development
 - **bugfix/[bug-name]**: Bug fixes
 - **release/[version]**: Release preparation
 
+### Pull Request Process
+1. Create a feature/bugfix branch from main
+2. Implement your changes with appropriate tests
+3. Submit a PR to the develop main branch
+4. Request review from at least one team member
+5. Merge after approval and passing CI checks
 
-## Communication Channels
+
+## Commmunication Plan
+
+### Meeting Schedule
+- Client Meetings: Every two weeks, on Friday 16:15-17:00 (Sprint review & Next Sprint planning) 
+- Team Meetings: Every week, on Friday 17:00-18:00 (Additional meetings as needed) 
+
+### Communication Channels
 - Project management: GitHub-Kanban
 - Code repository: GitHub
 - Client meetings: Microsoft Teams
