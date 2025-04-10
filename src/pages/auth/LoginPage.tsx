@@ -27,44 +27,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="max-w-md w-full p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center mb-6">
-          {mode === 'login' ? 'Login to Your Account' : 'Create a New Account'}
-        </h1>
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-              Username
-            </label>
-            <input
-              id="name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2">
-              Role
-            </label>
-            <div className="flex space-x-16">
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="text-3xl font-bold text-center mb-6">
+        {mode === 'login' ? 'Login to Your Account' : 'Create a New Account'}
+      </h1>
+
+      <div className="max-w-md w-full p-10 bg-white rounded-lg shadow-lg">
+        <div className="mb-6">
+            <div className="flex justify-around">
               <label className="inline-flex items-center">
                 <input
                   type="radio"
@@ -88,7 +58,34 @@ const LoginPage: React.FC = () => {
               </label>
             </div>
           </div>
+      
+        <form onSubmit={handleSubmit}>
+          <div className="mb-8 flex gap-6 justify-center items-center">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+              Username
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
           
+          <div className="mb-8 flex gap-6 justify-center items-center">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
           <div className="flex items-center justify-between">
             <button
               type="submit"
