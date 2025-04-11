@@ -21,8 +21,8 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 
 | Category | Technologies |
 |----------|--------------|
-| **Frontend** | Language: TypeScript<br>Fraemwork: React<br>CSS: Tailwind CSS<br>Build Tool: Vite|
-| **Backend** | Language: Python<br>Fraemwork: Flask<br>API: RESTful API |
+| **Frontend** | Language: TypeScript<br>Framework: React<br>CSS: Tailwind CSS<br>Build Tool: Vite|
+| **Backend** | Language: Python<br>Framework: Flask<br>API: RESTful API |
 | **Database** | MySQL |
 | **Visualization** | Blender |
 | **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions |
