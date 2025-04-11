@@ -21,7 +21,7 @@
 | **Backend** | Language: Python<br>Framework: Flask<br>API: RESTful API |
 | **Database** | MySQL |
 | **Visualization** | Blender |
-| **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions |
+| **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions<br>Containerization: Docker |
 | **Version Control** | Git with GitHub |
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
 
