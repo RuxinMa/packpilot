@@ -11,6 +11,7 @@ online, at 4:15pm – 5:00 pm on 11 April
 
 ## Project Plan & Sprint Breakdown
 Confirmed a six-sprint schedule, with each sprint lasting two weeks.
+
 Current focus: Technical design (Sprint 2) and Division of labor in development (Sprint 3).
 
 ## Group Milestone
