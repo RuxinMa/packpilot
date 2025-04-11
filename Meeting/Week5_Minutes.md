@@ -44,9 +44,9 @@ Supervisors confirmed the list of individual assignments for the production of t
 - The first milestone is to implement some core functions, and the initial results should be demonstrated before the seventh week, if possible earlier than planned.
 - The following specific division of labor and deadlines have been set:
 
-- **Part 1:** - Xuran, Jiahui  
+- **Part 1:** - Xuran   
 - **Part 2:**
-  - **2.1:** - Ruxin, Feinan  
+  - **2.1:** - Ruxin, Feinan, Jiahui
   - **2.2:** - Shiyu 
 - Individual task deadlines are this Friday, and the work will be summarized and uploaded on Saturday.
 
