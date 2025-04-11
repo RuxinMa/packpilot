@@ -9,7 +9,7 @@ Supervisor: Lia Song
 
 Chair: Shiyu Zhao
 
-Secretary: 
+Secretary: Jiabao Ye
 
 Attendees:
 
