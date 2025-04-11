@@ -1,9 +1,5 @@
 # LS1 Warehouse Packing Project Overview
 
-## Project Goal
-We're creating a visualization tool to help warehouse workers optimize how they pack items, transforming what is currently an experience-based process into one guided by optimization algorithms.
-
-## Project Scope
 - The project addresses the gap between AI optimization solutions and practical implementation
 - We'll be developing a web application to guide workers in following AI-recommended packing arrangements
 
@@ -30,52 +26,14 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
 
 
-
-## Project Timeline
-
-- Sprint 1 (Week2-4): Requirements Gathering & Project Plan
-- Sprint 2 (Week5-6): Technical Design
-- Sprint 3 (Week7-8): Development
-- Sprint 4 (Week9-10): Development
-- Sprint 5 (Week11-12): Testing & Refinement
-- Sprint 6 (Week13-14): Final Launch
-
-
-## Dev Setup Instructions
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-- Git
-
-### Frontend Setup
-1. Clone the repository
-   ```bash
-   git clone https://github.com/your-org/LS1.git
-   cd LS1
-   git checkout main
-   ```
-
-2. Install dependencies
-   ```bash
-   npm install
-   ```
-
-3. Start the development server
-   ```bash
-   npm run dev
-   ```
-   The application will be available at http://localhost:5173
-
-
-
 ## Development Workflow
 
 ### Branch Structure
-- **main**: Web application production code
-- **docs**: All project documentation (project docs, meetings and timesheets)
-- **feature/[feature-name]**: Individual feature development
-- **bugfix/[bug-name]**: Bug fixes
+- **main**: Production branch containing stable releases, project overview, and official documentation (project docs, meeting minutes, and timesheets)
+- **frontend-dev**: Main development branch for all frontend components and UI features
+- **backend-dev**: Main development branch for all backend services and API endpoints
+- **feature/[feature-name]**: Short-lived branches for developing specific features
+- **bugfix/[bug-name]**: Short-lived branches for addressing specific issues
 - **release/[version]**: Release preparation
 
 ### Pull Request Process
@@ -84,7 +42,6 @@ We're creating a visualization tool to help warehouse workers optimize how they 
 3. Submit a PR to the develop main branch
 4. Request review from at least one team member
 5. Merge after approval and passing CI checks
-
 
 ## Commmunication Plan
 
