@@ -30,8 +30,8 @@
 
 ### Branch Structure
 - **main**: Production branch containing stable releases, project overview, and official documentation (project docs, meeting minutes, and timesheets)
-- **frontend-dev**: Main development branch for all frontend components and UI features
-- **backend-dev**: Main development branch for all backend services and API endpoints
+- **dev-frontend**: Main development branch for all frontend components and UI features
+- **dev-backend**: Main development branch for all backend services and API endpoints
 - **feature/[feature-name]**: Short-lived branches for developing specific features
 - **bugfix/[bug-name]**: Short-lived branches for addressing specific issues
 - **release/[version]**: Release preparation
