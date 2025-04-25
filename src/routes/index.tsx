@@ -1,7 +1,9 @@
 import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
+import RegisterPage from '../pages/auth/RegisterPage';
 import ManagerDashboardPage from '../pages/manager/DashboardPage';
 import WorkerDashboardPage from '../pages/worker/DashboardPage';
+// import NotFoundPage from '../pages/common/NotFoundPage';
 
 // Simple router configuration without authentication
 const router = createBrowserRouter([
@@ -14,6 +16,10 @@ const router = createBrowserRouter([
     element: <LoginPage />
   },
   {
+    path: '/register',
+    element: <RegisterPage />
+  },
+  {
     path: '/dashboard/manager',
     element: <ManagerDashboardPage />
   },
@@ -21,10 +27,10 @@ const router = createBrowserRouter([
     path: '/dashboard/worker',
     element: <WorkerDashboardPage />
   },
-  {
-    path: '*',
-    element: <Navigate to="/" replace />
-  }
+  // {
+  //   path: '*',
+  //   element: <NotFoundPage />
+  // }
 ]);
 
 const Routes = () => {

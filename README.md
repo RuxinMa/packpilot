@@ -46,30 +46,78 @@ This document provides comprehensive setup instructions and development guidelin
 
 ```
 src/
-├── assets/                 # Static assets
-│   ├── images/             # All image files
-│   │   ├── icons/          # UI icons
-│   │   ├── logos/          # Brand logos
-│   │   └── illustrations/  # Larger illustrations
-│   └── fonts/              # Custom font files
-├── components/             # Reusable UI components
-│   ├── common/             # Generic UI components
-│   ├── layout/             # Layout components
-│   └── features/           # Feature-specific components
-│       ├── manager/        # Components for manager interface
-│       └── worker/         # Components for worker interface
-├── pages/                  # Page components
-│   ├── auth/               # Authentication pages
-│   ├── manager/            # Manager dashboard pages
-│   └── worker/             # Worker dashboard pages
-├── routes/                 # Routing configuration
-├── services/               # API services and data fetching
-├── types/                  # TypeScript type definitions
-├── utils/                  # Utility functions
-├── App.tsx                 # Main App component
-├── main.tsx                # Application entry point
-└── index.css               # Global styles
+├── assets/                  # Static assets (images, icons)
+├── components/              # Reusable UI components
+│   ├── common/              # Shared components
+│   │   ├── Button.tsx                    
+│   │   ├── Modal.tsx                   
+│   ├── auth/                # Authentication components
+│   │   ├── LoginForm.tsx        
+│   │   └── RegisterForm.tsx      
+│   ├── manager/             # Manager-specific components
+│   │   ├── AddItem.tsx      
+│   │   ├── EditItem.tsx       
+│   │   ├── ItemList.tsx         
+│   │   ├── AssignTask.tsx    
+│   │   └── TaskHistory.tsx    
+│   └── worker/              # Worker-specific components
+│       ├── TaskItemView.tsx   
+│       ├── NavigationControls.tsx   
+│       └── ProgressTracker.tsx  
+├── pages/                   # Page components
+│   ├── auth/
+│   │   ├── LoginPage.tsx    
+│   │   └── RegisterPage.tsx 
+│   ├── manager/
+│   │   └── DashboardPage.tsx 
+│   ├── worker/
+│   │   └── DashboardPage.tsx 
+│   ├── common/
+│   │   └── NotFoundPage.tsx  
+├── contexts/                # React Context providers
+│   ├── AuthContext.tsx      
+│   ├── ItemContext.tsx      
+│   └── TaskContext.tsx      
+├── services/                # API integration
+│   ├── api.ts               
+│   ├── authService.ts       
+│   ├── managerService.ts   
+│   └── workerService.ts     
+├── hooks/                   # Custom React hooks
+│   ├── useAuth.ts           
+│   ├── useItems.ts          
+│   ├── useTasks.ts          
+│   └── useNavigation.ts     
+├── types/                   # TypeScript definitions      
+├── routes/                  # Routing configuration
+├── styles/                  
+├── utils/                   
+├── App.tsx                  # Root component
+└── index.tsx                # Application entry point
 ```
+
+## Development Workflow
+
+### 1. Environment Setup & Foundation ✅
+- 1.1: Project Initialization
+- 1.2: Design Project Structure 
+- 1.3: Create Basic Layout of Pages and Routes
+
+### 2. Static Components (UI-Only Phase)
+- 2.1 Common Components
+- 2.2 Authentication Components
+- 2.3 Modal Framework
+- 2.4 Manager Dashboard UI
+- 2.5 Worker Dashboard UI
+
+### 3. Routing & Navigation
+
+### 4. State Management & API Integration
+
+### 5. User Experience Enhancements
+
+### 6. Testing & Refinement
+
 
 ## Related Documentation
 

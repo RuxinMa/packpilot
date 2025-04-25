@@ -1,29 +1,32 @@
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
-import LoginForm from '../../components/auth/LoginForm';
+import RegisterForm from '../../components/auth/RegisterForm';
 
-const LoginPage: React.FC = () => {
+const RegisterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async (username: string, password: string, role: 'manager' | 'worker') => {
+  const handleRegister = async (
+    username: string, 
+    password: string, 
+    confirmPassword: string, 
+    role: 'manager' | 'worker'
+  ) => {
     setIsLoading(true);
     setError(null);
     
     try {
-      // TODO: Implement actual login logic with API
-      console.log('Login attempt:', { username, password, role });
+      // TODO: Implement actual registration logic with API
+      console.log('Registration attempt:', { username, password, confirmPassword, role });
       
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Redirect based on role would happen here
-      // For now just log success
-      console.log('Login successful');
+      // Redirect to login would happen here
+      console.log('Registration successful');
       
     } catch (err) {
-      setError('Invalid username or password');
-      console.error('Login error:', err);
+      setError('Registration failed. Please try again.');
+      console.error('Registration error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -34,19 +37,19 @@ const LoginPage: React.FC = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="mb-10 text-center text-4xl font-extrabold text-gray-900">Warehouse System</h1>
         <h2 className="text-center text-2xl font-bold text-gray-900">
-          Welcome Back!
+          Create A New Account
         </h2>
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <LoginForm 
-            onSubmit={handleLogin}
+          <RegisterForm 
+            onSubmit={handleRegister}
             isLoading={isLoading}
             error={error}
           />
           
-          {/* Todo: implement redirect to register page */}
+          {/* Todo: implement redirect to log in page */}
           
         </div>
       </div>
@@ -54,4 +57,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
