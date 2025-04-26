@@ -2,18 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useItems } from '../../hooks/useItems';
 
 // Import components
+import Header from '../../components/common/Header';
 import AddItem from '../../components/manager/AddItem';
 import EditItem from '../../components/manager/EditItem';
 import AssignTask from '../../components/manager/AssignTask';
 import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
-import LogoutConfirmModal from '../../components/common/LogoutModal';
+import UserLog from '../../components/common/UserLog';
 
 const ManagerDashboardPage: React.FC = () => {
   // State for controlling modals
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState<boolean>(false);
   
   // Hooks for data fetching
   const { getItems, items } = useItems();
@@ -40,35 +40,19 @@ const ManagerDashboardPage: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-3xl font-bold text-gray-800"
-              >
-                Warehouse Manager DashBoard
-              </h1>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-lg font-medium bg-blue-100 text-blue-800">
-                Manager View
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header title="Warehouse Manager Dashboard" viewType="Manager" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex h-[calc(100vh-160px)]">
           
           {/* Left Sidebar - Control Panel */}
-          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-6">
+          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
             {/* actions */}
             <div className="p-6 flex-auto">
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <button 
                   onClick={() => setOpenModal('addItem')}
                   className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -91,21 +75,7 @@ const ManagerDashboardPage: React.FC = () => {
             </div>
             
             {/* user log */}
-            <div className="mt-auto border-t border-gray-200 p-5 pt-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="h-10 w-10 rounded-full bg-gray-300"></div>
-                <div>
-                  <div className="font-medium text-xl">Manager</div>
-                </div>
-              </div>
-              <div className='mx-7'>
-                <button 
-                  onClick={() => setShowLogoutConfirm(true)}
-                  className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200">
-                  Log out
-                </button>
-              </div>
-            </div>
+            <UserLog userType="Worker" onLogout={handleLogout}/>
           </div>
           
           {/* Right Content - Item List */}
@@ -149,14 +119,6 @@ const ManagerDashboardPage: React.FC = () => {
         isOpen={openModal === 'taskHistory'}
         onClose={() => setOpenModal(null)}
       />
-
-      {/* Todo: Logout confirmation modal */}
-      <LogoutConfirmModal
-        isOpen={showLogoutConfirm}
-        onClose={() => setShowLogoutConfirm(false)}
-        onConfirm={handleLogout}
-      />
-
     </div>
   );
 };

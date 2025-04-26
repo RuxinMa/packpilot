@@ -61,9 +61,8 @@ src/
 │   │   ├── AssignTask.tsx    
 │   │   └── TaskHistory.tsx    
 │   └── worker/              # Worker-specific components
-│       ├── TaskItemView.tsx   
-│       ├── NavigationControls.tsx   
-│       └── ProgressTracker.tsx  
+│       ├── ItemDescription.tsx   
+│       └── ProgressBar.tsx  
 ├── pages/                   # Page components
 │   ├── auth/
 │   │   ├── LoginPage.tsx    
@@ -87,7 +86,6 @@ src/
 │   ├── useAuth.ts           
 │   ├── useItems.ts          
 │   ├── useTasks.ts          
-│   └── useNavigation.ts     
 ├── types/                   # TypeScript definitions      
 ├── routes/                  # Routing configuration
 ├── styles/                  
@@ -99,16 +97,8 @@ src/
 ## Development Workflow
 
 ### 1. Environment Setup & Foundation ✅
-- 1.1: Project Initialization
-- 1.2: Design Project Structure 
-- 1.3: Create Basic Layout of Pages and Routes
 
 ### 2. Static Components (UI-Only Phase)
-- 2.1 Common Components
-- 2.2 Authentication Components
-- 2.3 Modal Framework
-- 2.4 Manager Dashboard UI
-- 2.5 Worker Dashboard UI
 
 ### 3. Routing & Navigation
 

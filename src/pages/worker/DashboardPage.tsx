@@ -1,32 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+// Import components
+import Header from '../../components/common/Header';
+import ProgressBar from '../../components/worker/ProgressBar';
+import UserLog from '../../components/common/UserLog';
 
 const WorkerDashboardPage: React.FC = () => {
+  const [packingProgress, setPackingProgress] = useState({ current: 10, total: 50 });
+  
+  const handleLogout = () => {
+    // TODO: Implement actual logout logic here
+    console.log('User logged out');
+    // Redirect to login page or perform other logout actions
+    window.location.href = '/login';
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <h1 className="text-3xl font-bold text-gray-800">LS1 Warehouse Worker</h1>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-lg font-medium bg-blue-100 text-blue-800">
-                Worker View
-              </span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header title="Warehouse Worker Dashboard" viewType="Worker" />
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
         <div className="flex h-[calc(100vh-160px)]">
 
           {/* Left Sidebar - Control Panel */}
-          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-6">
-            {/* actions */}
+          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
             <div className="p-8 flex-auto">
+              {/* actions */}
+              {/* Todo: Implement actual packing actions */}
               <div className="space-y-6">
                 <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-md">
                   Next Item
@@ -34,26 +36,24 @@ const WorkerDashboardPage: React.FC = () => {
                 <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-md">
                   Previous Task
                 </button>
-                
+                {/* progress bar */}
+                <ProgressBar 
+                  current={packingProgress.current} 
+                  total={packingProgress.total} 
+                />
+              </div>
+
+              {/* Todo: Item Description a component (component/worker/ItemDescription) */}
+              <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
+                <div className="flex items-center justify-center h-36 text-gray-500">
+                  <p>item description</p>
+                </div>
               </div>
             </div>
             
-            {/* user log */}
-            <div className="mt-auto border-t border-gray-200 p-5 pt-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="h-10 w-10 rounded-full bg-gray-300"></div>
-                <div>
-                  <div className="font-medium text-xl">Username</div>
-                </div>
-              </div>
-              <div className='mx-7 '>
-                <button className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md">
-                  Log out
-                </button>
-              </div>
-              
-            </div>
-          </div>
+          {/* user log */}
+          <UserLog userType="Worker" onLogout={handleLogout}/>
+        </div>
           
           {/* Right Content - Visulalization */}
           <div className="flex flex-col flex-1 bg-white shadow-md rounded-lg ml-6 border border-gray-200 relative">
@@ -73,7 +73,6 @@ const WorkerDashboardPage: React.FC = () => {
               </div>
             </div>
           </div>
-    
         </div>
       </div>
     </div>
