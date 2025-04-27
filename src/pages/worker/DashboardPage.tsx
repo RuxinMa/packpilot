@@ -10,6 +10,13 @@ const WorkerDashboardPage: React.FC = () => {
   const [packingProgress, setPackingProgress] = useState({ current: 0, total: itemDatabase.length });
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
+  const [currentItem, setCurrentItem] = useState<null | {
+    id: string;
+    Inf: string;
+    width: number;
+    height: number;
+    depth: number;
+  }>(null);
 
   const handleLogout = () => {
     console.log('User logged out');
@@ -37,11 +44,19 @@ const WorkerDashboardPage: React.FC = () => {
           width: item.width,
           height: item.height,
           depth: item.depth,
-          color: 0xadd8e6, // 颜色固定浅蓝色！
+          color: 0xadd8e6,
           position: item.position,
         };
   
         threeSceneRef.current.addItem(newItemParams);
+  
+        setCurrentItem({
+          id: item.id,
+          Inf: item.Inf,
+          width: item.width,
+          height: item.height,
+          depth: item.depth,
+        });
   
         setPackingProgress((prev) => ({
           ...prev,
@@ -51,17 +66,38 @@ const WorkerDashboardPage: React.FC = () => {
     }
   };
   
+  
 
   const handlePreviousTask = () => {
     if (threeSceneRef.current) {
-      threeSceneRef.current.removeLastItem(); // 调用Three.js的删除方法
-      
-      setPackingProgress((prev) => ({
-        ...prev,
-        current: Math.max(prev.current - 1, 0),
-      }));
+      threeSceneRef.current.removeLastItem();
+  
+      setPackingProgress((prev) => {
+        const newCurrent = Math.max(prev.current - 1, 0);
+  
+        // 同步更新 currentItem
+        if (newCurrent > 0) {
+          const item = itemDatabase[newCurrent - 1]; 
+          setCurrentItem({
+            id: item.id,
+            Inf: item.Inf,
+            width: item.width,
+            height: item.height,
+            depth: item.depth,
+          });
+        } else {
+ 
+          setCurrentItem(null);
+        }
+  
+        return {
+          ...prev,
+          current: newCurrent,
+        };
+      });
     }
   };
+  
   
   
 
@@ -89,7 +125,7 @@ const WorkerDashboardPage: React.FC = () => {
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
                 onClick={handlePreviousTask} // 新增
               >
-                Previous Task
+                Previous Item
               </button>
                 {/* progress bar */}
                 <ProgressBar 
@@ -100,9 +136,20 @@ const WorkerDashboardPage: React.FC = () => {
 
               {/* Item Description */}
               <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
-                <div className="flex items-center justify-center h-36 text-gray-500">
-                  <p>item description</p>
-                </div>
+              <div className="flex flex-col justify-start h-48 p-2 text-gray-600 space-y-1">
+                {currentItem ? (
+                  <>
+                    <p><strong>Name:</strong> {currentItem.id}</p>
+                    <p><strong>Info:</strong> {currentItem.Inf}</p>
+                    <p><strong>Width:</strong> {currentItem.width}</p>
+                    <p><strong>Height:</strong> {currentItem.height}</p>
+                    <p><strong>Depth:</strong> {currentItem.depth}</p>
+                  </>
+                ) : (
+                  <p>No item selected.</p>
+                )}
+              </div>
+
               </div>
             </div>
             
