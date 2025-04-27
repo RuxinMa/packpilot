@@ -1,19 +1,63 @@
-import React, { useState } from 'react';
-
-// Import components
+import React, { useState, useRef } from 'react';
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
+import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 
 const WorkerDashboardPage: React.FC = () => {
-  const [packingProgress, setPackingProgress] = useState({ current: 10, total: 50 });
-  
+  const [packingProgress, setPackingProgress] = useState({ current: 1, total: 50 });
+  const [is2DView, setIs2DView] = useState(false);
+  const threeSceneRef = useRef<ThreeSceneHandle>(null);
+
   const handleLogout = () => {
-    // TODO: Implement actual logout logic here
     console.log('User logged out');
-    // Redirect to login page or perform other logout actions
     window.location.href = '/login';
   };
+
+  const toggleView = () => {
+    if (threeSceneRef.current) {
+      if (is2DView) {
+        threeSceneRef.current.switchToDefaultView();
+      } else {
+        threeSceneRef.current.switchToTopView();
+      }
+      setIs2DView(!is2DView);
+    }
+  };
+
+  const handleNextItem = () => {
+    if (threeSceneRef.current) {
+      threeSceneRef.current.addItem({
+        width: 1, 
+        height: 1, 
+        depth: 1, 
+        color: Math.random() * 0xffffff, // 随机颜色
+        position: [
+          Math.random() * 10, 
+          0.5, 
+          Math.random() * 6
+        ] // 随机放在场景范围内
+      });
+      
+      setPackingProgress((prev) => ({
+        ...prev,
+        current: Math.min(prev.current + 1, prev.total),
+      }));
+    }
+  };
+
+  const handlePreviousTask = () => {
+    if (threeSceneRef.current) {
+      threeSceneRef.current.removeLastItem(); // 调用Three.js的删除方法
+      
+      setPackingProgress((prev) => ({
+        ...prev,
+        current: Math.max(prev.current - 1, 0),
+      }));
+    }
+  };
+  
+  
 
   return (
     <div className="min-h-screen">
@@ -28,14 +72,19 @@ const WorkerDashboardPage: React.FC = () => {
           <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
             <div className="p-8 flex-auto">
               {/* actions */}
-              {/* Todo: Implement actual packing actions */}
               <div className="space-y-6">
-                <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-md">
-                  Next Item
-                </button>
-                <button className="w-full py-3 px-4 bg-blue-600 text-white rounded-md">
-                  Previous Task
-                </button>
+              <button 
+                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+                onClick={handleNextItem}  // 绑定事件
+              >
+                Next Item
+              </button>
+              <button 
+                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+                onClick={handlePreviousTask} // 新增
+              >
+                Previous Task
+              </button>
                 {/* progress bar */}
                 <ProgressBar 
                   current={packingProgress.current} 
@@ -43,7 +92,7 @@ const WorkerDashboardPage: React.FC = () => {
                 />
               </div>
 
-              {/* Todo: Item Description a component (component/worker/ItemDescription) */}
+              {/* Item Description */}
               <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
                 <div className="flex items-center justify-center h-36 text-gray-500">
                   <p>item description</p>
@@ -51,24 +100,29 @@ const WorkerDashboardPage: React.FC = () => {
               </div>
             </div>
             
-          {/* user log */}
-          <UserLog userType="Worker" onLogout={handleLogout}/>
-        </div>
+            {/* user log */}
+            <UserLog userType="Worker" onLogout={handleLogout}/>
+          </div>
           
-          {/* Right Content - Visulalization */}
+          {/* Right Content - Visualization */}
           <div className="flex flex-col flex-1 bg-white shadow-md rounded-lg ml-6 border border-gray-200 relative">
             <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
-              <h2 className="text-lg font-medium text-gray-800 ">
+              <h2 className="text-lg font-medium text-gray-800">
                 Packing View
               </h2>
             </div>
             <div className='flex flex-1 bg-indigo-100 p-4 items-center justify-center'>
-              <h1 className="text-xl text-gray-800">
-                Visualization
-              </h1>
+              <div className="w-full h-full">
+                <ThreeScene ref={threeSceneRef} />
+              </div>
               <div className="absolute bottom-8 right-8">
-                <button className="py-3 px-4 bg-indigo-500 rounded-md text-white hover:bg-indigo-700 shadow-md">
-                  3D View
+                <button 
+                  onClick={toggleView}
+                  className={`py-3 px-4 rounded-md text-white shadow-md ${
+                    is2DView ? 'bg-gray-500 hover:bg-gray-600' : 'bg-indigo-500 hover:bg-indigo-600'
+                  }`}
+                >
+                  {is2DView ? '3D View' : '2D View'}
                 </button>
               </div>
             </div>
