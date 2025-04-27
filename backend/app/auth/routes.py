@@ -37,7 +37,7 @@ async def login(user_data: schemas.UserLogin, response: Response, db: Session = 
     )
     
     # Set redirect URL based on role
-    redirect_url = "/manager/dashboard" if user.role == models.UserRole.MANAGER else "/worker/dashboard"
+    redirect_url = "/manager/dashboard" if user.role == models.UserRole.Manager else "/worker/dashboard"
     
     return {
         "status": "success",
