@@ -12,12 +12,12 @@ test_users = [
     {
         "username": "manager1",
         "password": "password123",
-        "role": UserRole.Manager
+        "role": UserRole.MANAGER
     },
     {
         "username": "worker1",
         "password": "password123",
-        "role": UserRole.Worker
+        "role": UserRole.WORKER
     }
 ]
 
