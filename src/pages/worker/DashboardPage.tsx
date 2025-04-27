@@ -27,7 +27,7 @@ const WorkerDashboardPage: React.FC = () => {
 
   const handleNextItem = () => {
     if (threeSceneRef.current) {
-      threeSceneRef.current.addItem({
+      const newItemParams = {
         width: 1, 
         height: 1, 
         depth: 1, 
@@ -36,15 +36,18 @@ const WorkerDashboardPage: React.FC = () => {
           Math.random() * 10, 
           0.5, 
           Math.random() * 6
-        ] // 随机放在场景范围内
-      });
-      
+        ]
+      };
+  
+      threeSceneRef.current.addItem(newItemParams); // 直接传参数，不用管是不是Group
+  
       setPackingProgress((prev) => ({
         ...prev,
         current: Math.min(prev.current + 1, prev.total),
       }));
     }
   };
+  
 
   const handlePreviousTask = () => {
     if (threeSceneRef.current) {
