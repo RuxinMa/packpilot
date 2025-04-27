@@ -3,9 +3,11 @@ import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
+import { itemDatabase } from '../../components/common/data';
+
 
 const WorkerDashboardPage: React.FC = () => {
-  const [packingProgress, setPackingProgress] = useState({ current: 1, total: 50 });
+  const [packingProgress, setPackingProgress] = useState({ current: 0, total: itemDatabase.length });
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
 
@@ -27,24 +29,25 @@ const WorkerDashboardPage: React.FC = () => {
 
   const handleNextItem = () => {
     if (threeSceneRef.current) {
-      const newItemParams = {
-        width: 1, 
-        height: 1, 
-        depth: 1, 
-        color: Math.random() * 0xffffff, // 随机颜色
-        position: [
-          Math.random() * 10, 
-          0.5, 
-          Math.random() * 6
-        ]
-      };
+      const currentIndex = packingProgress.current;
+      if (currentIndex < itemDatabase.length) {
+        const item = itemDatabase[currentIndex];
   
-      threeSceneRef.current.addItem(newItemParams); // 直接传参数，不用管是不是Group
+        const newItemParams = {
+          width: item.width,
+          height: item.height,
+          depth: item.depth,
+          color: 0xadd8e6, // 颜色固定浅蓝色！
+          position: item.position,
+        };
   
-      setPackingProgress((prev) => ({
-        ...prev,
-        current: Math.min(prev.current + 1, prev.total),
-      }));
+        threeSceneRef.current.addItem(newItemParams);
+  
+        setPackingProgress((prev) => ({
+          ...prev,
+          current: Math.min(prev.current + 1, prev.total),
+        }));
+      }
     }
   };
   
@@ -104,7 +107,7 @@ const WorkerDashboardPage: React.FC = () => {
             </div>
             
             {/* user log */}
-            <UserLog userType="Worker" onLogout={handleLogout}/>
+            <UserLog userType="Worker1" onLogout={handleLogout}/>
           </div>
           
           {/* Right Content - Visualization */}
