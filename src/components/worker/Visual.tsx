@@ -1,6 +1,7 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { roomDatabase } from '../../components/common/data';
 
 // Define types for the cube creation parameters
 interface CubeParams {
@@ -316,11 +317,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
     }
     
 
-
+    const roomin = roomDatabase[0]
     const room = createRoom(scene, {
-      width: 12,   // X轴方向长度
-      height: 4,   // Y轴方向高度
-      depth: 8,    // Z轴方向深度
+      width: roomin.width,   // X轴方向长度
+      height: roomin.height,   // Y轴方向高度
+      depth: roomin.depth,    // Z轴方向深度
       color: 0xE8FFE8, 
     });
 

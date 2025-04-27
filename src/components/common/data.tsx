@@ -1,4 +1,10 @@
-import Info from "three/src/renderers/common/Info.js";
+export const roomDatabase = [
+    {
+      width: 10,
+      height: 4,
+      depth: 5,
+    }
+]
 
 export const itemDatabase = [
     {
