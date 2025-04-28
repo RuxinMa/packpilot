@@ -5,10 +5,10 @@ import { roomDatabase } from '../../components/common/data';
 
 // Define types for the cube creation parameters
 interface CubeParams {
+  id:string;
   width: number;
   height: number;
   depth: number;
-  color?: number;
   position?: [number, number, number];
 }
 
@@ -144,17 +144,18 @@ export interface ThreeSceneHandle {
   removeLastItem: () => void;
 }
 
+
 const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const itemsRef = useRef<THREE.Group[]>([]);
   const perspectiveCameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const orthoCameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const activeCameraRef = useRef<THREE.Camera | null>(null);
-  
+  const selectedMesh = useRef<THREE.Mesh | null>(null);
+
   //expose to parent
   useImperativeHandle(ref, () => ({
     switchToTopView: () => {
@@ -269,6 +270,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
 
     // init
     const scene = new THREE.Scene();
+    console.log('success load scene')
     scene.background = new THREE.Color(0xf0f0f0); // 浅灰色背景
     sceneRef.current = scene;
     
@@ -300,12 +302,90 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
     // default Perspective camera
     activeCameraRef.current = perspectiveCamera;
     
-    
-    
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(width, height);
     rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
+    
+    renderer.domElement.addEventListener('click', (event) => {
+      console.log('canvas clicked');
+      const rect = renderer.domElement.getBoundingClientRect();
+      const x = ((event.clientX - rect.left)/rect.width)*2 - 1;
+      const y = -((event.clientY - rect.top)/rect.height)*2 + 1;
+      const mousePoint = new THREE.Vector2(x, y);
+      const raycaster = new THREE.Raycaster();
+    
+      const camera = activeCameraRef.current;
+      const scene  = sceneRef.current;
+      if (!camera || !scene) return;
+    
+      raycaster.setFromCamera(mousePoint, camera);
+      const intersects = raycaster.intersectObjects(scene.children, true);
+      const pickable = intersects.filter(intersect => {
+        const obj = intersect.object;
+    
+        // 1. 跳过地板和三面墙
+        if (obj.name === 'floor' || obj.name === 'wall1' || obj.name === 'wall2') {
+          return false;
+        }
+    
+        // 2. 跳过所有边框线（LineSegments）
+        if (obj instanceof THREE.LineSegments) {
+          return false;
+        }
+    
+        return true;
+      });
+      if (pickable.length === 0) {
+        // 如果没有选中任何物体，同时需要把之前选中的物体恢复颜色
+        if (selectedMesh.current) {
+          const prevMaterial = selectedMesh.current.material as THREE.MeshBasicMaterial;
+      
+          const lastGroup = itemsRef.current[itemsRef.current.length - 1];
+          const lastCube = lastGroup?.getObjectByName('cube') as THREE.Mesh;
+      
+          if (selectedMesh.current === lastCube) {
+            // 是最新物体 → 恢复浅蓝色
+            prevMaterial.color.set(0xadd8e6);
+          } else {
+            // 是旧物体 → 恢复灰色
+            prevMaterial.color.set(0x999999);
+          }
+      
+          selectedMesh.current = null;
+        }
+        console.log('未点击到有效物体');
+        return;
+      }
+      
+    
+      // 5. 否则 pickable[0] 就是我们想要的对象
+      const picked = pickable[0].object as THREE.Mesh;
+      console.log('拾取到：', picked);
+    
+      // 如果有上一个选中的物体，恢复它的颜色
+      if (selectedMesh.current && selectedMesh.current !== picked) {
+        const prevMaterial = selectedMesh.current.material as THREE.MeshBasicMaterial;
+
+        const lastGroup = itemsRef.current[itemsRef.current.length - 1];
+        const lastCube = lastGroup?.getObjectByName('cube') as THREE.Mesh;
+
+        if (selectedMesh.current === lastCube) {
+          prevMaterial.color.set(0xadd8e6); // 浅蓝色
+        } else {
+          prevMaterial.color.set(0x999999); // 灰色
+        }
+      }
+    
+      // 给当前选中的物体上色
+      const material = picked.material as THREE.MeshBasicMaterial;
+      material.color.set(0xffff00); // 高亮成黄色
+    
+      // 更新保存
+      selectedMesh.current = picked;
+
+    });
+    
 
     // controls
     if (perspectiveCameraRef.current) {

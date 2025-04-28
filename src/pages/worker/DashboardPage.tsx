@@ -75,7 +75,6 @@ const WorkerDashboardPage: React.FC = () => {
       setPackingProgress((prev) => {
         const newCurrent = Math.max(prev.current - 1, 0);
   
-        // 同步更新 currentItem
         if (newCurrent > 0) {
           const item = itemDatabase[newCurrent - 1]; 
           setCurrentItem({
@@ -117,13 +116,13 @@ const WorkerDashboardPage: React.FC = () => {
               <div className="space-y-6">
               <button 
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
-                onClick={handleNextItem}  // 绑定事件
+                onClick={handleNextItem}  
               >
                 Next Item
               </button>
               <button 
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
-                onClick={handlePreviousTask} // 新增
+                onClick={handlePreviousTask} 
               >
                 Previous Item
               </button>
