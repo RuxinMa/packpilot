@@ -2,10 +2,10 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { roomDatabase } from '../../components/common/data';
+import { itemDatabase } from '../../components/common/data';
 
 // Define types for the cube creation parameters
 interface CubeParams {
-  id:string;
   width: number;
   height: number;
   depth: number;
@@ -143,9 +143,15 @@ export interface ThreeSceneHandle {
   addItem: (params: CubeParams) => void;
   removeLastItem: () => void;
 }
+//new info item 
+interface ThreeSceneProps {
+  onItemClick?: (itemId: string) => void;
+  onEmptyClick?: () => void; 
+}
 
-
-const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
+const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) => {
+  //end here
+  
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -185,12 +191,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
       if (sceneRef.current) {
         const lastGroup = itemsRef.current[itemsRef.current.length - 1];
         if (lastGroup) {
-          // remove frame
-          const edge = lastGroup.getObjectByName('edge');
-          if (edge) {
-            lastGroup.remove(edge); 
-          }
-    
+       
           // change color to grey
           const cube = lastGroup.getObjectByName('cube') as THREE.Mesh;
           if (cube && (cube.material instanceof THREE.Material || Array.isArray(cube.material))) {
@@ -340,7 +341,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
         // 如果没有选中任何物体，同时需要把之前选中的物体恢复颜色
         if (selectedMesh.current) {
           const prevMaterial = selectedMesh.current.material as THREE.MeshBasicMaterial;
-      
           const lastGroup = itemsRef.current[itemsRef.current.length - 1];
           const lastCube = lastGroup?.getObjectByName('cube') as THREE.Mesh;
       
@@ -354,7 +354,13 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
       
           selectedMesh.current = null;
         }
+
+        if (props.onEmptyClick) {
+          props.onEmptyClick();
+        }
+        
         console.log('未点击到有效物体');
+
         return;
       }
       
@@ -362,6 +368,19 @@ const ThreeScene = forwardRef<ThreeSceneHandle>((props, ref) => {
       // 5. 否则 pickable[0] 就是我们想要的对象
       const picked = pickable[0].object as THREE.Mesh;
       console.log('拾取到：', picked);
+      
+      // item info click
+      if (picked && props.onItemClick) {
+        const group = picked.parent as THREE.Group;
+        const index = itemsRef.current.findIndex(item => item === group);
+        if (index !== -1) {
+          const item = itemDatabase[index];
+          if (item) {
+            props.onItemClick(item.id); // 传回id
+          }
+        }
+      }
+      
     
       // 如果有上一个选中的物体，恢复它的颜色
       if (selectedMesh.current && selectedMesh.current !== picked) {

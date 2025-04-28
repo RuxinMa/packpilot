@@ -57,11 +57,11 @@ const WorkerDashboardPage: React.FC = () => {
           height: item.height,
           depth: item.depth,
         });
-  
+
         setPackingProgress((prev) => ({
           ...prev,
           current: Math.min(prev.current + 1, prev.total),
-        }));
+        }));       
       }
     }
   };
@@ -164,9 +164,26 @@ const WorkerDashboardPage: React.FC = () => {
               </h2>
             </div>
             <div className='flex flex-1 bg-indigo-100 p-4 items-center justify-center'>
-              <div className="w-full h-full">
-                <ThreeScene ref={threeSceneRef} />
-              </div>
+              <ThreeScene 
+                ref={threeSceneRef}
+                onItemClick={(itemId) => {
+                  const item = itemDatabase.find(item => item.id === itemId);
+                  
+                  if (item) {
+                    setCurrentItem({
+                      id: item.id,
+                      Inf: item.Inf,
+                      width: item.width,
+                      height: item.height,
+                      depth: item.depth,
+                    });
+                  }
+                }}
+                onEmptyClick={() => {
+                  console.log('空白点击');
+
+                }}                
+              />
               <div className="absolute bottom-8 right-8">
                 <button 
                   onClick={toggleView}
