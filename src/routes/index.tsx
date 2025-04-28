@@ -3,7 +3,7 @@ import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ManagerDashboardPage from '../pages/manager/DashboardPage';
 import WorkerDashboardPage from '../pages/worker/DashboardPage';
-// import NotFoundPage from '../pages/common/NotFoundPage';
+import NotFoundPage from '../pages/common/NotFoundPage';
 
 // Simple router configuration without authentication
 const router = createBrowserRouter([
@@ -27,10 +27,10 @@ const router = createBrowserRouter([
     path: '/dashboard/worker',
     element: <WorkerDashboardPage />
   },
-  // {
-  //   path: '*',
-  //   element: <NotFoundPage />
-  // }
+  {
+    path: '*',
+    element: <NotFoundPage />
+  }
 ]);
 
 const Routes = () => {
