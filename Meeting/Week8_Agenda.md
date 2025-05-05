@@ -27,6 +27,8 @@ None.
 ## 2. Kanban progress and Sprint 3 Review
 - Front-End Dev (Ruxin, Jiahui, Shiyu).
 - Back-End Dev (Feinan, Xuran, Jiabao).
+- Database Setup
+- Dev Environment
 
 
 ## 3. Sprint 4 plan
