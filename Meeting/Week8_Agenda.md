@@ -24,13 +24,18 @@ Attendees:
 ## 1. Apologies
 None.
 
-## 2. Kanban Review
+## 2. Kanban progress and Sprint 3 Review
+- Front-End Dev (Ruxin, Jiahui, Shiyu).
+- Back-End Dev (Feinan, Xuran, Jiabao).
 
 
-## 3. 
+## 3. Sprint 4 plan
+- Continued development of front-end and back-end.
+- Complete the alpha version of the project and test it.
+- Do the Test Plan
 
-
-## 4. 
-
+## 4. Assignment 2 feedback argument
+Discuss feedback from Assignment 2 with supervisor and grading of Assignment 2
   
 ## 5. Additional Discussion (Optional)
+This Sunday, we will be completing our Milestone 1 report, reviewing our previously identified draft plan, and checking our own section for any risks or issues.
