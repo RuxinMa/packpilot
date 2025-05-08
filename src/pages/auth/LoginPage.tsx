@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
 
 const LoginPage: React.FC = () => {
@@ -45,8 +45,16 @@ const LoginPage: React.FC = () => {
             isLoading={isLoading}
             error={error}
           />
-          
-          {/* Todo: implement redirect to register page */}
+
+
+          <div className="mt-6 text-center text-sm text-gray-600">
+            Don’t have an account?{' '}
+            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              Sign up
+            </Link>
+          </div>
+
+             
           
         </div>
       </div>
@@ -54,4 +62,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage
