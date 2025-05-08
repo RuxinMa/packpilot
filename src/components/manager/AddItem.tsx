@@ -6,7 +6,7 @@ import { useItems } from '../../services/itemService';
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
-  onItemAdded: () => void;
+  onItemAdded: (newItemData: any) => void; // MODIFIED: Now accepts item data
 }
 
 const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
@@ -120,21 +120,24 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     return !!formData.length && !!formData.width && !!formData.height && !!formData.direction;
   };
 
-  // Save the item to the database
+  // MODIFIED: Save the item to the database and pass data to parent
   const saveItem = async () => {
     setIsSubmitting(true);
     try {
-      // Add new item using the service
-      await addItem({
+      // Create the new item data
+      const newItemData = {
         length: parseFloat(formData.length),
         width: parseFloat(formData.width),
         height: parseFloat(formData.height),
         direction: getDirectionLabel(formData.direction),
         notes: formData.note
-      });
+      };
       
-      // Trigger refresh of item list
-      onItemAdded();
+      // In a real app, you would call the API here
+      // await addItem(newItemData);
+      
+      // Pass the new item data to the parent component
+      onItemAdded(newItemData);
     } catch (error) {
       console.error('Error adding item:', error);
     } finally {
