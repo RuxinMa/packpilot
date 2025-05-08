@@ -180,9 +180,9 @@ const WorkerDashboardPage: React.FC = () => {
                   }
                 }}
                 onEmptyClick={() => {
-                  console.log('空白点击');
-
-                }}                
+                  console.log('点击了空白区域，准备切回最新物体');
+                }}
+                            
               />
               <div className="absolute bottom-8 right-8">
                 <button 

@@ -358,14 +358,12 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         if (props.onEmptyClick) {
           props.onEmptyClick();
         }
-        
+
         console.log('未点击到有效物体');
 
         return;
       }
       
-    
-      // 5. 否则 pickable[0] 就是我们想要的对象
       const picked = pickable[0].object as THREE.Mesh;
       console.log('拾取到：', picked);
       
