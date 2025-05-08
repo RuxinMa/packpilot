@@ -9,7 +9,7 @@ import NotFoundPage from '../pages/common/NotFoundPage';
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navigate to="/dashboard/worker" replace />
+    element: <Navigate to="/login" replace />
   },
   {
     path: '/login',
