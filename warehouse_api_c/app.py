@@ -15,9 +15,9 @@ db.init_app(app)
 app.register_blueprint(item_bp)
 app.register_blueprint(task_bp)
 
-@app.before_first_request
-def create_tables():
+with app.app_context():
     db.create_all()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
