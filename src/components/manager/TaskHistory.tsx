@@ -53,14 +53,6 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ isOpen, onClose }) => {
           </div>
         )}
       </div>
-      <div className="flex justify-end pt-4 border-t mt-4">
-        <button 
-          onClick={onClose}
-          className="px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200"
-        >
-          Close
-        </button>
-      </div>
     </Modal>
   );
 };
