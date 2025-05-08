@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useItems } from '../../hooks/useItems';
+import { useItems } from '../../services/itemService';
 
 // Import components
 import Header from '../../components/common/Header';
 import AddItem from '../../components/manager/AddItem';
 import EditItem from '../../components/manager/EditItem';
+import DeleteItem from '../../components/manager/DeleteItem';
 import AssignTask from '../../components/manager/AssignTask';
 import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
@@ -18,6 +19,7 @@ const ManagerDashboardPage: React.FC = () => {
   // Hooks for data fetching
   const { getItems, items } = useItems();
   
+  // Load items on component mount
   useEffect(() => {
     getItems();
   }, [getItems]);
@@ -28,19 +30,24 @@ const ManagerDashboardPage: React.FC = () => {
     setOpenModal('editItem');
   };
   
+  const handleDeleteItem = (itemId: number) => {
+    setSelectedItemId(itemId);
+    setOpenModal('deleteItem');
+  };
+  
   const handleRefreshItems = () => {
     getItems();
   };
 
   const handleLogout = () => {
-    // TODO: Implement actual logout logic here
+    // Implement actual logout logic here
     console.log('User logged out');
-    // Redirect to login page or perform other logout actions
+    // Redirect to login page
     window.location.href = '/login';
   };
-  
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header title="Warehouse Manager Dashboard" viewType="Manager" />
 
@@ -50,32 +57,33 @@ const ManagerDashboardPage: React.FC = () => {
           
           {/* Left Sidebar - Control Panel */}
           <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
-            {/* actions */}
+
+            {/* Action buttons */}
             <div className="p-6 flex-auto">
               <div className="space-y-6">
                 <button 
                   onClick={() => setOpenModal('addItem')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
                 >
                   Add Item
                 </button>
                 <button 
                   onClick={() => setOpenModal('assignTask')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
                 >
                   Assign Task
                 </button>
                 <button 
                   onClick={() => setOpenModal('taskHistory')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
                 >
                   Task History
                 </button>
               </div>
             </div>
             
-            {/* user log */}
-            <UserLog userType="Worker" onLogout={handleLogout}/>
+            {/* User log */}
+            <UserLog userType="Manager" onLogout={handleLogout}/>
           </div>
           
           {/* Right Content - Item List */}
@@ -89,6 +97,7 @@ const ManagerDashboardPage: React.FC = () => {
               <ItemList 
                 items={items} 
                 onEdit={handleEditItem}
+                onDelete={handleDeleteItem}
                 onRefresh={handleRefreshItems}
               />
             </div>
@@ -118,6 +127,13 @@ const ManagerDashboardPage: React.FC = () => {
       <TaskHistory
         isOpen={openModal === 'taskHistory'}
         onClose={() => setOpenModal(null)}
+      />
+      
+      <DeleteItem
+        isOpen={openModal === 'deleteItem'}
+        onClose={() => setOpenModal(null)}
+        itemId={selectedItemId}
+        onItemDeleted={handleRefreshItems}
       />
     </div>
   );

@@ -1,13 +1,39 @@
 // src/types/index.ts
 
-// Item related types
+// Item types
+export interface ItemDimensions {
+  length: number;
+  width: number;
+  height: number;
+}
+
+// Item as used internally in the application
 export interface Item {
   id: number;
+  name?: string; // Optional since some APIs may not return it
   length: number;
   width: number;
   height: number;
   orientation: string;
   remarks: string;
+}
+
+// Item as expected by the Add/Edit Item API
+export interface ItemInput {
+  length: number;
+  width: number;
+  height: number;
+  orientation: string;
+  remarks: string;
+}
+
+// Item as returned by the Worker APIs (Next/Previous Item)
+export interface ItemResponse {
+  item_id: number;
+  item_name: string;
+  size: string;
+  direction: string;
+  note: string;
 }
 
 // Task related types
@@ -28,10 +54,8 @@ export interface Worker {
 }
 
 // Container related types
-export interface Container {
-  length: number;
-  width: number;
-  height: number;
+export interface Container extends ItemDimensions {
+  // Reusing the ItemDimensions interface
 }
 
 // API response types
@@ -40,16 +64,13 @@ export interface ApiResponse {
   message: string;
 }
 
-export interface ItemResponse extends ApiResponse {
-  item_id?: number;
-}
-
-export interface TaskResponse extends ApiResponse {
-  task_id?: number;
-}
-
 export interface TaskHistoryResponse extends ApiResponse {
-  tasks?: Task[];
+  tasks?: {
+    task_name: string;
+    worker: string;
+    workload: number;
+    status: 'Completed' | 'Assigned';
+  }[];
 }
 
 export interface WorkerTasksResponse extends ApiResponse {

@@ -109,4 +109,5 @@ src/
 - [React Documentation](https://react.dev/docs/getting-started)
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [React Icon Documentation](https://react-icons.github.io/react-icons/icons/fa/)
 - [Vite Documentation](https://vitejs.dev/guide/)
