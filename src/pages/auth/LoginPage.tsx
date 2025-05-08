@@ -46,19 +46,15 @@ const LoginPage: React.FC = () => {
             error={error}
           />
 
-          <div className="mt-4">
-            <Link to="/register">
-              <button
-                type="button"
-                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
-              >
-                Register
-              </button>
+
+          <div className="mt-6 text-center text-sm text-gray-600">
+            Don’t have an account?{' '}
+            <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+              Sign up
             </Link>
           </div>
 
-          
-          {/* Todo: implement redirect to register page */}
+             
           
         </div>
       </div>
@@ -66,4 +62,4 @@ const LoginPage: React.FC = () => {
   );
 };
 
-export default LoginPage;
+export default LoginPage

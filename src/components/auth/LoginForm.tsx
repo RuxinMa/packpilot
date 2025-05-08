@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../common/Button';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (username: string, password: string, role: 'manager' | 'worker') => void;
@@ -11,6 +12,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'manager' | 'worker'>('worker');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,22 +79,29 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
         </div>
       </div>
 
+
       <div className='flex justify-around gap-4 items-center'>
-        <label htmlFor="password" className="block font-medium text-gray-700">
-          Password
-        </label>
-        <div className="mt-1 flex-1">
+        <label htmlFor="password" className="block font-medium text-gray-700">Password</label>
+        <div className="mt-1 flex-1 relative">
           <input
             id="password"
             name="password"
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
+          <button
+            type="button"
+            className="absolute right-2 top-2 text-gray-600 hover:text-gray-800"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         </div>
       </div>
+
       
       <div>
         <Button
