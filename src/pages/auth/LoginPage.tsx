@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
 
 const LoginPage: React.FC = () => {
@@ -45,6 +45,18 @@ const LoginPage: React.FC = () => {
             isLoading={isLoading}
             error={error}
           />
+
+          <div className="mt-4">
+            <Link to="/register">
+              <button
+                type="button"
+                className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+              >
+                Register
+              </button>
+            </Link>
+          </div>
+
           
           {/* Todo: implement redirect to register page */}
           
