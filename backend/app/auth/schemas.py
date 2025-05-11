@@ -31,7 +31,7 @@ class User(UserBase):
     user_id: int
 
     class Config:
-        from_attributes = True
+        from_orm = True
 
 class Token(BaseModel):
     access_token: str
