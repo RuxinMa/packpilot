@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from flask import request, jsonify
+from functools import wraps
 from .schemas import TokenData
 from .models import UserRole
 from ..core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -34,3 +36,22 @@ def verify_token(token: str) -> Optional[TokenData]:
         return TokenData(username=username, role=UserRole(role))
     except JWTError:
         return None 
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = None
+        auth_header = request.headers.get('Authorization')
+        
+        if auth_header and auth_header.startswith('Bearer '):
+            token = auth_header.split(' ')[1]
+            
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+            
+        token_data = verify_token(token)
+        if not token_data:
+            return jsonify({'message': 'Invalid token!'}), 401
+            
+        return f(token_data=token_data, *args, **kwargs)
+    return decorated 
