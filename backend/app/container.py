@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import Session
-from ..db.database import SessionLocal
-from ..auth.auth import token_required
-from ..models import Container
-from ..schemas import ContainerCreate
+
+from backend.app.auth.auth import token_required
+
+from backend.app.db.database import SessionLocal
+
+from backend.app.models import Container
+
+from backend.app.schemas import ContainerCreate
+
 
 bp = Blueprint('container', __name__)
 

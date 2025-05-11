@@ -1,8 +1,12 @@
 from flask import Blueprint, request, jsonify
 from datetime import timedelta
-from ..db.database import SessionLocal
-from . import models, schemas, auth
-from ..core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.db.database import SessionLocal
+from backend.app.models import User, UserRole
+# from backend.app.auth.schemas import UserLogin
+from backend.app.auth import auth
+from backend.app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+import backend.app.auth.schemas as schemas
+import backend.app.models as models
 
 bp = Blueprint('auth', __name__)
 
@@ -17,11 +21,30 @@ def login():
         request_data = request.get_json()
         user_data = schemas.UserLogin(**request_data)
         
+        
+
+        try:
+            user_role_enum = UserRole(user_data.role)
+        except ValueError:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid role provided",
+                "token": None,
+                "role": None,
+                "redirect_url": None
+            }), 400
+
         user = db.query(models.User).filter(
             models.User.username == user_data.username,
-            models.User.role == user_data.role
+            models.User.role == user_role_enum
         ).first()
-        
+
+        print("Looking for:", user_data.username, user_data.role)
+        print("Resolved role:", user_role_enum)
+        print("Found user:", user.username if user else "None")
+        if user:
+            print("Password check:", auth.verify_password(user_data.password, user.password))
+
         if not user or not auth.verify_password(user_data.password, user.password):
             return jsonify({
                 "status": "error",

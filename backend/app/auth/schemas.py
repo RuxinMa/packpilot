@@ -1,7 +1,8 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 import re
-from .models import UserRole
+from backend.app.models import UserRole
+
 
 class UserBase(BaseModel):
     username: str
