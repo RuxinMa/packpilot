@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.ext.declarative import declarative_base
-from ..core.config import DATABASE_URL
+from backend.app.core.config import DATABASE_URL
 from flask import g
 
 engine = create_engine(

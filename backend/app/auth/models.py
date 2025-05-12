@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String, Enum, CheckConstraint
 import enum
 import re
-from ..db.database import Base
+from backend.app.db.database import Base
+
+import backend.app.auth.models as models
+
+
 
 class UserRole(enum.Enum):
     Manager = "Manager"
@@ -9,6 +13,7 @@ class UserRole(enum.Enum):
 
 class User(Base):
     __tablename__ = "users"
+    
 
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     username = Column(String(20), unique=True, index=True, nullable=False)

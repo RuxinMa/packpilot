@@ -16,29 +16,5 @@ class ItemOut(ItemCreate):
     class Config:
         from_orm = True
 
-# ----- Task -----
-class TaskCreate(BaseModel):
-    worker_id: int
-    item_ids: List[int]
 
-class TaskOut(BaseModel):
-    task_id: int
-    task_name: str
-    worker_id: int
-    status: str
 
-    class Config:
-        from_orm = True
-
-# ----- Container -----
-class ContainerCreate(BaseModel):
-    length: float
-    width: float
-    height: float
-    label: Optional[str] = None
-
-class ContainerOut(ContainerCreate):
-    container_id: int
-
-    class Config:
-        from_orm = True

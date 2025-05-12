@@ -2,9 +2,10 @@ from flask import Flask
 from .auth.routes import bp as auth_bp
 from .db.database import engine, close_db
 from .auth import models
-from .routes.task import bp as task_bp
-from .routes.container import bp as container_bp
-from .routes.item import bp as item_bp
+
+from .item import bp as item_bp
+from backend.app.db.database import Base
+
 
 
 

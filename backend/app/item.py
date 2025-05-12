@@ -1,9 +1,14 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import Session
-from ..db.database import SessionLocal
-from ..auth.auth import token_required
-from ..models import Item
-from ..schemas import ItemCreate
+# from ..db.database import SessionLocal
+# from ..auth.auth import token_required
+# from ..models import Item
+# from ..schemas import ItemCreate
+from backend.app.db.database import SessionLocal
+from backend.app.auth.auth import token_required
+from backend.app.auth.models import Item
+from backend.app.schemas import ItemCreate
+
 
 bp = Blueprint('item', __name__)
 

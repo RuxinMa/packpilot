@@ -6,6 +6,8 @@ run: python create_test_users.py
 from app.db.database import SessionLocal
 from app.auth.models import User, UserRole
 from app.auth.auth import get_password_hash
+from backend.app.db.database import Base
+
 
 # test users data
 test_users = [
