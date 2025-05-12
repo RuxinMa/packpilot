@@ -15,6 +15,13 @@ bp = Blueprint('container', __name__)
 @bp.route("/api/manager/add_container", methods=["POST"])
 @token_required
 def add_container(token_data):
+    print("DEBUG: token_data.role =", token_data.role)
+
+    if token_data.role.value != "Manager":
+
+
+        return jsonify({"status": "error", "message": "Forbidden"}), 403
+
     db: Session = SessionLocal()
     try:
         container_data = request.get_json()
