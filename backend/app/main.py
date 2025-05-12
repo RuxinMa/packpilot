@@ -22,6 +22,10 @@ def create_app():
 
 app = create_app()
 
+print("\n✅ REGISTERED ROUTES:")
+for rule in app.url_map.iter_rules():
+    print(f"{rule.methods} {rule.rule}")
+
 # Create DB tables after app is created
 with app.app_context():
     Base.metadata.create_all(bind=engine)
