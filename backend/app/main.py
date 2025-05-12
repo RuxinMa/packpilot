@@ -11,19 +11,21 @@ def create_app():
     # Config
     app.config.from_mapping(SECRET_KEY="dev")
 
-    # Routes
+    # Register blueprints
     app.register_blueprint(auth_bp)
+    app.register_blueprint(item_bp)
+
+    # Teardown
     app.teardown_appcontext(close_db)
 
     return app
 
 app = create_app()
 
-# ✅ Make sure this runs AFTER `engine` is available and app is created
+# Create DB tables after app is created
 with app.app_context():
     Base.metadata.create_all(bind=engine)
 
-# Optional routes just for testing
+# For direct local runs (optional)
 if __name__ == "__main__":
-    app.register_blueprint(item_bp)
     app.run(debug=True)
