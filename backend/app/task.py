@@ -1,9 +1,13 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import Session
-from ..db.database import SessionLocal
-from ..auth.auth import token_required
-from ..models import Task, TaskItem, Item
-from ..schemas import TaskCreate
+# from ..db.database import SessionLocal
+# from ..auth.auth import token_required
+# from ..models import Task, TaskItem, Item
+# from ..schemas import TaskCreate
+from backend.app.db.database import SessionLocal
+from backend.app.auth.auth import token_required
+from backend.app.auth.models import Task, TaskItem, Item
+from backend.app.schemas import TaskCreate
 
 bp = Blueprint('task', __name__)
 

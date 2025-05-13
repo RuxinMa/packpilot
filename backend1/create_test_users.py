@@ -3,11 +3,9 @@ one-time script to create test users
 run: python create_test_users.py
 """
 
-from backend.app.db.database import SessionLocal
-from backend.app.auth.models import User, UserRole
-from backend.app.auth.auth import get_password_hash
-from backend.app.db.database import Base
-
+from app.db.database import SessionLocal
+from app.auth.models import User, UserRole
+from app.auth.auth import get_password_hash
 
 # test users data
 test_users = [

@@ -1,21 +1,6 @@
 from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, ForeignKey, Enum
-from backend.app.db.database import Base
-
+from ..db.database import Base
 import enum
-from sqlalchemy import Enum
-
-class UserRole(enum.Enum):
-    Manager = "Manager"
-    Worker = "Worker"
-
-class User(Base):
-    __tablename__ = "users"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), unique=True, nullable=False)
-    password = Column(String(128), nullable=False)
-    role = Column(Enum(UserRole), nullable=False)
-
 
 # ----- Item -----
 class Item(Base):
@@ -60,6 +45,3 @@ class Container(Base):
     width = Column(Numeric(5, 2), nullable=False)
     height = Column(Numeric(5, 2), nullable=False)
     label = Column(String(50), nullable=True)
-
-
-
