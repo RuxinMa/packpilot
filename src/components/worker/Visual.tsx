@@ -1,8 +1,8 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { roomDatabase } from '../../components/common/data';
-import { itemDatabase } from '../../components/common/data';
+import { roomDatabase } from '../../mocks/data';
+import { itemDatabase } from '../../mocks/data';
 
 // Define types for the cube creation parameters
 interface CubeParams {

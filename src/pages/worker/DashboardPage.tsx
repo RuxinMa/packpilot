@@ -3,7 +3,7 @@ import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
-import { itemDatabase } from '../../components/common/data';
+import { itemDatabase } from '../../mocks/data';
 
 
 const WorkerDashboardPage: React.FC = () => {
