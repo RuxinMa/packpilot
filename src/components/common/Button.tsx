@@ -57,28 +57,28 @@ const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   // Base styles
-  const baseClasses = 'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors rounded-md';
+  const baseClasses = 'inline-flex items-center justify-center font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors rounded-md box-border';
   
   // Size classes
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
+    sm: 'px-3 py-1.5 text-sm h-8',
+    md: 'px-4 py-2 text-md h-15',
+    lg: 'px-6 py-3 text-lg h-20'
   };
   
   // Variant classes (including active state variations)
   const variantClasses = {
     primary: {
-      default: 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300',
-      active: 'text-white bg-blue-800 hover:bg-blue-900 focus:ring-blue-700 disabled:bg-blue-300'
+      default: 'text-white bg-blue-600 hover:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300 border border-transparent shadow-none',
+      active: 'text-white bg-blue-800 hover:bg-blue-900 focus:ring-blue-700 disabled:bg-blue-300 border border-transparent shadow-none'
     },
     secondary: {
-      default: 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500 disabled:bg-gray-100 disabled:text-gray-400',
-      active: 'text-gray-800 bg-gray-300 hover:bg-gray-400 focus:ring-gray-500 disabled:bg-gray-100 disabled:text-gray-400'
+      default: 'text-gray-700 bg-gray-100 hover:bg-gray-200 focus:ring-gray-500 disabled:bg-gray-100 disabled:text-gray-400 border border-transparent shadow-none',
+      active: 'text-gray-800 bg-gray-300 hover:bg-gray-400 focus:ring-gray-500 disabled:bg-gray-100 disabled:text-gray-400 border border-transparent shadow-none'
     },
     outline: {
-      default: 'text-blue-700 bg-transparent border border-blue-600 hover:bg-blue-50 focus:ring-blue-500 disabled:text-blue-300 disabled:border-blue-300',
-      active: 'text-blue-800 bg-blue-50 border border-blue-700 hover:bg-blue-100 focus:ring-blue-500 disabled:text-blue-300 disabled:border-blue-300'
+      default: 'text-blue-700 bg-transparent border border-blue-600 hover:bg-blue-50 focus:ring-blue-500 disabled:text-blue-300 disabled:border-blue-300 shadow-none',
+      active: 'text-blue-800 bg-blue-50 border border-blue-700 hover:bg-blue-100 focus:ring-blue-500 disabled:text-blue-300 disabled:border-blue-300 shadow-none'
     }
   };
   
@@ -87,8 +87,10 @@ const Button: React.FC<ButtonProps> = ({
     ? 'cursor-not-allowed opacity-80' 
     : '';
   
-  // Full width class
-  const widthClass = fullWidth ? 'w-full' : '';
+  // Enhanced width class for consistent button sizing
+  const enhancedWidthClass = fullWidth 
+    ? 'w-full' 
+    : 'w-[140px] justify-center'; // Fixed width for all buttons
   
   // Combined classes
   const buttonClasses = `
@@ -96,7 +98,7 @@ const Button: React.FC<ButtonProps> = ({
     ${sizeClasses[size]}
     ${active ? variantClasses[variant].active : variantClasses[variant].default}
     ${loadingClasses}
-    ${widthClass}
+    ${enhancedWidthClass}
     ${className}
   `;
   
