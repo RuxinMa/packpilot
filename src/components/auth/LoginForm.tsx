@@ -13,15 +13,43 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'manager' | 'worker'>('worker');
   const [showPassword, setShowPassword] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const validateForm = (): boolean => {
+    if (username.length < 5 || username.length > 20) {
+      setValidationError('Username must be 5-20 characters');
+      return false;
+    }
+
+    if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+      setValidationError('Username can only contain alphanumeric and underscores.');
+      return false;
+    }
+
+    if (password.trim() === '') {
+      setValidationError('Please enter the password');
+      return false;
+    }
+
+    setValidationError(null);
+    return true;
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(username, password, role);
+    
+    // check the form valid
+    if (validateForm()) {
+      onSubmit(username, password, role);
+    }
   };
+
+  const displayError = error || validationError;
 
   return (
     <form className="space-y-8" onSubmit={handleSubmit}>
-      {error && (
+      {displayError && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="flex">
             <div className="ml-3">
@@ -73,7 +101,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
             type="text"
             required
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              setValidationError(null); 
+            }}
             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
         </div>
@@ -89,7 +120,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit, isLoading, error }) => 
             type={showPassword ? 'text' : 'password'}
             required
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setValidationError(null); 
+            }}
             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           />
           <button

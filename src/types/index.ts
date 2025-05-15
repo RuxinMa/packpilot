@@ -1,5 +1,7 @@
 // src/types/index.ts
 
+export * from './auth';
+
 // Item types
 export interface ItemDimensions {
   length: number;

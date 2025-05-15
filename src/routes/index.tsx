@@ -1,40 +1,39 @@
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
 import RegisterPage from '../pages/auth/RegisterPage';
 import ManagerDashboardPage from '../pages/manager/DashboardPage';
 import WorkerDashboardPage from '../pages/worker/DashboardPage';
 import NotFoundPage from '../pages/common/NotFoundPage';
 
-// Simple router configuration without authentication
-const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <Navigate to="/login" replace />
-  },
-  {
-    path: '/login',
-    element: <LoginPage />
-  },
-  {
-    path: '/register',
-    element: <RegisterPage />
-  },
-  {
-    path: '/dashboard/manager',
-    element: <ManagerDashboardPage />
-  },
-  {
-    path: '/dashboard/worker',
-    element: <WorkerDashboardPage />
-  },
-  {
-    path: '*',
-    element: <NotFoundPage />
-  }
-]);
-
-const Routes = () => {
-  return <RouterProvider router={router} />;
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route 
+        path="/" 
+        element={<Navigate to="/login" replace />} 
+      />
+      <Route 
+        path="/login" 
+        element={<LoginPage />} 
+      />
+      <Route 
+        path="/register" 
+        element={<RegisterPage />} 
+      />
+      <Route 
+        path="/dashboard/manager" 
+        element={<ManagerDashboardPage />} 
+      />
+      <Route 
+        path="/dashboard/worker" 
+        element={<WorkerDashboardPage />} 
+      />
+      <Route 
+        path="*" 
+        element={<NotFoundPage />} 
+      />
+    </Routes>
+  );
 };
 
-export default Routes;
+export default AppRoutes;

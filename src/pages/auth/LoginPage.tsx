@@ -1,32 +1,22 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
+import { useAuthContext } from '../../contexts/AuthContext';
+// import { useMockAuthContext } from '../../mocks/MockAuthContext';
 
 const LoginPage: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { login, isLoading, error, isAuthenticated, role } = useAuthContext();
+  const navigate = useNavigate();
+    
+  // if user already logged, redireact to certain page
+  useEffect(() => {
+    if (isAuthenticated && role) {
+      navigate(`/dashboard/${role.toLowerCase()}`);
+    }
+  }, [isAuthenticated, role, navigate]);
 
   const handleLogin = async (username: string, password: string, role: 'manager' | 'worker') => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      // TODO: Implement actual login logic with API
-      console.log('Login attempt:', { username, password, role });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect based on role would happen here
-      // For now just log success
-      console.log('Login successful');
-      
-    } catch (err) {
-      setError('Invalid username or password');
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    await login(username, password, role)
   };
 
   return (
@@ -46,15 +36,12 @@ const LoginPage: React.FC = () => {
             error={error}
           />
 
-
           <div className="mt-6 text-center text-sm text-gray-600">
             Don’t have an account?{' '}
             <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Sign up
             </Link>
           </div>
-
-             
           
         </div>
       </div>
