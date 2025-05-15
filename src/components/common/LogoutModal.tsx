@@ -19,17 +19,18 @@ const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
       onClose={onClose}
       title="Confirm Logout"
     >
-      <div className="flex flex-col items-center space-y-4 px-4 py-2">
-        <p className="text-gray-700 text-base text-center">
+      <div className="flex flex-col items-center space-y-4 px-4 py-4">
+        <p className="text-gray-700 text-xl text-center mb-4">
           Are you sure you want to log out?
         </p>
 
-        <div className="flex justify-center space-x-4 mt-2">
+
+        <div className="flex justify-center space-x-16">
           <Button onClick={onClose} variant="secondary">
             Cancel
           </Button>
           <Button onClick={onConfirm} variant="primary">
-            Logout
+            Log Out
           </Button>
         </div>
       </div>

@@ -1,4 +1,6 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../contexts/AuthContext';
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
@@ -7,6 +9,9 @@ import { itemDatabase } from '../../mocks/data';
 
 
 const WorkerDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthContext();
+
   const [packingProgress, setPackingProgress] = useState({ current: 0, total: itemDatabase.length });
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
@@ -19,8 +24,9 @@ const WorkerDashboardPage: React.FC = () => {
   }>(null);
 
   const handleLogout = () => {
+    logout();
     console.log('User logged out');
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   const toggleView = () => {

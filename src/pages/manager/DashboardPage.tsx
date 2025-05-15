@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-// import { useItems } from '../../services/itemService';
+import { useNavigate } from 'react-router-dom';
+import { useAuthContext } from '../../contexts/AuthContext';
 
 // Import components
 import Header from '../../components/common/Header';
@@ -11,56 +12,13 @@ import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
 
-// Mock data for testing
-const mockItems = [
-  { 
-    id: 1, 
-    length: 50, 
-    width: 30, 
-    height: 20, 
-    direction: 'Face up', 
-    notes: 'Fragile item', 
-    createdAt: new Date('2025-05-01T10:30:00')
-  },
-  { 
-    id: 2, 
-    length: 100, 
-    width: 45, 
-    height: 35, 
-    direction: 'Face down', 
-    notes: 'Heavy box', 
-    createdAt: new Date('2025-05-03T14:15:00')
-  },
-  { 
-    id: 3, 
-    length: 75, 
-    width: 60, 
-    height: 40, 
-    direction: 'Side A', 
-    notes: '', 
-    createdAt: new Date('2025-05-05T09:45:00')
-  },
-  { 
-    id: 4, 
-    length: 120, 
-    width: 80, 
-    height: 50, 
-    direction: 'Side B', 
-    notes: '', 
-    createdAt: new Date('2025-05-07T16:20:00')
-  },
-  { 
-    id: 5, 
-    length: 90, 
-    width: 65, 
-    height: 45, 
-    direction: 'Face up', 
-    notes: 'Kitchen appliance', 
-    createdAt: new Date('2025-05-08T11:10:00')
-  }
-];
+// Import Mock data
+import { mockItems } from '../../mocks/managerItems';
 
 const ManagerDashboardPage: React.FC = () => {
+  const navigate = useNavigate();
+  const { logout } = useAuthContext();
+  
   // State for controlling modals
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
@@ -72,12 +30,7 @@ const ManagerDashboardPage: React.FC = () => {
   // Hooks for data fetching (using mock data for now)
   // const { getItems, items } = useItems();
   const [items, setItems] = useState(mockItems);
-  
-  // Load items on component mount
-  // useEffect(() => {
-  //   getItems();
-  // }, [getItems]);
-  
+
   // Handler functions
   const handleEditItem = (itemId: number) => {
     setSelectedItemId(itemId);
@@ -154,10 +107,11 @@ const ManagerDashboardPage: React.FC = () => {
   };
 
   const handleLogout = () => {
+    logout();
     // Implement actual logout logic here
     console.log('User logged out');
     // Redirect to login page
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   return (
