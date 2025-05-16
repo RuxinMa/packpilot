@@ -37,6 +37,107 @@ Adds a new item to a container. Only users with the `Manager` role can access th
   "remarks": "Test item from curl"
 }
 ```
+
+---
+
+### ✅ Success Response
+
+- **Status Code**: `200 OK`
+
+```json
+{
+  "status": "success",
+  "message": "Item added",
+  "item_id": 1
+}
+```
+
+---
+
+### ❌ Error Responses
+
+#### 400 Bad Request – Validation Failed
+
+```json
+{
+  "status": "error",
+  "message": "Validation failed"
+}
+```
+
+#### 401 Unauthorized – Missing or Invalid Token
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+#### 403 Forbidden – User Not Manager
+
+```json
+{
+  "status": "error",
+  "message": "Forbidden"
+}
+```
+
+---
+
+## 🧪 Test Accounts
+
+| Username  | Password     | Role    |
+|-----------|--------------|---------|
+| manager1  | password123  | Manager |
+| worker1   | password123  | Worker  |
+
+---
+
+## 🧰 Mock Data for Frontend Testing
+
+### ✅ Mock Add Item Request
+
+```json
+{
+  "length": 100.0,
+  "width": 50.0,
+  "height": 40.0,
+  "orientation": "Face Down",
+  "remarks": "Mock test item"
+}
+```
+
+### ✅ Mock Success Response
+
+```json
+{
+  "status": "success",
+  "message": "Item added",
+  "item_id": 1
+}
+```
+
+### ❌ Mock Forbidden Response (Worker Token)
+
+```json
+{
+  "status": "error",
+  "message": "Forbidden"
+}
+```
+
+### ❌ Mock Unauthorized Response (Missing Token)
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+---
+
 ### Quick Curl Testing Commands
 
 ```json
@@ -51,4 +152,10 @@ Adds a new item to a container. Only users with the `Manager` role can access th
 
 }
 ```
+
+## 🧠 Developer Notes
+
+- Frontend should provide field-level validation before submitting.
+- Orientation defaults to `"Face Up"` if not provided.
+- All error messages follow a consistent structure with `status` and `message` fields.
 

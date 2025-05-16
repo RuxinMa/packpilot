@@ -35,6 +35,106 @@ Assigns a task to a worker. Only users with the `Manager` role can access this e
   "deadline": "2025-05-20T17:00:00"
 }
 ```
+
+---
+
+### ✅ Success Response
+
+- **Status Code**: `200 OK`
+
+```json
+{
+  "status": "success",
+  "message": "Task assigned",
+  "task_id": 1
+}
+```
+
+---
+
+### ❌ Error Responses
+
+#### 400 Bad Request – Validation Failed
+
+```json
+{
+  "status": "error",
+  "message": "Validation failed"
+}
+```
+
+#### 401 Unauthorized – Missing or Invalid Token
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+#### 403 Forbidden – User Not Manager
+
+```json
+{
+  "status": "error",
+  "message": "Forbidden"
+}
+```
+
+---
+
+## 🧪 Test Accounts
+
+| Username  | Password     | Role    |
+|-----------|--------------|---------|
+| manager1  | password123  | Manager |
+| worker1   | password123  | Worker  |
+
+---
+
+## 🧰 Mock Data for Frontend Testing
+
+### ✅ Mock Assign Task Request
+
+```json
+{
+  "task_name": "Label container B",
+  "container_id": 2,
+  "assigned_to": "worker1",
+  "deadline": "2025-06-01T12:00:00"
+}
+```
+
+### ✅ Mock Success Response
+
+```json
+{
+  "status": "success",
+  "message": "Task assigned",
+  "task_id": 3
+}
+```
+
+### ❌ Mock Forbidden Response (Worker Token)
+
+```json
+{
+  "status": "error",
+  "message": "Forbidden"
+}
+```
+
+### ❌ Mock Unauthorized Response (Missing Token)
+
+```json
+{
+  "status": "error",
+  "message": "Invalid token"
+}
+```
+
+---
+
 ### Quick Curl Testing Commands
 
 ```json
@@ -49,3 +149,8 @@ Assigns a task to a worker. Only users with the `Manager` role can access this e
 
 }
 ```
+## 🧠 Developer Notes
+
+- Frontend should provide field-level validation before submitting.
+- Orientation defaults to `"Face Up"` if not provided.
+- All error messages follow a consistent structure with `status` and `message` fields.
