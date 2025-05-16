@@ -2,7 +2,7 @@
 
 ## Base URL
 
-For development: `http://localhost:5000`
+For development: `http://localhost:8000`
 
 ## Authentication
 
@@ -125,6 +125,20 @@ For development and testing purposes, you can use the following accounts:
 {
   "status": "error",
   "message": "Invalid token"
+}
+```
+### Quick Curl Testing Commands
+
+```json
+{
+  "Start the port": "PYTHONPATH=. /Users/calvinchen/anaconda3/bin/python backend/wsgi.py",
+  
+  "Creat test users (On a different terminal)": "PYTHONPATH=. /Users/calvinchen/anaconda3/bin/python backend/create_test_users.py",
+
+  "Getting Token with Login (Manager token)": "curl -X POST http://127.0.0.1:8000/api/auth/token   -H "Content-Type: application/json"   -d '{"username": "manager1", "password": "password123", "role": "Manager"}'",
+  
+  "Add Container (Replace the word TOKEN with actual token from last step)":"curl -X POST http://127.0.0.1:8000/api/manager/add_container \>   -H "Authorization: Bearer TOKEN" \>   -H "Content-Type: application/json" \>   -d '{>     "length": 120.0,>     "width": 80.0,>     "height": 60.0,>     "label": "Manager test container">   }'"
+
 }
 ```
 
