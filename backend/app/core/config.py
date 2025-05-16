@@ -10,4 +10,4 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 # Database Configuration
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///backend/app.db")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./app.db") 
