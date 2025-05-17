@@ -13,7 +13,7 @@ import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
 
 // Import Mock data
-import { mockItems } from '../../mocks/ManagerItems';
+import { mockItems } from '../../mocks/ManagerDashboard';
 
 const ManagerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
