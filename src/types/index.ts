@@ -40,10 +40,8 @@ export interface ItemResponse {
 
 // Task related types
 export interface Task {
-  task_id: number;
   task_name: string;
   worker: string;
-  worker_id: number;
   workload: number;
   status: 'Completed' | 'Assigned';
   items: Item[];

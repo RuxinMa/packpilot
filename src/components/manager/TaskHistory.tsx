@@ -1,6 +1,6 @@
-// src/components/manager/TaskHistory.tsx
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
+import { mockTaskHistory } from '../../mocks/ManagerDashboard';
 
 interface Task {
   task_name: string;
@@ -21,14 +21,21 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setIsLoading(true);
-      // API call to fetch task history will be implemented later
-      // For now, just simulate loading state
+      // Simulating API call with mock data
       setTimeout(() => {
         setIsLoading(false);
-        setTasks([]);
+        // Sorting by task name in descending order
+        const sortedTasks = [...mockTaskHistory].sort((a, b) => 
+          b.task_name.localeCompare(a.task_name)
+        );
+        setTasks(sortedTasks);
       }, 500);
     }
   }, [isOpen]);
+
+  const formatTaskName = (taskName: string): string => {
+    return taskName.replace(/^Task-/, '');
+  };
 
   return (
     <Modal
@@ -39,7 +46,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ isOpen, onClose }) => {
       <div className="min-h-[300px]">
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
-            <p className="text-gray-500">Loading task history...</p>
+            <p className="text-gray-500">Loading Task History...</p>
           </div>
         ) : tasks.length === 0 ? (
           <div className="flex justify-center items-center h-64">
@@ -48,7 +55,44 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({ isOpen, onClose }) => {
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              {/* Table content will be implemented later */}
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Task
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Worker
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Workload
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {tasks.map((task, index) => (
+                  <tr key={index}>
+                    <td className="px-3 py-4 whitespace-nowrap text-xs font-medium text-gray-500">
+                      {formatTaskName(task.task_name)}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {task.worker}
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {task.workload} items
+                    </td>
+                    <td className="px-3 py-4 whitespace-nowrap text-sm">
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                        task.status === 'Completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {task.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
         )}

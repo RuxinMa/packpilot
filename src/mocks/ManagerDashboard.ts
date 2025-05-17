@@ -1,3 +1,10 @@
+interface Task {
+  task_name: string;
+  worker: string;
+  workload: number;
+  status: 'Completed' | 'Assigned';
+}
+
 // Mock data for testing
 export const mockItems = [
   { 
@@ -45,4 +52,45 @@ export const mockItems = [
     notes: 'Kitchen appliance', 
     createdAt: new Date('2025-05-08T11:10:00')
   }
+];
+
+
+// Mock data
+export const mockTaskHistory: Task[] = [
+  {
+    task_name: 'Task-20250517-0034',
+    worker: "worker1",
+    workload: 30,
+    status: "Completed" as const,
+  },
+  {
+    task_name: 'Task-20250517-0035',
+    worker: "worker1",
+    workload: 50,
+    status: "Assigned" as const,
+  },
+  {
+    task_name: 'Task-20250517-0036',
+    worker: "worker2",
+    workload: 50,
+    status: "Completed" as const,
+  },
+  {
+    task_name: 'Task-20250517-0037',
+    worker: "worker3",
+    workload: 55,
+    status: "Assigned" as const,
+  },
+  {
+    task_name: 'Task-20250517-0038',
+    worker: "worker4",
+    workload: 35,
+    status: "Completed" as const,
+  },
+  {
+    task_name: 'Task-20250517-0039',
+    worker: "worker4",
+    workload: 40,
+    status: "Assigned" as const,
+  },
 ];

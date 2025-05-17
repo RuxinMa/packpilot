@@ -13,11 +13,11 @@ interface AssignTaskProps {
 // Mock data
 // if real application only has fixed workers, we can import constant data here
 const mockWorkers = [
-  { id: 1, username: 'John Smith' },
-  { id: 2, username: 'Emily Davis' },
-  { id: 3, username: 'Michael Johnson' },
-  { id: 4, username: 'Sarah Wilson' },
-  { id: 5, username: 'David Chen' }
+  { id: 1, username: 'worker1' },
+  { id: 2, username: 'worker2' },
+  { id: 3, username: 'worker3' },
+  { id: 4, username: 'worker4' },
+  { id: 5, username: 'worker5' }
 ];
 
 const AssignTask: React.FC<AssignTaskProps> = ({ 
