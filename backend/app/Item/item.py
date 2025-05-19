@@ -6,8 +6,8 @@ from sqlalchemy.orm import Session
 # from ..schemas import ItemCreate
 from backend.app.db.database import SessionLocal
 from backend.app.auth.auth import token_required
-from backend.app.auth.models import Item
-from backend.app.schemas import ItemCreate
+from backend.app.Item.models import Item
+from backend.app.Item.schemas import ItemCreate
 
 
 bp = Blueprint('item', __name__)
