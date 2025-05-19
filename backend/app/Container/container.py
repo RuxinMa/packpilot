@@ -5,9 +5,9 @@ from backend.app.auth.auth import token_required
 
 from backend.app.db.database import SessionLocal
 
-from backend.app.auth.models import Container
+from backend.app.Container.models import Container
 
-from backend.app.schemas import ContainerCreate
+from backend.app.Container.schemas import ContainerCreate
 from flask import Blueprint, request, jsonify
 from sqlalchemy.orm import Session
 # from ..db.database import SessionLocal
@@ -16,8 +16,8 @@ from sqlalchemy.orm import Session
 # from ..schemas import ItemCreate
 from backend.app.db.database import SessionLocal
 from backend.app.auth.auth import token_required
-from backend.app.auth.models import Item
-from backend.app.schemas import ItemCreate
+from backend.app.Container.models import Item
+from backend.app.Container.schemas import ItemCreate
 
 
 bp = Blueprint('container', __name__)

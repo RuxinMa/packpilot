@@ -1,7 +1,7 @@
 from flask import Flask
 from backend.app.auth.routes import bp as auth_bp
 
-from backend.app.container import bp as container_bp
+from backend.app.Container.container import bp as container_bp
 
 from backend.app.db.database import engine, close_db
 from backend.app.auth.models import Base
