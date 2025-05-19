@@ -145,7 +145,12 @@ Assigns a task to a worker. Only users with the `Manager` role can access this e
 
   "Getting Token with Login (Manager token)": "curl -X POST http://127.0.0.1:8000/api/auth/token   -H "Content-Type: application/json"   -d '{"username": "manager1", "password": "password123", "role": "Manager"}'",
   
-  "Add Item (Replace the word TOKEN with actual token from last step)":"curl -X POST http://127.0.0.1:8000/api/manager/assign_task   -H "Authorization: Bearer TOKEN"   -H "Content-Type: application/json"   -d '{"worker_id": 1,"item_ids": [1,2]}'"
+  "Assign task (Replace the word TOKEN with actual token from last step)": "curl -X POST http://127.0.0.1:8000/api/manager/assign_task   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJtYW5hZ2VyMSIsInJvbGUiOiJNYW5hZ2VyIiwiZXhwIjoxNzQ3NjUzNzk4fQ.cvMAjHZPl8biaRo03ZCvoKd46ExacgLQS_tqU-5Axfc"   -H "Content-Type: application/json"   -d '{
+    "task_name": "Pack container X",
+    "container_id": 1,
+    "assigned_to": "worker1",
+    "deadline": "2025-06-01T17:00:00"
+  }'
 
 }
 ```
