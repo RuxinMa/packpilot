@@ -17,9 +17,15 @@ class ItemOut(ItemCreate):
         from_orm = True
 
 # ----- Task -----
+# class TaskCreate(BaseModel):
+#     worker_id: int
+#     item_ids: List[int]
 class TaskCreate(BaseModel):
-    worker_id: int
-    item_ids: List[int]
+    task_name: Optional[str]
+    container_id: int
+    assigned_to: str
+    deadline: Optional[str]
+
 
 class TaskOut(BaseModel):
     task_id: int
