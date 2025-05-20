@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from optimizer.box import Box
-from optimizer.sa_optimizer import simulated_annealing
+from app.optimizer.box import Box
+from app.optimizer.sa_optimizer import simulated_annealing
 
 bp = Blueprint("ai", __name__, url_prefix="/api/ai")
 
