@@ -1,7 +1,7 @@
 from flask import Flask
 from backend.app.auth.routes import bp as auth_bp
 from backend.app.Item.item import bp as item_bp
-
+from backend.app.Task.task import bp as task_bp
 from backend.app.db.database import engine, close_db
 from backend.app.auth.models import Base
 
@@ -14,14 +14,25 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(item_bp)
+    app.register_blueprint(task_bp)
 
     # Teardown
     app.teardown_appcontext(close_db)
+
 
     return app
 
 app = create_app()
 
+print("\n✅ REGISTERED ROUTES:")
+for rule in app.url_map.iter_rules():
+    print(f"{rule.methods} {rule.rule}")
+
+# Create DB tables after app is created
+with app.app_context():
+    Base.metadata.create_all(bind=engine)
+
+# For direct local runs (optional)
 print("\n✅ REGISTERED ROUTES:")
 for rule in app.url_map.iter_rules():
     print(f"{rule.methods} {rule.rule}")
