@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 import enum
 from sqlalchemy import Enum
+from sqlalchemy import Enum
 
 class UserRole(enum.Enum):
     Manager = "Manager"
@@ -11,6 +12,10 @@ class UserRole(enum.Enum):
 
 class User(Base):
     __tablename__ = "users"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(50), unique=True, nullable=False)
+    password = Column(String(128), nullable=False)
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, nullable=False)

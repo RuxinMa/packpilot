@@ -1,0 +1,10 @@
+{
+  "message": "415 Unsupported Media Type: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.",
+  "redirect_url": null,
+  "role": null,
+  "status": "error",
+  "token": null
+}
+--_curl_--"username": "manager1"
+--_curl_-- "password": "password123"
+--_curl_-- "role": "Manager"

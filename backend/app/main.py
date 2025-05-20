@@ -2,6 +2,7 @@ from flask import Flask
 from backend.app.auth.routes import bp as auth_bp
 from backend.app.Item.item import bp as item_bp
 from backend.app.Task.task import bp as task_bp
+from backend.app.Container.container import bp as container_bp
 from backend.app.db.database import engine, close_db
 from backend.app.auth.models import Base
 
@@ -11,10 +12,14 @@ def create_app():
     # Config
     app.config.from_mapping(SECRET_KEY="dev")
 
+    # Config
+    app.config.from_mapping(SECRET_KEY="dev")
+
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(item_bp)
     app.register_blueprint(task_bp)
+    app.register_blueprint(container_bp)
 
     # Teardown
     app.teardown_appcontext(close_db)
