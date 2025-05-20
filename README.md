@@ -25,9 +25,10 @@ This document provides comprehensive setup instructions and development guidelin
    cd LS1
    ```
 
-2. Switch to the frontend branch
+2. Switch to the frontend branch and frontend directory
    ```bash
    git checkout dev-frontend
+   cd frontend
    ```
 
 3. Install dependencies
