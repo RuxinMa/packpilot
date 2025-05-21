@@ -248,10 +248,21 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     
     addItem: (params: CubeParams) => {
       if (sceneRef.current) {
+        itemsRef.current.forEach(group => {
+          group.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = true;
+    
+              if (child.material) {
+                child.material.transparent = false;
+                child.material.opacity = 1;
+              }
+            }
+          });
+        });
+    
         const lastGroup = itemsRef.current[itemsRef.current.length - 1];
         if (lastGroup) {
-       
-          // change color to grey
           const cube = lastGroup.getObjectByName('cube') as THREE.Mesh;
           if (cube && (cube.material instanceof THREE.Material || Array.isArray(cube.material))) {
             if (Array.isArray(cube.material)) {
@@ -268,7 +279,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
           }
         }
     
-        // add new item
         const group = createCube(
           sceneRef.current,
           params.width,
@@ -280,6 +290,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         itemsRef.current.push(group);
       }
     },
+    
     
     removeLastItem: () => {
       if (sceneRef.current && itemsRef.current.length > 0) {
@@ -320,6 +331,27 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
             cube.material.transparent = false;
           }
         }
+        itemsRef.current.forEach(group => {
+          group.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = false; 
+            }
+          });
+        });
+
+
+        if (newLastGroup) {
+          newLastGroup.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = true;
+              if (child.material) {
+                child.material.transparent = false;
+                child.material.opacity = 1;
+              }
+            }
+          });
+        }
+
       }
     }
       
