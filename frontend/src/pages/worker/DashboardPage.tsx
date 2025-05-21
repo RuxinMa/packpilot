@@ -29,16 +29,20 @@ const WorkerDashboardPage: React.FC = () => {
     navigate('/login');
   };
 
-  const toggleView = () => {
-    if (threeSceneRef.current) {
-      if (is2DView) {
-        threeSceneRef.current.switchToDefaultView();
-      } else {
-        threeSceneRef.current.switchToTopView();
-      }
-      setIs2DView(!is2DView);
-    }
-  };
+const switchTo2D = () => {
+  if (threeSceneRef.current) {
+    threeSceneRef.current.switchToTopView();
+    setIs2DView(true);
+  }
+};
+
+const switchTo3D = () => {
+  if (threeSceneRef.current) {
+    threeSceneRef.current.switchToDefaultView();
+    setIs2DView(false);
+  }
+};
+
 
   const handleNextItem = () => {
     if (threeSceneRef.current) {
@@ -190,16 +194,20 @@ const WorkerDashboardPage: React.FC = () => {
                 }}
                             
               />
-              <div className="absolute bottom-8 right-8">
-                <button 
-                  onClick={toggleView}
-                  className={`py-3 px-4 rounded-md text-white shadow-md ${
-                    is2DView ? 'bg-gray-500 hover:bg-gray-600' : 'bg-indigo-500 hover:bg-indigo-600'
-                  }`}
-                >
-                  {is2DView ? '3D View' : '2D View'}
-                </button>
-              </div>
+                <div className="absolute bottom-8 right-8 space-x-4">
+                  <button 
+                    onClick={switchTo2D}
+                    className="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-md"
+                  >
+                    2D View
+                  </button>
+                  <button 
+                    onClick={switchTo3D}
+                    className="py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md"
+                  >
+                    3D View
+                  </button>
+                </div>
             </div>
           </div>
         </div>
