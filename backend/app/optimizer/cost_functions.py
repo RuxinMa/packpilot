@@ -11,9 +11,9 @@ def overlap(box1, box2):
 
 # 尝试将箱子放置在容器中
 def try_place(box, placed_boxes, container):
-    for z in range(container['depth'] - int(box.depth) + 1):
-        for y in range(container['height'] - int(box.height) + 1):
-            for x in range(container['width'] - int(box.width) + 1):
+    for z in range(int(container['depth'] - box.depth + 1)):
+        for y in range(int(container['height'] - box.height + 1)):
+            for x in range(int(container['width'] - box.width + 1)):
                 box.x, box.y, box.z = x, y, z
                 if all(not overlap(box, other) for other in placed_boxes):
                     return True
