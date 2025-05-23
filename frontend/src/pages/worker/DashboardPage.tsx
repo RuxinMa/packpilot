@@ -6,6 +6,7 @@ import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import { itemDatabase } from '../../mocks/data';
+import Button from '../../components/common/Button';
 
 
 const WorkerDashboardPage: React.FC = () => {
@@ -145,7 +146,7 @@ const switchTo3D = () => {
 
               {/* Item Description */}
               <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
-              <div className="flex flex-col justify-start h-48 p-2 text-gray-600 space-y-1">
+              <div className="flex flex-col justify-start h-40 p-2 text-gray-600 space-y-1">
                 {currentItem ? (
                   <>
                     <p><strong>Name:</strong> {currentItem.id}</p>
@@ -173,7 +174,7 @@ const switchTo3D = () => {
                 Packing View
               </h2>
             </div>
-            <div className='flex flex-1 bg-indigo-100 p-4 items-center justify-center'>
+            <div className='flex flex-1 p-4 items-center justify-center'>
               <ThreeScene 
                 ref={threeSceneRef}
                 onItemClick={(itemId) => {
@@ -194,19 +195,21 @@ const switchTo3D = () => {
                 }}
                             
               />
-                <div className="absolute bottom-8 right-8 space-x-4">
-                  <button 
+                <div className="absolute bottom-8 right-8 flex space-x-4">
+                  <Button
                     onClick={switchTo2D}
-                    className="py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow-md"
+                    variant={is2DView ? 'primary' : 'secondary'}
+                    className="px-4 py-3 text-lg w-24"
                   >
                     2D View
-                  </button>
-                  <button 
+                  </Button>
+                  <Button
                     onClick={switchTo3D}
-                    className="py-3 px-4 bg-green-600 hover:bg-green-700 text-white rounded-md shadow-md"
+                    variant={!is2DView ? 'primary' : 'secondary'}
+                    className="px-4 py-3 text-lg w-24"
                   >
                     3D View
-                  </button>
+                  </Button>
                 </div>
             </div>
           </div>
