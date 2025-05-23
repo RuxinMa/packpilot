@@ -68,7 +68,6 @@ def advanced_cost_function(order, container):
                 base_bias_penalty += box.x + box.y + box.z
 
                 # 如果箱子放在边缘，惩罚增加
-                # 如果箱子放在边缘，惩罚增加
                 if box.x == 0 or box.y == 0 or box.z == 0:
                     wall_bonus -= 1.0
                 else:

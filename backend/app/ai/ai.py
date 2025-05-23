@@ -27,7 +27,8 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
         "z": box.z,
         "width": box.width,
         "height": box.height,
-        "depth": box.depth
+        "depth": box.depth,
+        "is_fragile": box.is_fragile
     } for box in best_solution]
 
     return {
