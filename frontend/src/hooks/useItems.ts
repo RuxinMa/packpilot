@@ -1,197 +1,206 @@
-// src/hooks/useItems.ts
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Item, ItemInput } from '../types';
+import { mockItems } from '../mocks/dataManager';
 
-// Mock data for development
-const mockItems: Item[] = [
-  {
-    id: 1,
-    name: 'Item0023',
-    length: 40.4,
-    width: 52.3,
-    height: 40.0,
-    orientation: 'face_up',
-    remarks: 'Fragile'
+// Mock API service - replace with real API calls later
+const itemService = {
+  // Get all items
+  getItems: async (): Promise<Item[]> => {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Get items from localStorage or use mock data
+    const storedItems = localStorage.getItem('warehouse_items');
+    if (storedItems) {
+      const items = JSON.parse(storedItems);
+      // Ensure data consistency and convert dates
+      return items.map((item: any) => ({
+        ...item,
+        is_fragile: item.is_fragile === true || item.is_fragile === 'true' || item.is_fragile === 'yes',
+        created_at: item.created_at ? new Date(item.created_at) : undefined
+      }));
+    }
+    
+    // Initialize with mock data
+    localStorage.setItem('warehouse_items', JSON.stringify(mockItems));
+    return mockItems;
   },
-  {
-    id: 2,
-    name: 'Item0024',
-    length: 30.0,
-    width: 20.0,
-    height: 15.5,
-    orientation: 'side_a',
-    remarks: 'Heavy'
-  }
-];
 
-export const useItems = () => {
+  // Add new item
+  addItem: async (itemData: ItemInput): Promise<{ success: boolean; item: Item; message?: string }> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const storedItems = localStorage.getItem('warehouse_items');
+    const items = storedItems ? JSON.parse(storedItems) : mockItems;
+    
+    const newItem: Item = {
+      id: Math.max(...items.map((item: Item) => item.id), 0) + 1,
+      length: itemData.length,
+      width: itemData.width,
+      height: itemData.height,
+      orientation: itemData.orientation || '',
+      remarks: itemData.remarks || '',
+      is_fragile: Boolean(itemData.is_fragile),
+      created_at: new Date()
+    };
+    
+    const updatedItems = [...items, newItem];
+    localStorage.setItem('warehouse_items', JSON.stringify(updatedItems));
+    
+    return { success: true, item: newItem, message: 'Item added successfully' };
+  },
+
+  // Update existing item
+  updateItem: async (id: number, itemData: Partial<ItemInput>): Promise<{ success: boolean; message?: string }> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const storedItems = localStorage.getItem('warehouse_items');
+    const items = storedItems ? JSON.parse(storedItems) : mockItems;
+    
+    const itemIndex = items.findIndex((item: Item) => item.id === id);
+    if (itemIndex === -1) {
+      return { success: false, message: 'Item not found' };
+    }
+    
+    items[itemIndex] = { ...items[itemIndex], ...itemData };
+    localStorage.setItem('warehouse_items', JSON.stringify(items));
+    
+    return { success: true, message: 'Item updated successfully' };
+  },
+
+  // Delete item
+  deleteItem: async (id: number): Promise<{ success: boolean; message?: string }> => {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    const storedItems = localStorage.getItem('warehouse_items');
+    const items = storedItems ? JSON.parse(storedItems) : mockItems;
+    
+    const filteredItems = items.filter((item: Item) => item.id !== id);
+    localStorage.setItem('warehouse_items', JSON.stringify(filteredItems));
+    
+    return { success: true, message: 'Item deleted successfully' };
+  }
+};
+
+// Hook return interface
+interface UseItemsReturn {
+  items: Item[];
+  loading: boolean;
+  error: string | null;
+  addItem: (itemData: ItemInput) => Promise<{ success: boolean; message?: string }>;
+  updateItem: (id: number, itemData: Partial<ItemInput>) => Promise<{ success: boolean; message?: string }>;
+  deleteItem: (id: number) => Promise<{ success: boolean; message?: string }>;
+  refreshItems: () => Promise<void>;
+}
+
+export const useItems = (): UseItemsReturn => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all items
-  const getItems = useCallback(async () => {
+  // Load items on component mount
+  const refreshItems = async () => {
     setLoading(true);
     setError(null);
     
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch('/api/items');
-      // const data = await response.json();
-      // setItems(data.items);
-      
-      // For now, use mock data
-      await new Promise(resolve => setTimeout(resolve, 500));
-      setItems(mockItems);
-      
+      const itemsData = await itemService.getItems();
+      setItems(itemsData);
     } catch (err) {
-      setError('Failed to fetch items');
-      console.error('Error fetching items:', err);
+      setError('Failed to load items');
+      console.error('Error loading items:', err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  // Add a new item
-  const addItem = useCallback(async (itemData: ItemInput): Promise<number | null> => {
+  // Add new item
+  const addItem = async (itemData: ItemInput) => {
     setLoading(true);
     setError(null);
     
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch('/api/manager/add_item', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(itemData),
-      // });
-      // const data = await response.json();
-      // return data.item_id || null;
-      
-      // For development, simulate API call with mock data
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const newItem: Item = {
-        ...itemData,
-        id: Math.max(0, ...items.map(item => item.id)) + 1,
-        name: `Item${Math.floor(1000 + Math.random() * 9000)}`
-      };
-      
-      setItems(prevItems => [...prevItems, newItem]);
-      return newItem.id;
-      
+      const response = await itemService.addItem(itemData);
+      if (response.success) {
+        setItems(prevItems => [...prevItems, response.item]);
+        return { success: true, message: response.message };
+      } else {
+        setError(response.message || 'Failed to add item');
+        return { success: false, message: response.message };
+      }
     } catch (err) {
-      setError('Failed to add item');
+      const errorMessage = 'Failed to add item';
+      setError(errorMessage);
       console.error('Error adding item:', err);
-      return null;
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
-  }, [items]);
+  };
 
-  // Update an existing item
-  const updateItem = useCallback(async (id: number, itemData: Partial<ItemInput>): Promise<boolean> => {
+  // Update existing item
+  const updateItem = async (id: number, itemData: Partial<ItemInput>) => {
     setLoading(true);
     setError(null);
     
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch(`/api/manager/edit_item/${id}`, {
-      //   method: 'PUT',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify(itemData),
-      // });
-      // const data = await response.json();
-      // return data.status === 'success';
-      
-      // For development, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setItems(prevItems => 
-        prevItems.map(item => 
-          item.id === id ? { ...item, ...itemData } : item
-        )
-      );
-      
-      return true;
-      
+      const response = await itemService.updateItem(id, itemData);
+      if (response.success) {
+        setItems(prevItems => 
+          prevItems.map(item => 
+            item.id === id ? { ...item, ...itemData } : item
+          )
+        );
+        return { success: true, message: response.message };
+      } else {
+        setError(response.message || 'Failed to update item');
+        return { success: false, message: response.message };
+      }
     } catch (err) {
-      setError('Failed to update item');
+      const errorMessage = 'Failed to update item';
+      setError(errorMessage);
       console.error('Error updating item:', err);
-      return false;
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  // Delete an item
-  const deleteItem = useCallback(async (id: number): Promise<boolean> => {
+  // Delete item
+  const deleteItem = async (id: number) => {
     setLoading(true);
     setError(null);
     
     try {
-      // TODO: Replace with actual API call when backend is ready
-      // const response = await fetch(`/api/manager/delete_item/${id}`, {
-      //   method: 'DELETE',
-      // });
-      // const data = await response.json();
-      // return data.status === 'success';
-      
-      // For development, simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setItems(prevItems => prevItems.filter(item => item.id !== id));
-      
-      return true;
-      
+      const response = await itemService.deleteItem(id);
+      if (response.success) {
+        setItems(prevItems => prevItems.filter(item => item.id !== id));
+        return { success: true, message: response.message };
+      } else {
+        setError(response.message || 'Failed to delete item');
+        return { success: false, message: response.message };
+      }
     } catch (err) {
-      setError('Failed to delete item');
+      const errorMessage = 'Failed to delete item';
+      setError(errorMessage);
       console.error('Error deleting item:', err);
-      return false;
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
-  // Get a single item by ID
-  const getItemById = useCallback((id: number): Item | undefined => {
-    return items.find(item => item.id === id);
-  }, [items]);
-
-  // Format item dimensions as a string (e.g., "40.4 × 52.3 × 40.0")
-  const formatItemSize = useCallback((item: Item): string => {
-    return `${item.length.toFixed(1)} × ${item.width.toFixed(1)} × ${item.height.toFixed(1)}`;
-  }, []);
-
-  // Convert API ItemResponse to internal Item type
-  const convertApiItemToItem = useCallback((apiItem: { item_id: number, item_name: string, size: string, direction: string, note: string }): Item => {
-    // Parse the size string (e.g., "40.4 × 52.3 × 40.0") into dimensions
-    const dimensions = apiItem.size.split('×').map(dim => parseFloat(dim.trim()));
-    
-    return {
-      id: apiItem.item_id,
-      name: apiItem.item_name,
-      length: dimensions[0] || 0,
-      width: dimensions[1] || 0, 
-      height: dimensions[2] || 0,
-      orientation: apiItem.direction,
-      remarks: apiItem.note
-    };
+  useEffect(() => {
+    refreshItems();
   }, []);
 
   return {
     items,
     loading,
     error,
-    getItems,
     addItem,
     updateItem,
     deleteItem,
-    getItemById,
-    formatItemSize,
-    convertApiItemToItem
+    refreshItems
   };
 };
