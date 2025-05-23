@@ -60,6 +60,40 @@ function createCube(
   return group;
 }
 
+function fitCameraToScene(scene: THREE.Scene, camera: THREE.Camera, controls?: OrbitControls) {
+  const box = new THREE.Box3().setFromObject(scene);
+  const size = box.getSize(new THREE.Vector3());
+  const center = box.getCenter(new THREE.Vector3());
+
+  const maxDim = Math.max(size.x, size.y, size.z);
+  const fov = (camera as THREE.PerspectiveCamera).fov ?? 75;
+  const aspect = camera.aspect ?? 1;
+
+  // Padding ratio
+  const padding = 1.2;
+
+  if (camera instanceof THREE.PerspectiveCamera) {
+    const cameraZ = (maxDim / 2) / Math.tan((fov * Math.PI) / 360);
+    camera.position.set(center.x, center.y, center.z + cameraZ * padding);
+  } else if (camera instanceof THREE.OrthographicCamera) {
+    const frustumSize = maxDim * padding;
+    const newAspect = aspect;
+
+    camera.left = -frustumSize * newAspect / 2;
+    camera.right = frustumSize * newAspect / 2;
+    camera.top = frustumSize / 2;
+    camera.bottom = -frustumSize / 2;
+    camera.position.set(center.x, center.y + 20, center.z); // 俯视图位置
+    camera.up.set(0, 0, -1);
+    camera.lookAt(center);
+  }
+
+  camera.lookAt(center);
+  if (controls) {
+    controls.target.copy(center);
+    controls.update();
+  }
+}
 
 
 function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
@@ -165,34 +199,70 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
   //expose to parent
   useImperativeHandle(ref, () => ({
     switchToTopView: () => {
-      if (controlsRef.current && orthoCameraRef.current) {
+      if (controlsRef.current && orthoCameraRef.current && sceneRef.current) {
+        const box = new THREE.Box3().setFromObject(sceneRef.current);
+        const center = box.getCenter(new THREE.Vector3());
+    
+        orthoCameraRef.current.position.set(center.x, center.y + 50, center.z);
+        orthoCameraRef.current.up.set(0, 0, -1);  
+        orthoCameraRef.current.lookAt(center);
+    
         activeCameraRef.current = orthoCameraRef.current;
         controlsRef.current.object = orthoCameraRef.current;
-        controlsRef.current.enableRotate = false; // rotate
-        controlsRef.current.enablePan = true;     // move
-        controlsRef.current.enableZoom = true;    // zoom
+        controlsRef.current.target.copy(center); 
+        controlsRef.current.enableRotate = false;
+        controlsRef.current.enablePan = true;
+        controlsRef.current.enableZoom = true;
         controlsRef.current.update();
       }
     },
     
     switchToDefaultView: () => {
-      if (controlsRef.current && perspectiveCameraRef.current) {
-        activeCameraRef.current = perspectiveCameraRef.current;
-        controlsRef.current.object = perspectiveCameraRef.current;
-        controlsRef.current.enableRotate = true; 
-        controlsRef.current.enablePan = true;    
-        controlsRef.current.enableZoom = true;   
+      if (controlsRef.current && perspectiveCameraRef.current && sceneRef.current) {
+        const camera = perspectiveCameraRef.current;
+        const scene = sceneRef.current;
+    
+        const box = new THREE.Box3().setFromObject(scene);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+    
+  
+        const fov = THREE.MathUtils.degToRad(camera.fov); 
+        const cameraZ = (maxDim / 2) / Math.tan(fov / 2) * 1.5; 
+    
+        camera.position.set(center.x + maxDim / 2, center.y + maxDim / 2, center.z + cameraZ);
+        camera.lookAt(center);
+    
+        activeCameraRef.current = camera;
+        controlsRef.current.object = camera;
+        controlsRef.current.target.copy(center);
+        controlsRef.current.enableRotate = true;
+        controlsRef.current.enablePan = true;
+        controlsRef.current.enableZoom = true;
         controlsRef.current.update();
       }
     },
     
     
+    
     addItem: (params: CubeParams) => {
       if (sceneRef.current) {
+        itemsRef.current.forEach(group => {
+          group.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = true;
+    
+              if (child.material) {
+                child.material.transparent = false;
+                child.material.opacity = 1;
+              }
+            }
+          });
+        });
+    
         const lastGroup = itemsRef.current[itemsRef.current.length - 1];
         if (lastGroup) {
-       
-          // change color to grey
           const cube = lastGroup.getObjectByName('cube') as THREE.Mesh;
           if (cube && (cube.material instanceof THREE.Material || Array.isArray(cube.material))) {
             if (Array.isArray(cube.material)) {
@@ -209,7 +279,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
           }
         }
     
-        // add new item
         const group = createCube(
           sceneRef.current,
           params.width,
@@ -221,6 +290,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         itemsRef.current.push(group);
       }
     },
+    
     
     removeLastItem: () => {
       if (sceneRef.current && itemsRef.current.length > 0) {
@@ -261,6 +331,27 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
             cube.material.transparent = false;
           }
         }
+        itemsRef.current.forEach(group => {
+          group.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = false; 
+            }
+          });
+        });
+
+
+        if (newLastGroup) {
+          newLastGroup.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.visible = true;
+              if (child.material) {
+                child.material.transparent = false;
+                child.material.opacity = 1;
+              }
+            }
+          });
+        }
+
       }
     }
       
@@ -418,6 +509,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       depth: roomin.depth,    // Z轴方向深度
       color: 0xE8FFE8, 
     });
+    fitCameraToScene(scene, activeCameraRef.current!, controlsRef.current);
 
     // back light 
     const ambientLight = new THREE.AmbientLight(0x404040);
@@ -439,7 +531,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         rendererRef.current.render(sceneRef.current, activeCameraRef.current);
       }
     };
-    
+    // 自动初始化为 3D 斜上视角
+    if (ref && typeof ref !== 'function' && ref.current && ref.current.switchToDefaultView) {
+      ref.current.switchToDefaultView();
+    }
+
     
     animate();
 
