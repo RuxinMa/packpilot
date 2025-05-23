@@ -6,8 +6,9 @@ interface ItemData {
   length: number;
   width: number;
   height: number;
-  direction: string;
-  note: string;
+  is_fragile: boolean;
+  orientation: string;  
+  remarks: string;    
 }
 
 interface ItemConfirmationProps {
@@ -64,14 +65,23 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
             </div>
             
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Direction:</h4>
-              <p className="text-base font-medium">{item.direction}</p>
+              <h4 className="text-sm font-medium text-gray-500">Is Fragile:</h4>
+              <p className={`text-base font-medium ${item.is_fragile ? 'text-red-600' : 'text-green-600'}`}>
+                {item.is_fragile ? 'Yes' : 'No'}
+              </p>
             </div>
             
-            {item.note && (
+            {item.orientation && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500">Note:</h4>
-                <p className="text-base">{item.note}</p>
+                <h4 className="text-sm font-medium text-gray-500">Orientation:</h4>
+                <p className="text-base font-medium">{item.orientation}</p>
+              </div>
+            )}
+            
+            {item.remarks && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Remarks:</h4>
+                <p className="text-base">{item.remarks}</p>
               </div>
             )}
           </div>

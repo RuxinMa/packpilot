@@ -1,6 +1,6 @@
 // MockAuthContext.tsx
 import React, { useState, createContext, useContext, ReactNode } from 'react';
-import { UserRole } from '../types/auth'; // 确保路径正确
+import { UserRole } from '../types/auth'; 
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -22,7 +22,7 @@ export const MockAuthProvider: React.FC<{ children: ReactNode }> = ({ children }
   const [error, setError] = useState<string | null>(null);
 
   // 模拟登录函数
-  const login = async (username: string, password: string, selectedRole: 'manager' | 'worker') => {
+  const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
     
