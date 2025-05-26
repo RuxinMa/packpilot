@@ -1,0 +1,106 @@
+{
+    "cost": 3000022.2004675427,
+    "results": [
+        {
+            "box_id": 6,
+            "depth": 2.0,
+            "height": 2.0,
+            "is_fragile": true,
+            "width": 2.0,
+            "x": 0,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "box_id": 4,
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "width": 4.0,
+            "x": 2,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "box_id": 8,
+            "depth": 1.0,
+            "height": 4.0,
+            "is_fragile": false,
+            "width": 1.0,
+            "x": 6,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "box_id": 1,
+            "depth": 3.0,
+            "height": 4.0,
+            "is_fragile": false,
+            "width": 5.0,
+            "x": 0,
+            "y": 5,
+            "z": 0
+        },
+        {
+            "box_id": 5,
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "width": 4.0,
+            "x": 6,
+            "y": 4,
+            "z": 0
+        },
+        {
+            "box_id": 3,
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "width": 4.0,
+            "x": 0,
+            "y": 0,
+            "z": 2
+        },
+        {
+            "box_id": 7,
+            "depth": 3.0,
+            "height": 3.0,
+            "is_fragile": false,
+            "width": 3.0,
+            "x": 7,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "box_id": 10,
+            "depth": 3.0,
+            "height": 2.0,
+            "is_fragile": false,
+            "width": 3.0,
+            "x": 4,
+            "y": 0,
+            "z": 2
+        },
+        {
+            "box_id": 9,
+            "depth": 2.0,
+            "height": 1.0,
+            "is_fragile": true,
+            "width": 2.0,
+            "x": 0,
+            "y": 2,
+            "z": 0
+        },
+        {
+            "box_id": 2,
+            "depth": 1.0,
+            "height": 3.0,
+            "is_fragile": true,
+            "width": 2.0,
+            "x": 4,
+            "y": 2,
+            "z": 2
+        }
+    ],
+    "status": "success"
+}
