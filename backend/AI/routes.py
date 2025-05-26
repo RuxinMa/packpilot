@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app.ai.schemas import OptimizeRequest
-from app.ai.ai import run_ai_optimizer
+from AI.schemas import OptimizeRequest
+from AI.ai import run_ai_optimizer
 
 bp = Blueprint("ai", __name__, url_prefix="/api/ai")
 
