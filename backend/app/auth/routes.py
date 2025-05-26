@@ -38,7 +38,7 @@ def login():
         )
         
         # Set redirect URL based on role
-        redirect_url = "/dashboard/manager" if user.role == models.UserRole.Manager else "/dashboard/worker"
+        redirect_url = "/manager/dashboard" if user.role == models.UserRole.Manager else "/worker/dashboard"
         
         return jsonify({
             "status": "success",

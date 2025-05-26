@@ -1,7 +1,7 @@
 from flask import Flask
-from app.auth.routes import bp as auth_bp
-from app.db.database import engine, close_db
-from app.auth import models
+from .auth.routes import bp as auth_bp
+from .db.database import engine, close_db
+from .auth import models
 from app.AI.routes import bp as ai_bp
 
 # Create database tables
