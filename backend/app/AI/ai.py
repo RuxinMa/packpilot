@@ -1,5 +1,5 @@
-from AI.optimizer.sa_optimizer import simulated_annealing
-from AI.optimizer.box import Box
+from app.AI.optimizer.sa_optimizer import simulated_annealing
+from app.AI.optimizer.box import Box
 
 def run_ai_optimizer(container, boxes_raw, runs=5):
     best_solution = None
