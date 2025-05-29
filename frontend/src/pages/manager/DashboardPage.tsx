@@ -12,6 +12,7 @@ import AssignTask from '../../components/manager/AssignTask';
 import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
+import Button from '../../components/common/Button';
 
 // Import hooks
 import { useItems } from '../../hooks/useItems';
@@ -103,6 +104,17 @@ const ManagerDashboardPage: React.FC = () => {
     }
   };
 
+  // New function to handle select all
+  const handleSelectAll = () => {
+    const allItemIds = items.map(item => item.id);
+    setSelectedItems(allItemIds);
+  };
+
+  // New function to handle clear all selections
+  const handleClearAll = () => {
+    setSelectedItems([]);
+  };
+
   const handleContinueSelection = () => {
     setOpenModal('assignTask');
   };
@@ -171,36 +183,46 @@ const ManagerDashboardPage: React.FC = () => {
             {/* Action buttons */}
             <div className="p-6 flex-auto">
               <div className="space-y-6">
-                <button 
+                <Button 
                   onClick={() => setOpenModal('addItem')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
+                  variant="primary"
+                  size="md"
+                  fullWidth
                   disabled={selectionMode || itemsLoading}
+                  isLoading={itemsLoading}
                 >
-                  {itemsLoading ? 'Loading...' : 'Add Item'}
-                </button>
+                  Add Item
+                </Button>
                 {selectionMode ? (
-                  <button 
+                  <Button 
                     onClick={handleClearSelection}
-                    className="w-full py-3 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center"
+                    variant="secondary"
+                    size="md"
+                    fullWidth
                   >
                     Cancel Selection
-                  </button>
+                  </Button>
                 ) : (
-                  <button 
+                  <Button 
                     onClick={handleStartAssignTask}
-                    className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
+                    variant="primary"
+                    size="md"
+                    fullWidth
                     disabled={itemsLoading || items.length === 0}
                   >
                     Assign Task
-                  </button>
+                  </Button>
                 )}
-                <button 
+                <Button 
                   onClick={() => setOpenModal('taskHistory')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
+                  variant="primary"
+                  size="md"
+                  fullWidth
                   disabled={selectionMode || tasksLoading}
+                  isLoading={tasksLoading}
                 >
-                  {tasksLoading ? 'Loading...' : 'Task History'}
-                </button>
+                  Task History
+                </Button>
               </div>
             </div>
             
@@ -225,6 +247,8 @@ const ManagerDashboardPage: React.FC = () => {
                 selectionMode={selectionMode}
                 selectedItems={selectedItems}
                 onToggleItemSelection={handleToggleItemSelection}
+                onSelectAll={handleSelectAll}
+                onClearAll={handleClearAll}
                 onContinueSelection={handleContinueSelection}
                 loading={itemsLoading}
               />
