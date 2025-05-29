@@ -7,7 +7,7 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
 
     for _ in range(runs):
         boxes = [Box(
-            box_id=box["box_id"],
+            item_id=box["item_id"],
             original_width=box["width"],
             original_height=box["height"],
             original_depth=box["depth"],
@@ -21,7 +21,7 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
             best_solution = solution
 
     results = [{
-        "box_id": box.box_id,
+        "item_id": box.item_id,
         "x": box.x,
         "y": box.y,
         "z": box.z,

@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 class BoxInput(BaseModel):
-    box_id: int
+    item_id: int
     width: float
     height: float
     depth: float
