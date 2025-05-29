@@ -12,8 +12,7 @@ import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
 
-// Import Mock data
-import { mockItems } from '../../mocks/ManagerDashboard';
+import { useItems } from '../../services/itemService';
 
 const ManagerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -28,8 +27,8 @@ const ManagerDashboardPage: React.FC = () => {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
   // Hooks for data fetching (using mock data for now)
-  // const { getItems, items } = useItems();
-  const [items, setItems] = useState(mockItems);
+  const { items, addItem, updateItem, deleteItem, refreshItems } = useItems();
+
 
   // Handler functions
   const handleEditItem = (itemId: number) => {
@@ -47,21 +46,8 @@ const ManagerDashboardPage: React.FC = () => {
     console.log('Refreshing items');
   };
 
-  // MODIFIED: Handle item added with proper item data
   const handleItemAdded = (newItemData: any) => {
-    // In a real app, we would refresh the items from API
-    // For mock testing, create a new item with the submitted data
-    const newItem = { 
-      id: Math.max(...items.map(item => item.id), 0) + 1, // Generate a unique ID
-      length: newItemData.length,
-      width: newItemData.width,
-      height: newItemData.height, 
-      direction: newItemData.direction,
-      notes: newItemData.notes || '',
-      createdAt: new Date()
-    };
-    
-    setItems([...items, newItem]);
+    addItem(newItemData); 
   };
 
   const handleItemUpdated = () => {
@@ -69,13 +55,16 @@ const ManagerDashboardPage: React.FC = () => {
     console.log('Item updated');
   };
 
-  const handleItemDeleted = () => {
-    // In a real app, we would refresh the items
-    // For mock testing, let's remove the item
+  const handleItemDeleted = async () => {
     if (selectedItemId) {
-      setItems(items.filter(item => item.id !== selectedItemId));
+      const success = await deleteItem(selectedItemId);
+      if (success) {
+        refreshItems();          
+        setSelectedItemId(null); 
+      }
     }
   };
+  
 
   const handleStartAssignTask = () => {
     setSelectionMode(true);
@@ -100,11 +89,13 @@ const ManagerDashboardPage: React.FC = () => {
   };
 
   const handleTaskAssigned = () => {
-    // Remove assigned items from the list
-    setItems(items.filter(item => !selectedItems.includes(item.id)));
+    selectedItems.forEach(id => {
+      deleteItem(id);
+    });
     setSelectionMode(false);
     setSelectedItems([]);
   };
+  
 
   const handleLogout = () => {
     logout();
@@ -220,6 +211,8 @@ const ManagerDashboardPage: React.FC = () => {
         onClose={() => setOpenModal(null)}
         itemId={selectedItemId}
         onItemDeleted={handleItemDeleted}
+        items={items}
+        deleteItem={deleteItem}
       />
     </div>
   );
