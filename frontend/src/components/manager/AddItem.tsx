@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ItemConfirmation from './ItemConfirmation';
+import Button from '../common/Button';
 import { ItemInput } from '../../types';
 
 interface AddItemProps {
@@ -319,13 +320,14 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
           
           {/* Action buttons */}
           <div className="flex justify-end space-x-3 pt-4 border-t">
-            <button 
+            <Button 
               type="submit" 
+              variant={isFormValid() && !isSubmitting ? "primary" : "secondary"}
               disabled={!isFormValid() || isSubmitting}
-              className={`px-4 py-2 ${isFormValid() && !isSubmitting ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} rounded-md`}
+              className="px-4 py-2"
             >
               Continue
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

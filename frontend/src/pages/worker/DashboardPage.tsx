@@ -1,13 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
+
+// Import components
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
-import { itemDatabase } from '../../mocks/data';
 import Button from '../../components/common/Button';
 
+import { itemDatabase } from '../../mocks/data';
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -107,9 +109,6 @@ const switchTo3D = () => {
       });
     }
   };
-  
-  
-  
 
   return (
     <div className="min-h-screen">
@@ -125,18 +124,22 @@ const switchTo3D = () => {
             <div className="p-8 flex-auto">
               {/* actions */}
               <div className="space-y-6">
-              <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
                 onClick={handleNextItem}  
               >
                 Next Item
-              </button>
-              <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+              </Button>
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
                 onClick={handlePreviousTask} 
               >
                 Previous Item
-              </button>
+              </Button>
                 {/* progress bar */}
                 <ProgressBar 
                   current={packingProgress.current} 
