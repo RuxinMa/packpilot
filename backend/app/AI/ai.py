@@ -23,9 +23,9 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
     results = [{
         "item_id": box.item_id,
         "placement_order": idx + 1,
-        "x": box.x, # + box.width / 2,
-        "y": box.y, # + box.height / 2,
-        "z": box.z, # + box.depth / 2,
+        "x": box.x,
+        "y": box.y,
+        "z": box.z,
         "width": box.width,
         "height": box.height,
         "depth": box.depth,
