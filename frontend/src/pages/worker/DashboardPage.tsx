@@ -7,18 +7,45 @@ import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import { itemDatabase } from '../../mocks/data';
 import Button from '../../components/common/Button';
+import aiOutput from '../../mocks/sample_ai_output.json';
 
+// 定义AI输出数据的类型
+interface AIBox {
+  box_id: number;
+  width: number;
+  height: number;
+  depth: number;
+  is_fragile: boolean;
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface AIOutput {
+  cost: number;
+  results: AIBox[];
+  status: string;
+}
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuthContext();
 
-  const [packingProgress, setPackingProgress] = useState({ current: 0, total: itemDatabase.length });
+  // 转换AI输出数据为与原来兼容的格式
+  const transformedData = (aiOutput as AIOutput).results.map(box => ({
+    id: `Box-${box.box_id}`,
+    Inf: box.is_fragile ? 'Fragile' : 'Non-fragile',
+    width: box.width,
+    height: box.height,
+    depth: box.depth,
+    position: [box.x, box.y, box.z] as [number, number, number]
+  }));
+  const [packingProgress, setPackingProgress] = useState({ current: 0, total: transformedData.length });
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
   const [currentItem, setCurrentItem] = useState<null | {
     id: string;
-    Inf: string;
+    is_fragile: boolean;
     width: number;
     height: number;
     depth: number;
@@ -45,68 +72,66 @@ const switchTo3D = () => {
 };
 
 
-  const handleNextItem = () => {
-    if (threeSceneRef.current) {
-      const currentIndex = packingProgress.current;
-      if (currentIndex < itemDatabase.length) {
-        const item = itemDatabase[currentIndex];
-  
-        const newItemParams = {
-          width: item.width,
-          height: item.height,
-          depth: item.depth,
-          color: 0xadd8e6,
-          position: item.position,
-        };
-  
-        threeSceneRef.current.addItem(newItemParams);
-  
+const handleNextItem = () => {
+  if (threeSceneRef.current) {
+    const currentIndex = packingProgress.current;
+    if (currentIndex < transformedData.length) {
+      const item = transformedData[currentIndex];
+
+      const newItemParams = {
+        width: item.width,
+        height: item.height,
+        depth: item.depth,
+        color: 0xadd8e6,
+        position: item.position,
+      };
+
+      threeSceneRef.current.addItem(newItemParams);
+
+      setCurrentItem({
+        id: item.id,
+        is_fragile: item.is_fragile,
+        width: item.width,
+        height: item.height,
+        depth: item.depth,
+      });
+
+      setPackingProgress((prev) => ({
+        ...prev,
+        current: Math.min(prev.current + 1, prev.total),
+      }));       
+    }
+  }
+};
+
+const handlePreviousTask = () => {
+  if (threeSceneRef.current) {
+    threeSceneRef.current.removeLastItem();
+
+    setPackingProgress((prev) => {
+      const newCurrent = Math.max(prev.current - 1, 0);
+
+      if (newCurrent > 0) {
+        const item = transformedData[newCurrent - 1]; 
         setCurrentItem({
           id: item.id,
-          Inf: item.Inf,
+          is_fragile: item.is_fragile,
           width: item.width,
           height: item.height,
           depth: item.depth,
         });
-
-        setPackingProgress((prev) => ({
-          ...prev,
-          current: Math.min(prev.current + 1, prev.total),
-        }));       
+      } else {
+        setCurrentItem(null);
       }
-    }
-  };
-  
-  
 
-  const handlePreviousTask = () => {
-    if (threeSceneRef.current) {
-      threeSceneRef.current.removeLastItem();
-  
-      setPackingProgress((prev) => {
-        const newCurrent = Math.max(prev.current - 1, 0);
-  
-        if (newCurrent > 0) {
-          const item = itemDatabase[newCurrent - 1]; 
-          setCurrentItem({
-            id: item.id,
-            Inf: item.Inf,
-            width: item.width,
-            height: item.height,
-            depth: item.depth,
-          });
-        } else {
- 
-          setCurrentItem(null);
-        }
-  
-        return {
-          ...prev,
-          current: newCurrent,
-        };
-      });
-    }
-  };
+      return {
+        ...prev,
+        current: newCurrent,
+      };
+    });
+  }
+};
+
   
   
   
@@ -150,7 +175,7 @@ const switchTo3D = () => {
                 {currentItem ? (
                   <>
                     <p><strong>Name:</strong> {currentItem.id}</p>
-                    <p><strong>Info:</strong> {currentItem.Inf}</p>
+                    <p><strong>Fragile:</strong> {currentItem.is_fragile ? 'Yes' : 'No'}</p>
                     <p><strong>Width:</strong> {currentItem.width}</p>
                     <p><strong>Height:</strong> {currentItem.height}</p>
                     <p><strong>Depth:</strong> {currentItem.depth}</p>
@@ -183,7 +208,7 @@ const switchTo3D = () => {
                   if (item) {
                     setCurrentItem({
                       id: item.id,
-                      Inf: item.Inf,
+                      is_fragile: item.is_fragile,
                       width: item.width,
                       height: item.height,
                       depth: item.depth,
