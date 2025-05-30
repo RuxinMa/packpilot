@@ -2,35 +2,28 @@ import random
 import math
 from .cost_functions import advanced_cost_function
 
-
 def perturb(solution):
     new_solution = [b.copy() for b in solution]
-    ops = ["swap", "rotate", "move"]
-    for _ in range(random.randint(1, 3)):
-        op = random.choice(ops)
+    op = random.choice(["swap", "rotate", "move"])
 
-        if op == "swap" and len(new_solution) >= 2:
-            i, j = random.sample(range(len(new_solution)), 2)
-            new_solution[i], new_solution[j] = new_solution[j], new_solution[i]
+    if op == "swap" and len(new_solution) >= 2:
+        i, j = random.sample(range(len(new_solution)), 2)
+        new_solution[i], new_solution[j] = new_solution[j], new_solution[i]
 
-        elif op == "rotate":
-            i = random.randint(0, len(new_solution) - 1)
-            new_solution[i].rotate(random.randint(0, 5))
+    elif op == "rotate":
+        i = random.randint(0, len(new_solution) - 1)
+        new_solution[i].rotate(random.randint(0, 5))
 
-        elif op == "move" and len(new_solution) >= 2:
-            i = random.randint(0, len(new_solution) - 1)
-            box = new_solution.pop(i)
-            new_solution.insert(random.randint(0, len(new_solution)), box)
+    elif op == "move" and len(new_solution) >= 2:
+        i = random.randint(0, len(new_solution) - 1)
+        box = new_solution.pop(i)
+        new_solution.insert(random.randint(0, len(new_solution)), box)
 
     return new_solution
 
 # 这个文件实现了模拟退火算法，用于优化箱子的放置。它使用了一个成本函数来评估当前的放置方案，并通过随机扰动来寻找更好的解决方案。
-def simulated_annealing(boxes, container, initial_temp=1500, cooling_rate=0.995, stop_T=1, max_iter=3000):
+def simulated_annealing(boxes, container, initial_temp=1000, cooling_rate=0.99, stop_T=1, max_iter=10000):
     current_solution = [b.copy() for b in boxes]
-    random.shuffle(current_solution)
-    for b in current_solution:
-        b.rotate(random.randint(0, 5))
-
     current_cost = advanced_cost_function(current_solution, container)
     best_solution = [b.copy() for b in current_solution]
     best_cost = current_cost
@@ -52,8 +45,8 @@ def simulated_annealing(boxes, container, initial_temp=1500, cooling_rate=0.995,
 
         if iteration % 100 == 0:
             print(f"Iter {iteration}: Temp={T:.2f}, Cost={current_cost:.2f}, Best={best_cost:.2f}")
+
         T *= cooling_rate
         iteration += 1
 
-    print(f"\nFinal best cost: {best_cost}, placed boxes: {len(best_solution)}")
     return best_solution, best_cost
