@@ -123,7 +123,7 @@ const handlePreviousTask = () => {
       }
       
       setIsLastItem(newCurrent === transformedData.length);
-      
+
       return {
         ...prev,
         current: newCurrent,
@@ -151,7 +151,7 @@ return (
           <div className="p-8 flex-auto">
             {/* actions */}
             <div className="space-y-6">
-              {/* 修改按钮：动态切换 "Next Item" 和 "Finish" */}
+              {/* change buttion from next item to finish*/}
               <button 
                 className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
                 onClick={isLastItem ? handleFinish : handleNextItem}  
