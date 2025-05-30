@@ -9,14 +9,63 @@ def overlap(box1, box2):
                 box1.z + box1.depth <= box2.z or
                 box2.z + box2.depth <= box1.z)
 
+def overlap_on_yz(b1, b2):
+    return not (
+        b1.y + b1.height <= b2.y or b2.y + b2.height <= b1.y or
+        b1.z + b1.depth  <= b2.z or b2.z + b2.depth  <= b1.z
+    )
+
+def overlap_on_xz(b1, b2):
+    return not (
+        b1.x + b1.width <= b2.x or b2.x + b2.width <= b1.x or
+        b1.z + b1.depth <= b2.z or b2.z + b2.depth <= b1.z
+    )
+
+def overlap_on_xy(b1, b2):
+    return not (
+        b1.x + b1.width <= b2.x or b2.x + b2.width <= b1.x or
+        b1.y + b1.height <= b2.y or b2.y + b2.height <= b1.y
+    )
+
+
 # 尝试将箱子放置在容器中
-def try_place(box, placed_boxes, container):
-    for z in range(int(container['depth'] - box.depth + 1)):
-        for y in range(int(container['height'] - box.height + 1)):
-            for x in range(int(container['width'] - box.width + 1)):
+# def try_place(box, placed_boxes, container):
+#     for z in range(int(container['depth'] - box.depth + 1)):
+#         for y in range(int(container['height'] - box.height + 1)):
+#             for x in range(int(container['width'] - box.width + 1)):
+#                 box.x, box.y, box.z = x, y, z
+#                 if all(not overlap(box, other) for other in placed_boxes):
+#                     return True
+#     return False
+
+def is_touching(box, others):
+    # 靠墙
+    if box.x == 0 or box.y == 0 or box.z == 0:
+        return True
+
+    # 靠近已有箱子：任意一面贴合
+    for other in others:
+        if abs(box.x + box.width - other.x) < 1e-3 or abs(other.x + other.width - box.x) < 1e-3:
+            if overlap_on_yz(box, other): return True
+        if abs(box.y + box.height - other.y) < 1e-3 or abs(other.y + other.height - box.y) < 1e-3:
+            if overlap_on_xz(box, other): return True
+        if abs(box.z + box.depth - other.z) < 1e-3 or abs(other.z + other.depth - box.z) < 1e-3:
+            if overlap_on_xy(box, other): return True
+    return False
+
+
+def try_place_with_contact_priority(box, placed_boxes, container):
+    x_range = list(range(int(container['width'] - box.width + 1)))
+    y_range = list(range(int(container['height'] - box.height + 1)))
+    z_range = list(range(int(container['depth'] - box.depth + 1)))
+
+    for z in z_range:
+        for y in y_range:
+            for x in x_range:
                 box.x, box.y, box.z = x, y, z
                 if all(not overlap(box, other) for other in placed_boxes):
-                    return True
+                    if is_touching(box, placed_boxes) or len(placed_boxes) == 0:
+                        return True
     return False
 
 # 检查箱子是否小于给定体积
@@ -47,7 +96,7 @@ def advanced_cost_function(order, container):
         placed = False
         for orientation in range(6):
             box.rotate(orientation)
-            if try_place(box, placed_boxes, container):
+            if try_place_with_contact_priority(box, placed_boxes, container):
                 placed_boxes.append(box)
                 total_volume += box.width * box.height * box.depth
                 total_x += box.x + box.width / 2
@@ -100,6 +149,15 @@ def advanced_cost_function(order, container):
     # 计算高度惩罚
     height_penalty = max_z / container['depth']
 
+    # 计算接触奖励
+    touching_bonus = 0
+    for i, box in enumerate(placed_boxes):
+        for j, other in enumerate(placed_boxes):
+            if i == j:
+                continue
+            if is_touching(box, [other]):
+                touching_bonus += 1
+
     # 计算总惩罚
     return (center_penalty +
             fragile_penalty +
@@ -107,5 +165,6 @@ def advanced_cost_function(order, container):
             base_bias_penalty * 0.5 +
             volume_penalty +
             height_penalty +
-            wall_bonus
+            wall_bonus -
+            0.1 * touching_bonus
     )
