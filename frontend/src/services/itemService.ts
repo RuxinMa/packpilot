@@ -6,8 +6,9 @@ export interface Item {
   length: number;
   width: number;
   height: number;
-  direction: string;
-  notes: string;
+  is_fragile: boolean;
+  orientation: string; 
+  remarks: string; 
   createdAt: Date;
 }
 

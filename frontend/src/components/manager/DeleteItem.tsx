@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import { FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
-import { Item } from '../../services/itemService';
+import { Item } from '../../types'; 
+
+
 
 interface DeleteItemProps {
   isOpen: boolean;
@@ -68,12 +70,12 @@ const DeleteItem: React.FC<DeleteItemProps> = ({ isOpen, onClose, itemId, onItem
               </div>
               <div className="flex">
                 <span className="text-sm font-medium text-gray-500 w-24">Direction:</span>
-                <span className="text-sm">{item.direction}</span>
+                <span className="text-sm">{item.orientation}</span>
               </div>
-              {item.notes && (
+              {item.remarks && (
                 <div className="flex">
                   <span className="text-sm font-medium text-gray-500 w-24">Notes:</span>
-                  <span className="text-sm">{item.notes}</span>
+                  <span className="text-sm">{item.remarks}</span>
                 </div>
               )}
             </div>

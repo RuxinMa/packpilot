@@ -82,11 +82,13 @@ const ManagerDashboardPage: React.FC = () => {
 
   const handleItemDeleted = async () => {
     if (selectedItemId) {
-      const result = await deleteItem(selectedItemId);
-      if (result.success) {
-        console.log('Item deleted successfully:', result.message);
+      const success = await deleteItem(selectedItemId);
+      if (success) {
+        await refreshItems();
+        setSelectedItemId(null);
+        console.log('Item deleted successfully');
       } else {
-        console.error('Failed to delete item:', result.message);
+        console.error('Failed to delete item');
       }
     }
   };
@@ -142,7 +144,10 @@ const ManagerDashboardPage: React.FC = () => {
     if (result.success) {
       // Remove assigned items from the items list (they're now assigned to worker)
       for (const itemId of selectedItems) {
-        await deleteItem(itemId);
+        const success = await deleteItem(itemId);
+        if (!success) {
+          console.error(`Failed to delete item ID ${itemId}`);
+        }
       }
       
       setSelectionMode(false);

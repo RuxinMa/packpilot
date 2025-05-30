@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ItemConfirmation from './ItemConfirmation';
-import { useItems, Item } from '../../services/itemService';
+import { useItems } from '../../services/itemService';
 
 interface EditItemProps {
   isOpen: boolean;
@@ -13,13 +13,16 @@ interface EditItemProps {
 
 const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpdated }) => {
   const { items, updateItem } = useItems();
+
   const [formData, setFormData] = useState({
     length: '',
     width: '',
     height: '',
-    direction: '',
-    note: ''
+    is_fragile: '',
+    orientation: '',
+    remarks: ''
   });
+
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,8 +34,9 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
           length: item.length.toString(),
           width: item.width.toString(),
           height: item.height.toString(),
-          direction: item.direction,
-          note: item.notes || ''
+          is_fragile: item.is_fragile ? 'yes' : 'no',
+          orientation: item.orientation || '',
+          remarks: item.remarks || ''
         });
       }
     }
@@ -59,8 +63,9 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
         length: parseFloat(formData.length),
         width: parseFloat(formData.width),
         height: parseFloat(formData.height),
-        direction: formData.direction,
-        notes: formData.note
+        is_fragile: formData.is_fragile === 'yes',
+        orientation: formData.orientation,
+        remarks: formData.remarks
       });
       onItemUpdated();
       onClose();
@@ -71,7 +76,7 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
     }
   };
 
-  const getDirectionLabel = (value: string) => {
+  const getOrientationLabel = (value: string) => {
     const options = {
       face_up: 'Face up',
       face_down: 'Face down',
@@ -98,11 +103,9 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
         title={`Edit Item #${itemId}`}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
-              <label htmlFor="length" className="block text-sm font-medium text-gray-700">
-                Length (cm)
-              </label>
+              <label htmlFor="length" className="block text-sm font-medium text-gray-700">Length (cm)</label>
               <input
                 type="number"
                 name="length"
@@ -112,9 +115,7 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
               />
             </div>
             <div>
-              <label htmlFor="width" className="block text-sm font-medium text-gray-700">
-                Width (cm)
-              </label>
+              <label htmlFor="width" className="block text-sm font-medium text-gray-700">Width (cm)</label>
               <input
                 type="number"
                 name="width"
@@ -123,32 +124,41 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
               />
             </div>
+            <div>
+              <label htmlFor="height" className="block text-sm font-medium text-gray-700">Height (cm)</label>
+              <input
+                type="number"
+                name="height"
+                value={formData.height}
+                onChange={handleChange}
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
           </div>
 
           <div>
-            <label htmlFor="height" className="block text-sm font-medium text-gray-700">
-              Height (cm)
-            </label>
-            <input
-              type="number"
-              name="height"
-              value={formData.height}
-              onChange={handleChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="direction" className="block text-sm font-medium text-gray-700">
-              Direction
-            </label>
+            <label htmlFor="is_fragile" className="block text-sm font-medium text-gray-700">Is Fragile</label>
             <select
-              name="direction"
-              value={formData.direction}
+              name="is_fragile"
+              value={formData.is_fragile}
               onChange={handleChange}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
             >
-              <option value="">Select direction</option>
+              <option value="">Select fragile status</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="orientation" className="block text-sm font-medium text-gray-700">Orientation</label>
+            <select
+              name="orientation"
+              value={formData.orientation}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
+            >
+              <option value="">Select orientation</option>
               <option value="face_up">Face up</option>
               <option value="face_down">Face down</option>
               <option value="side_a">Side A</option>
@@ -157,12 +167,10 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
           </div>
 
           <div>
-            <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-              Note
-            </label>
+            <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">Remarks</label>
             <textarea
-              name="note"
-              value={formData.note}
+              name="remarks"
+              value={formData.remarks}
               onChange={handleChange}
               rows={3}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md"
@@ -185,13 +193,14 @@ const EditItem: React.FC<EditItemProps> = ({ isOpen, onClose, itemId, onItemUpda
         onClose={handleModalClose}
         onBack={handleBackToEdit}
         onConfirmAndClose={handleConfirmAndSave}
-        onConfirmAndAddNext={() => {}} // Required but unused for edit
+        onConfirmAndAddNext={() => {}}
         item={{
           length: parseFloat(formData.length) || 0,
           width: parseFloat(formData.width) || 0,
           height: parseFloat(formData.height) || 0,
-          direction: getDirectionLabel(formData.direction),
-          note: formData.note
+          is_fragile: formData.is_fragile === 'yes',
+          orientation: getOrientationLabel(formData.orientation),
+          remarks: formData.remarks
         }}
         isSubmitting={isSubmitting}
         isEdit={true}
