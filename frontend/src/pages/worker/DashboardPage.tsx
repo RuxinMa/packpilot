@@ -1,6 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
+
+// Import components
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
@@ -8,6 +10,7 @@ import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import Button from '../../components/common/Button';
 import aiOutput from '../../mocks/sample_ai_output.json';
 
+<<<<<<< HEAD
 interface AIBox {
   item_id: number;
   width: number;
@@ -24,6 +27,9 @@ interface AIOutput {
   results: AIBox[];
   status: string;
 }
+=======
+import { itemDatabase } from '../../mocks/data';
+>>>>>>> cd2638759f55483b6919ebfc1e30f07b2600c2ed
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -139,6 +145,7 @@ const handleFinish = () => {
   
   
 
+<<<<<<< HEAD
 return (
   <div className="min-h-screen">
     {/* Header */}
@@ -166,6 +173,73 @@ return (
               >
                 Previous Item
               </button>
+=======
+  const handlePreviousTask = () => {
+    if (threeSceneRef.current) {
+      threeSceneRef.current.removeLastItem();
+  
+      setPackingProgress((prev) => {
+        const newCurrent = Math.max(prev.current - 1, 0);
+  
+        if (newCurrent > 0) {
+          const item = itemDatabase[newCurrent - 1]; 
+          setCurrentItem({
+            id: item.id,
+            Inf: item.Inf,
+            width: item.width,
+            height: item.height,
+            depth: item.depth,
+          });
+        } else {
+ 
+          setCurrentItem(null);
+        }
+  
+        return {
+          ...prev,
+          current: newCurrent,
+        };
+      });
+    }
+  };
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <Header title="Warehouse Worker Dashboard" viewType="Worker" />
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="flex h-[calc(100vh-160px)]">
+
+          {/* Left Sidebar - Control Panel */}
+          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
+            <div className="p-8 flex-auto">
+              {/* actions */}
+              <div className="space-y-6">
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
+                onClick={handleNextItem}  
+              >
+                Next Item
+              </Button>
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
+                onClick={handlePreviousTask} 
+              >
+                Previous Item
+              </Button>
+                {/* progress bar */}
+                <ProgressBar 
+                  current={packingProgress.current} 
+                  total={packingProgress.total} 
+                />
+              </div>
+>>>>>>> cd2638759f55483b6919ebfc1e30f07b2600c2ed
 
               {/* progress bar */}
               <ProgressBar 

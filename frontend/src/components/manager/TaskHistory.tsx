@@ -70,16 +70,40 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
       title="Task History"
     >
       <div className="min-h-[400px]">
-        {/* Header with refresh button */}
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-medium text-gray-800">
-            Task Management History
-          </h3>
+        {/* Summary and Refresh Button Row */}
+        <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          {/* Summary Stats */}
+          {!loading ? (
+            <div className="flex items-center space-x-6">
+              <div className="text-center">
+                <p className="text-lg font-bold text-blue-600">
+                  {sortedTasks.length}
+                </p>
+                <p className="text-xs text-gray-500">Total</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-green-600">
+                  {sortedTasks.filter(t => t.status === 'completed').length}
+                </p>
+                <p className="text-xs text-gray-500">Completed</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-yellow-600">
+                  {sortedTasks.filter(t => t.status === 'in_progress').length}
+                </p>
+                <p className="text-xs text-gray-500">In Progress</p>
+              </div>
+            </div>
+          ) : (
+            <div></div> // Empty div to maintain layout when loading
+          )}
+
+          {/* Refresh Button */}
           {onRefresh && (
             <button
               onClick={handleRefresh}
               disabled={loading}
-              className="flex items-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              className="flex items-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50 bg-white rounded-md border border-gray-300 hover:bg-blue-50 transition-colors"
             >
               {loading ? (
                 <FaSpinner className="animate-spin mr-1" />
@@ -99,13 +123,37 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
             </div>
           </div>
         ) : sortedTasks.length === 0 ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="text-center">
-              <p className="text-gray-500 mb-2">No tasks have been assigned yet.</p>
-              <p className="text-sm text-gray-400">
-                Create your first task by selecting items and clicking "Assign Task"
-              </p>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Task Name
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Worker
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Workload
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white">
+                <tr>
+                  <td colSpan={4} className="px-6 py-16 text-center">
+                    <div className="text-gray-500">
+                      <p className="text-lg mb-2">No tasks have been assigned yet</p>
+                      <p className="text-sm text-gray-400">
+                        Create your first task by selecting items and clicking "Assign Task"
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -147,32 +195,6 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
                 ))}
               </tbody>
             </table>
-          </div>
-        )}
-
-        {/* Summary */}
-        {!loading && sortedTasks.length > 0 && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <p className="text-2xl font-bold text-blue-600">
-                  {sortedTasks.length}
-                </p>
-                <p className="text-sm text-gray-500">Total Tasks</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-green-600">
-                  {sortedTasks.filter(t => t.status === 'completed').length}
-                </p>
-                <p className="text-sm text-gray-500">Completed</p>
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-yellow-600">
-                  {sortedTasks.filter(t => t.status === 'in_progress').length}
-                </p>
-                <p className="text-sm text-gray-500">In Progress</p>
-              </div>
-            </div>
           </div>
         )}
       </div>
