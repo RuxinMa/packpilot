@@ -27,6 +27,50 @@ def overlap_on_xy(b1, b2):
         b1.y + b1.height <= b2.y or b2.y + b2.height <= b1.y
     )
 
+def is_gap_too_large(box, placed_boxes, threshold=1.5):
+    for other in placed_boxes:
+        if box == other:
+            continue
+        if overlap_on_yz(box, other):
+            dx = min(abs(box.x + box.width - other.x), abs(other.x + other.width - box.x))
+            if dx < threshold:
+                return False
+        if overlap_on_xz(box, other):
+            dy = min(abs(box.y + box.height - other.y), abs(other.y + other.height - box.y))
+            if dy < threshold:
+                return False
+        if overlap_on_xy(box, other):
+            dz = min(abs(box.z + box.depth - other.z), abs(other.z + other.depth - box.z))
+            if dz < threshold:
+                return False
+    return True
+
+
+def support_area_ratio(box, placed_boxes, step=0.5):
+    supported = 0
+    total = 0
+    x_steps = int(box.width / step)
+    z_steps = int(box.depth / step)
+    for i in range(x_steps):
+        for k in range(z_steps):
+            px = box.x + i * step + step / 2
+            pz = box.z + k * step + step / 2
+            py = box.y
+            is_supported = False
+            if abs(py) < 1e-3:
+                is_supported = True  # 贴地
+            else:
+                for other in placed_boxes:
+                    if (abs(other.y + other.height - py) < 1e-3 and
+                        other.x <= px <= other.x + other.width and
+                        other.z <= pz <= other.z + other.depth):
+                        is_supported = True
+                        break
+            supported += int(is_supported)
+            total += 1
+    return supported / total if total > 0 else 0
+
+
 
 # 尝试将箱子放置在容器中
 # def try_place(box, placed_boxes, container):
@@ -54,18 +98,21 @@ def is_touching(box, others):
     return False
 
 
-def try_place_with_contact_priority(box, placed_boxes, container):
+def try_place_with_contact_priority(box, placed_boxes, container, min_support_ratio=0.95):
     x_range = list(range(int(container['width'] - box.width + 1)))
     y_range = list(range(int(container['height'] - box.height + 1)))
     z_range = list(range(int(container['depth'] - box.depth + 1)))
 
-    for z in z_range:
-        for y in y_range:
-            for x in x_range:
-                box.x, box.y, box.z = x, y, z
-                if all(not overlap(box, other) for other in placed_boxes):
-                    if is_touching(box, placed_boxes) or len(placed_boxes) == 0:
-                        return True
+    positions = [(x, y, z) for y in y_range for z in z_range for x in x_range]
+    # positions.sort(key=lambda pos: (pos[0] + pos[1] + pos[2]))
+
+    positions.sort(key=lambda pos: (pos[1], pos[2], pos[0]))
+
+    for x, y, z in positions:
+        box.x, box.y, box.z = x, y, z
+        if all(not overlap(box, other) for other in placed_boxes):
+            if support_area_ratio(box, placed_boxes) >= min_support_ratio:
+                return True
     return False
 
 # 检查箱子是否小于给定体积
@@ -83,6 +130,9 @@ def is_on_edge(box, container, margin=1.0):
 
 # 计算成本函数
 def advanced_cost_function(order, container):
+    # 按照体积从大到小排序箱子
+    order = sorted(order, key=lambda b: (-(b.width * b.height * b.depth), -b.height))
+
     placed_boxes = []
     total_volume = 0
     total_x = total_y = total_z = 0
@@ -104,6 +154,11 @@ def advanced_cost_function(order, container):
                 total_z += box.z + box.depth / 2
                 max_z = max(max_z, box.z + box.depth)
 
+                # 控制斜率（不希望太陡）
+                slope_penalty = 0
+                if (box.x + box.z) > 0:
+                    slope_penalty += max(0, box.y - 0.4 * (box.x + box.z)) ** 2
+
                 # 计算易碎箱子的惩罚
                 if box.is_fragile:
                     if any(overlap(other, box) and other.z > box.z for other in placed_boxes if other != box):
@@ -113,21 +168,25 @@ def advanced_cost_function(order, container):
                 if is_small_box(box) and is_on_edge(box, container):
                     edge_penalty += 1e6
 
-                # 计算基础偏差惩罚 （越靠近原点惩罚越小）
-                base_bias_penalty += box.x + box.y + box.z
-
-                # 如果箱子放在边缘，惩罚增加
-                if box.x == 0 or box.y == 0 or box.z == 0:
-                    wall_bonus -= 1.0
+                # 计算箱子放置的基础偏差惩罚
+                if not is_gap_too_large(box, placed_boxes):
+                    base_bias_penalty -= 5
                 else:
-                    wall_bonus += 2.0
+                    base_bias_penalty += 10 
+
+                # 如果箱子放在地上，增加奖励
+                ground_bonus = 0
+                if box.y == 0: ground_bonus -= 5.0  # 明确地板优先
+                if box.x == 0: wall_bonus -= 2.0
+                if box.z == 0: wall_bonus -= 2.0
 
                 placed = True
                 break
 
-        # 如果没有找到合适的放置位置，则返回一个很大的惩罚值
+        # 如果没有找到合适的放置位置，不直接终止，而是跳过它，最后加惩罚
         if not placed:
-            return 1e12  # hard penalty
+            print(f"Warning: Box {box.item_id} could not be placed.")
+            continue
 
     if not placed_boxes:
         return 1e12
@@ -139,7 +198,7 @@ def advanced_cost_function(order, container):
     avg_x = total_x / len(placed_boxes)
     avg_y = total_y / len(placed_boxes)
     avg_z = total_z / len(placed_boxes)
-    center_penalty = math.sqrt((avg_x - center_x)**2 + (avg_y - center_y)**2 + (avg_z - center_z)**2)
+    center_penalty = 0.5 * math.sqrt((avg_x - center_x)**2 + (avg_y - center_y)**2 + (avg_z - center_z)**2)
 
     container_volume = container['width'] * container['height'] * container['depth']
     # 计算未使用的体积
@@ -148,6 +207,8 @@ def advanced_cost_function(order, container):
     volume_penalty = unused_volume / container_volume
     # 计算高度惩罚
     height_penalty = max_z / container['depth']
+    # 计算箱子未放置的惩罚
+    unplaced_penalty = (len(order) - len(placed_boxes)) * 1e5
 
     # 计算接触奖励
     touching_bonus = 0
@@ -158,13 +219,24 @@ def advanced_cost_function(order, container):
             if is_touching(box, [other]):
                 touching_bonus += 1
 
+    # 对放置的箱子按y, z, x排序
+    placed_boxes.sort(key=lambda b: (b.y, b.z, b.x))
+
+    # 计算斜率惩罚
+    gap_penalty = sum([1 for box in placed_boxes if is_gap_too_large(box, placed_boxes)])
+
     # 计算总惩罚
-    return (center_penalty +
-            fragile_penalty +
-            edge_penalty +
-            base_bias_penalty * 0.5 +
-            volume_penalty +
-            height_penalty +
-            wall_bonus -
-            0.1 * touching_bonus
+    return (
+        base_bias_penalty * 1.0 +         # 紧密贴合最优先
+        gap_penalty * 2.0 -               # 贴合优先（重复增强）
+        0.5 * touching_bonus +            # 接触奖励
+        slope_penalty * 2.0 +             # 控制斜率
+        ground_bonus +                    # 越贴地越好
+        wall_bonus +                      # 然后再考虑贴墙
+        fragile_penalty +                 # 易碎惩罚
+        edge_penalty +                    # 小箱子贴边惩罚
+        volume_penalty +                  # 利用率
+        height_penalty +                  # 堆高惩罚
+        center_penalty +                  # 中心偏离
+        unplaced_penalty                  # 未放下惩罚（这是很大项，不动）
     )

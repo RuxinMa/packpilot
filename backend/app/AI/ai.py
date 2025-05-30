@@ -20,6 +20,8 @@ def run_ai_optimizer(container, boxes_raw, runs=10):
             best_cost = cost
             best_solution = solution
 
+    sorted_solution = sorted(best_solution, key=lambda b: (b.z, b.y, b.x))
+    
     results = [{
         "item_id": box.item_id,
         "placement_order": idx + 1,
@@ -30,7 +32,7 @@ def run_ai_optimizer(container, boxes_raw, runs=10):
         "height": box.height,
         "depth": box.depth,
         "is_fragile": box.is_fragile
-    } for idx, box in enumerate(best_solution)]
+    } for idx, box in enumerate(sorted_solution)]
 
     return {
         "status": "success",
