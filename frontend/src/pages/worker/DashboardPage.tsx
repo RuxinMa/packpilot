@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
+
+// Import components
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
-import { itemDatabase } from '../../mocks/data';
+import Button from '../../components/common/Button';
 
+import { itemDatabase } from '../../mocks/data';
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -29,16 +32,20 @@ const WorkerDashboardPage: React.FC = () => {
     navigate('/login');
   };
 
-  const toggleView = () => {
-    if (threeSceneRef.current) {
-      if (is2DView) {
-        threeSceneRef.current.switchToDefaultView();
-      } else {
-        threeSceneRef.current.switchToTopView();
-      }
-      setIs2DView(!is2DView);
-    }
-  };
+const switchTo2D = () => {
+  if (threeSceneRef.current) {
+    threeSceneRef.current.switchToTopView();
+    setIs2DView(true);
+  }
+};
+
+const switchTo3D = () => {
+  if (threeSceneRef.current) {
+    threeSceneRef.current.switchToDefaultView();
+    setIs2DView(false);
+  }
+};
+
 
   const handleNextItem = () => {
     if (threeSceneRef.current) {
@@ -102,9 +109,6 @@ const WorkerDashboardPage: React.FC = () => {
       });
     }
   };
-  
-  
-  
 
   return (
     <div className="min-h-screen">
@@ -120,18 +124,22 @@ const WorkerDashboardPage: React.FC = () => {
             <div className="p-8 flex-auto">
               {/* actions */}
               <div className="space-y-6">
-              <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
                 onClick={handleNextItem}  
               >
                 Next Item
-              </button>
-              <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+              </Button>
+              <Button 
+                variant="primary"
+                size="md"
+                fullWidth
                 onClick={handlePreviousTask} 
               >
                 Previous Item
-              </button>
+              </Button>
                 {/* progress bar */}
                 <ProgressBar 
                   current={packingProgress.current} 
@@ -141,7 +149,7 @@ const WorkerDashboardPage: React.FC = () => {
 
               {/* Item Description */}
               <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
-              <div className="flex flex-col justify-start h-48 p-2 text-gray-600 space-y-1">
+              <div className="flex flex-col justify-start h-40 p-2 text-gray-600 space-y-1">
                 {currentItem ? (
                   <>
                     <p><strong>Name:</strong> {currentItem.id}</p>
@@ -169,7 +177,7 @@ const WorkerDashboardPage: React.FC = () => {
                 Packing View
               </h2>
             </div>
-            <div className='flex flex-1 bg-indigo-100 p-4 items-center justify-center'>
+            <div className='flex flex-1 p-4 items-center justify-center'>
               <ThreeScene 
                 ref={threeSceneRef}
                 onItemClick={(itemId) => {
@@ -190,16 +198,22 @@ const WorkerDashboardPage: React.FC = () => {
                 }}
                             
               />
-              <div className="absolute bottom-8 right-8">
-                <button 
-                  onClick={toggleView}
-                  className={`py-3 px-4 rounded-md text-white shadow-md ${
-                    is2DView ? 'bg-gray-500 hover:bg-gray-600' : 'bg-indigo-500 hover:bg-indigo-600'
-                  }`}
-                >
-                  {is2DView ? '3D View' : '2D View'}
-                </button>
-              </div>
+                <div className="absolute bottom-8 right-8 flex space-x-4">
+                  <Button
+                    onClick={switchTo2D}
+                    variant={is2DView ? 'primary' : 'secondary'}
+                    className="px-4 py-3 text-lg w-24"
+                  >
+                    2D View
+                  </Button>
+                  <Button
+                    onClick={switchTo3D}
+                    variant={!is2DView ? 'primary' : 'secondary'}
+                    className="px-4 py-3 text-lg w-24"
+                  >
+                    3D View
+                  </Button>
+                </div>
             </div>
           </div>
         </div>

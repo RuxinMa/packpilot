@@ -4,6 +4,7 @@ import RegisterPage from '../pages/auth/RegisterPage';
 import ManagerDashboardPage from '../pages/manager/DashboardPage';
 import WorkerDashboardPage from '../pages/worker/DashboardPage';
 import NotFoundPage from '../pages/common/NotFoundPage';
+import AuthGuard from '../components/auth/AuthGuard';
 
 const AppRoutes = () => {
   return (
@@ -22,11 +23,19 @@ const AppRoutes = () => {
       />
       <Route 
         path="/dashboard/manager" 
-        element={<ManagerDashboardPage />} 
+        element={
+          <AuthGuard allowedRoles={['Manager']}>
+            <ManagerDashboardPage />
+          </AuthGuard>
+        } 
       />
       <Route 
         path="/dashboard/worker" 
-        element={<WorkerDashboardPage />} 
+        element={
+          <AuthGuard allowedRoles={['Worker']}>
+            <WorkerDashboardPage />
+          </AuthGuard>
+        } 
       />
       <Route 
         path="*" 

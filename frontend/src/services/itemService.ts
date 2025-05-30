@@ -1,7 +1,5 @@
 // src/services/itemService.ts
-import { useState, useCallback, useEffect } from 'react';
-import { mockItems } from '../mocks/ManagerDashboard';
-
+import { useState, useCallback } from 'react';
 
 export interface Item {
   id: number;
@@ -15,21 +13,21 @@ export interface Item {
 
 interface UseItemsReturn {
   items: Item[];
+  getItems: () => void;
   addItem: (item: Omit<Item, 'id' | 'createdAt'>) => Promise<Item>;
   updateItem: (id: number, updates: Partial<Omit<Item, 'id'>>) => Promise<Item | null>;
-  deleteItem: (id: number) => Promise<boolean>;
-  refreshItems: () => void;
 }
 
 // Simulate a stored items array
-let storedItems: Item[] = [...mockItems];
+let storedItems: Item[] = [];
 // Track the last used ID to ensure sequential ID generation
-let lastItemId = Math.max(...storedItems.map(i => i.id), 0);
+let lastItemId = 0;
 
 export const useItems = (): UseItemsReturn => {
   const [items, setItems] = useState<Item[]>([]);
 
-  useEffect(() => {
+  // Get all items
+  const getItems = useCallback(() => {
     setItems([...storedItems]);
   }, []);
 
@@ -79,35 +77,13 @@ export const useItems = (): UseItemsReturn => {
     setItems([...storedItems]);
     
     // Return the updated item (simulating an API response)
-    return Promise.resolve(updatedItem);    
+    return Promise.resolve(updatedItem);
   }, []);
-
-// Delete an existing item by ID
-const deleteItem = useCallback(async (id: number): Promise<boolean> => {
-  const itemIndex = storedItems.findIndex(item => item.id === id);
-
-  // Return false if item not found
-  if (itemIndex === -1) return Promise.resolve(false);
-
-  // Remove the item from the stored array
-  storedItems = storedItems.filter(item => item.id !== id);
-
-  // Update the state
-  setItems([...storedItems]);
-
-  // Return true to indicate successful deletion
-  return Promise.resolve(true);
-}, []);
-
-const refreshItems = () => {
-  setItems([...storedItems]);
-};
 
   return {
     items,
+    getItems,
     addItem,
     updateItem,
-    deleteItem,
-    refreshItems,
   };
 };

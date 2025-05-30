@@ -1,13 +1,15 @@
 import React from 'react';
 import Modal from '../common/Modal';
-import { FaArrowLeft, FaSpinner } from "react-icons/fa";
+import Button from '../common/Button';
+import { FaArrowLeft } from "react-icons/fa";
 
 interface ItemData {
   length: number;
   width: number;
   height: number;
-  direction: string;
-  note: string;
+  is_fragile: boolean;
+  orientation: string;  
+  remarks: string;    
 }
 
 interface ItemConfirmationProps {
@@ -29,7 +31,7 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
   onConfirmAndAddNext,
   item,
   isSubmitting = false,
-  isEdit = false // ✅ 默认 false
+  isEdit = false 
 }) => {
   return (
     <Modal
@@ -64,47 +66,60 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
               </p>
             </div>
             <div>
-              <h4 className="text-sm font-medium text-gray-500">Direction:</h4>
-              <p className="text-base font-medium">{item.direction}</p>
+              <h4 className="text-sm font-medium text-gray-500">Is Fragile:</h4>
+              <p className={`text-base font-medium ${item.is_fragile ? 'text-red-600' : 'text-green-600'}`}>
+                {item.is_fragile ? 'Yes' : 'No'}
+              </p>
             </div>
-            {item.note && (
+
+            {item.orientation && (
               <div>
-                <h4 className="text-sm font-medium text-gray-500">Note:</h4>
-                <p className="text-base">{item.note}</p>
+                <h4 className="text-sm font-medium text-gray-500">Orientation:</h4>
+                <p className="text-base font-medium">{item.orientation}</p>
               </div>
             )}
+            {item.remarks && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-500">Remarks:</h4>
+                <p className="text-base">{item.remarks}</p>
+              </div>
+            )}
+
           </div>
         </div>
 
         {/* Action buttons */}
-        <div className="flex justify-end pt-4 border-t">
+        <div className="flex justify-between pt-4 border-t">
           {isEdit ? (
-            <button 
+            <Button 
               onClick={onConfirmAndClose}
               disabled={isSubmitting}
-              className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md flex items-center`}
+              isLoading={isSubmitting}
+              variant="primary"
+              className="px-4 py-2"
             >
-              {isSubmitting && <FaSpinner className="animate-spin mr-2" />}
               Save the change
-            </button>
+            </Button>
           ) : (
             <>
-              <button 
+              <Button 
                 onClick={onConfirmAndClose}
                 disabled={isSubmitting}
-                className={`px-4 py-2 ${isSubmitting ? 'bg-orange-300 cursor-not-allowed' : 'bg-orange-500 hover:bg-orange-600'} text-white rounded-md flex items-center`}
+                isLoading={isSubmitting}
+                variant="secondary"
+                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white disabled:bg-orange-300"
               >
-                {isSubmitting && <FaSpinner className="animate-spin mr-2" />}
                 Confirm and Close
-              </button>
-              <button 
+              </Button>
+              <Button 
                 onClick={onConfirmAndAddNext}
                 disabled={isSubmitting}
-                className={`px-4 py-2 ${isSubmitting ? 'bg-blue-300 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white rounded-md flex items-center`}
+                isLoading={isSubmitting}
+                variant="primary"
+                className="px-4 py-2"
               >
-                {isSubmitting && <FaSpinner className="animate-spin mr-2" />}
                 Confirm and Add Next
-              </button>
+              </Button>
             </>
           )}
         </div>

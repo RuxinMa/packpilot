@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { ItemInput, TaskInput } from '../../types';
 
 // Import components
 import Header from '../../components/common/Header';
@@ -11,8 +12,11 @@ import AssignTask from '../../components/manager/AssignTask';
 import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
+import Button from '../../components/common/Button';
 
-import { useItems } from '../../services/itemService';
+// Import hooks
+import { useItems } from '../../hooks/useItems';
+import { useTasks } from '../../hooks/useTasks';
 
 const ManagerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -26,9 +30,23 @@ const ManagerDashboardPage: React.FC = () => {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   
-  // Hooks for data fetching (using mock data for now)
-  const { items, addItem, updateItem, deleteItem, refreshItems } = useItems();
-
+  // Hooks for data management
+  const { 
+    items, 
+    loading: itemsLoading, 
+    error: itemsError, 
+    addItem, 
+    deleteItem, 
+    refreshItems 
+  } = useItems();
+  
+  const { 
+    tasks, 
+    loading: tasksLoading, 
+    error: tasksError, 
+    assignTask, 
+    refreshTasks 
+  } = useTasks();
 
   // Handler functions
   const handleEditItem = (itemId: number) => {
@@ -41,26 +59,34 @@ const ManagerDashboardPage: React.FC = () => {
     setOpenModal('deleteItem');
   };
   
-  const handleRefreshItems = () => {
-    // In a real app, we would refresh from API
-    console.log('Refreshing items');
+  const handleRefreshItems = async () => {
+    await refreshItems();
   };
 
-  const handleItemAdded = (newItemData: any) => {
-    addItem(newItemData); 
+  // Handle item added with API integration
+  const handleItemAdded = async (newItemData: ItemInput) => {
+    console.log('Adding item with data:', newItemData); // Debug log
+    const result = await addItem(newItemData);
+    if (result.success) {
+      console.log('Item added successfully:', result.message);
+    } else {
+      console.error('Failed to add item:', result.message);
+    }
   };
 
-  const handleItemUpdated = () => {
-    // In a real app, we would refresh the items
-    console.log('Item updated');
+  const handleItemUpdated = async () => {
+    // Refresh items to get updated data
+    await refreshItems();
+    console.log('Item updated successfully');
   };
 
   const handleItemDeleted = async () => {
     if (selectedItemId) {
-      const success = await deleteItem(selectedItemId);
-      if (success) {
-        refreshItems();          
-        setSelectedItemId(null); 
+      const result = await deleteItem(selectedItemId);
+      if (result.success) {
+        console.log('Item deleted successfully:', result.message);
+      } else {
+        console.error('Failed to delete item:', result.message);
       }
     }
   };
@@ -79,6 +105,17 @@ const ManagerDashboardPage: React.FC = () => {
     }
   };
 
+  // New function to handle select all
+  const handleSelectAll = () => {
+    const allItemIds = items.map(item => item.id);
+    setSelectedItems(allItemIds);
+  };
+
+  // New function to handle clear all selections
+  const handleClearAll = () => {
+    setSelectedItems([]);
+  };
+
   const handleContinueSelection = () => {
     setOpenModal('assignTask');
   };
@@ -88,20 +125,37 @@ const ManagerDashboardPage: React.FC = () => {
     setSelectedItems([]);
   };
 
-  const handleTaskAssigned = () => {
-    selectedItems.forEach(id => {
-      deleteItem(id);
-    });
-    setSelectionMode(false);
-    setSelectedItems([]);
+  const handleTaskAssigned = async (taskData: { 
+    task_name: string; 
+    worker: string; 
+    container: { length: number; width: number; height: number; }
+  }) => {
+    const taskInput: TaskInput = {
+      task_name: taskData.task_name,
+      worker: taskData.worker,
+      item_ids: selectedItems,
+      container: taskData.container
+    };
+
+    const result = await assignTask(taskInput);
+
+    if (result.success) {
+      // Remove assigned items from the items list (they're now assigned to worker)
+      for (const itemId of selectedItems) {
+        await deleteItem(itemId);
+      }
+      
+      setSelectionMode(false);
+      setSelectedItems([]);
+      console.log('Task assigned successfully:', result.message);
+    } else {
+      console.error('Failed to assign task:', result.message);
+    }
   };
-  
 
   const handleLogout = () => {
     logout();
-    // Implement actual logout logic here
     console.log('User logged out');
-    // Redirect to login page
     navigate('/login');
   };
 
@@ -109,6 +163,16 @@ const ManagerDashboardPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header title="Warehouse Manager Dashboard" viewType="Manager" />
+
+      {/* Error display */}
+      {(itemsError || tasksError) && (
+        <div className="max-w-7xl mx-auto px-4 py-2">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            {itemsError && <p>Items Error: {itemsError}</p>}
+            {tasksError && <p>Tasks Error: {tasksError}</p>}
+          </div>
+        </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6">
@@ -120,35 +184,46 @@ const ManagerDashboardPage: React.FC = () => {
             {/* Action buttons */}
             <div className="p-6 flex-auto">
               <div className="space-y-6">
-                <button 
+                <Button 
                   onClick={() => setOpenModal('addItem')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
-                  disabled={selectionMode}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  disabled={selectionMode || itemsLoading}
+                  isLoading={itemsLoading}
                 >
                   Add Item
-                </button>
+                </Button>
                 {selectionMode ? (
-                  <button 
+                  <Button 
                     onClick={handleClearSelection}
-                    className="w-full py-3 px-4 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center"
+                    variant="secondary"
+                    size="md"
+                    fullWidth
                   >
                     Cancel Selection
-                  </button>
+                  </Button>
                 ) : (
-                  <button 
+                  <Button 
                     onClick={handleStartAssignTask}
-                    className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
+                    variant="primary"
+                    size="md"
+                    fullWidth
+                    disabled={itemsLoading || items.length === 0}
                   >
                     Assign Task
-                  </button>
+                  </Button>
                 )}
-                <button 
+                <Button 
                   onClick={() => setOpenModal('taskHistory')}
-                  className="w-full py-3 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center justify-center"
-                  disabled={selectionMode}
+                  variant="primary"
+                  size="md"
+                  fullWidth
+                  disabled={selectionMode || tasksLoading}
+                  isLoading={tasksLoading}
                 >
                   Task History
-                </button>
+                </Button>
               </div>
             </div>
             
@@ -162,6 +237,7 @@ const ManagerDashboardPage: React.FC = () => {
               <h2 className="text-lg font-medium text-gray-800">
                 {selectionMode ? 'Select Items for Task' : 'Item Inventory'}
               </h2>
+              {itemsLoading && <p className="text-sm text-gray-500 mt-1">Loading items...</p>}
             </div>
             <div className="flex-1 p-6 overflow-auto">
               <ItemList 
@@ -172,7 +248,10 @@ const ManagerDashboardPage: React.FC = () => {
                 selectionMode={selectionMode}
                 selectedItems={selectedItems}
                 onToggleItemSelection={handleToggleItemSelection}
+                onSelectAll={handleSelectAll}
+                onClearAll={handleClearAll}
                 onContinueSelection={handleContinueSelection}
+                loading={itemsLoading}
               />
             </div>
           </div>
@@ -199,11 +278,15 @@ const ManagerDashboardPage: React.FC = () => {
         selectedItems={selectedItems}
         onClearSelection={handleClearSelection}
         onTaskAssigned={handleTaskAssigned}
+        items={items}
       />
       
       <TaskHistory
         isOpen={openModal === 'taskHistory'}
         onClose={() => setOpenModal(null)}
+        tasks={tasks}
+        loading={tasksLoading}
+        onRefresh={refreshTasks}
       />
       
       <DeleteItem

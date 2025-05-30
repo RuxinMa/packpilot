@@ -1,34 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
-import { FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import Button from '../common/Button';
+import { FaInfoCircle } from 'react-icons/fa';
+import { Item } from '../../types';
+import { MOCK_WORKERS } from '../../mocks/dataManager';
 
 interface AssignTaskProps {
   isOpen: boolean;
   onClose: () => void;
   selectedItems: number[];
   onClearSelection: () => void;
-  onTaskAssigned?: () => void;
+  onTaskAssigned: (taskData: {
+    task_name: string;
+    worker: string;
+    container: {
+      length: number;
+      width: number;
+      height: number;
+    };
+  }) => void;
+  items: Item[]; // Add items prop to show selected items info
 }
-
-// Mock data
-// if real application only has fixed workers, we can import constant data here
-const mockWorkers = [
-  { id: 1, username: 'worker1' },
-  { id: 2, username: 'worker2' },
-  { id: 3, username: 'worker3' },
-  { id: 4, username: 'worker4' },
-  { id: 5, username: 'worker5' }
-];
 
 const AssignTask: React.FC<AssignTaskProps> = ({ 
   isOpen, 
   onClose,
   selectedItems,
   onClearSelection,
-  onTaskAssigned
+  onTaskAssigned,
+  items
 }) => {
   const [formData, setFormData] = useState({
-    worker_id: '',
+    worker: '',
     container_length: '',
     container_width: '',
     container_height: ''
@@ -47,7 +50,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
       
       // Pre-set container size
       setFormData({
-        worker_id: '',
+        worker: '',
         container_length: '120',
         container_width: '80',
         container_height: '60'
@@ -63,38 +66,43 @@ const AssignTask: React.FC<AssignTaskProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     
-    // Simulated API call delay
-    setTimeout(() => {
-      console.log('Assigning task with data:', {
-        ...formData,
+    try {
+      // Call the parent's onTaskAssigned with properly formatted data
+      await onTaskAssigned({
         task_name: taskName,
-        item_ids: selectedItems,
-        timestamp: new Date().toISOString()
+        worker: formData.worker,
+        container: {
+          length: parseFloat(formData.container_length),
+          width: parseFloat(formData.container_width),
+          height: parseFloat(formData.container_height)
+        }
       });
-      
-      // Reset status after completing the operation
-      setIsSubmitting(false);
       
       // Clear selected items
       onClearSelection();
       
-      // Close the modal box
+      // Close the modal
       onClose();
-      
-      if (onTaskAssigned) onTaskAssigned();
-    }, 800);
+    } catch (error) {
+      console.error('Error assigning task:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Check if the form is valid
   const isFormValid = 
-    formData.worker_id !== '' && 
+    formData.worker !== '' && 
     formData.container_length !== '' && 
     formData.container_width !== '' && 
     formData.container_height !== '';
+
+  // Get selected items details
+  // const selectedItemsDetails = items.filter(item => selectedItems.includes(item.id));
 
   return (
     <Modal
@@ -119,15 +127,15 @@ const AssignTask: React.FC<AssignTaskProps> = ({
             Choose a Worker <span className="text-red-500">*</span>
           </label>
           <select
-            name="worker_id"
-            value={formData.worker_id}
+            name="worker"
+            value={formData.worker}
             onChange={handleInputChange}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required
           >
             <option value="">Select a worker</option>
-            {mockWorkers.map((worker) => (
-              <option key={worker.id} value={worker.id}>
+            {MOCK_WORKERS.map((worker) => (
+              <option key={worker.id} value={worker.username}>
                 {worker.username}
               </option>
             ))}
@@ -149,6 +157,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
                 min="1"
+                step="0.1"
               />
             </div>
             <div>
@@ -161,6 +170,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
                 min="1"
+                step="0.1"
               />
             </div>
             <div>
@@ -173,6 +183,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 required
                 min="1"
+                step="0.1"
               />
             </div>
           </div>
@@ -183,11 +194,11 @@ const AssignTask: React.FC<AssignTaskProps> = ({
             <div className="flex-shrink-0">
               <FaInfoCircle className="h-5 w-5 text-blue-400" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
+            <div className="mx-4">
+              <p className="text-lg text-blue-700">
                 <span className="font-medium">{selectedItems.length}</span> items selected for this task
               </p>
-              <p className="mt-1 text-xs text-blue-600">
+              <p className="mt-2 text-sm text-blue-600">
                 The assigned items will be removed from the inventory after the task is created.
               </p>
             </div>
@@ -195,24 +206,15 @@ const AssignTask: React.FC<AssignTaskProps> = ({
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <button 
+          <Button 
             type="submit" 
-            className={`px-4 py-2 bg-blue-600 text-white rounded-md ${
-              isFormValid && !isSubmitting 
-                ? 'hover:bg-blue-700' 
-                : 'opacity-50 cursor-not-allowed'
-            }`}
+            variant="primary"
             disabled={!isFormValid || isSubmitting}
+            isLoading={isSubmitting}
+            className="px-4 py-2"
           >
-             {isSubmitting ? (
-              <span className="flex items-center">
-                <FaSpinner className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                Assigning...
-              </span>
-            ) : (
-              'Assign Task'
-            )}
-          </button>
+            Assign Task
+          </Button>
         </div>
       </form>
     </Modal>

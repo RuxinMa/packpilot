@@ -1,6 +1,6 @@
-// import { LoginResponse, UserRole } from '../types/auth';
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { UserRole, LoginResponse } from '../types/auth'; 
+import { UserRole, LoginResponse } from '../types/auth';
+import { MOCK_USERS } from '../mocks/dataManager';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -12,82 +12,78 @@ interface AuthContextType {
   logout: () => void;
 }
 
-const MOCK_USERS = [
-  { username: 'manager1', password: 'password', role: 'Manager' as UserRole },
-  { username: 'worker1', password: 'password', role: 'Worker' as UserRole }
-];
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-//   const auth = useAuth();
-  
-//   return (
-//     <AuthContext.Provider value={auth}>
-//       {children}
-//     </AuthContext.Provider>
-//   );
-// };
-
-// Mock Testing
+// Mock Auth Provider
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 从本地存储中检查已有的登录状态
+  // Check existing login status from localStorage
   useEffect(() => {
     const storedAuth = localStorage.getItem('auth');
     if (storedAuth) {
       try {
-        const { isAuthenticated, role } = JSON.parse(storedAuth);
+        const { isAuthenticated, role, username } = JSON.parse(storedAuth);
         setIsAuthenticated(isAuthenticated);
-        setRole(role as UserRole); // 使用类型断言确保与 UserRole 类型兼容
+        setRole(role as UserRole);
+        setUsername(username);
       } catch (err) {
-        // 如果解析错误，清除无效的存储
+        // Clear invalid storage if parsing fails
         localStorage.removeItem('auth');
       }
     }
   }, []);
 
-  // 模拟登录流程
-  const login = async (username: string, password: string, selectedRole: 'manager' | 'worker') => {
+  // Mock login process
+  const login = async (username: string, password: string, selectedRole: 'manager' | 'worker'): Promise<LoginResponse> => {
     setIsLoading(true);
     setError(null);
     
-    // 模拟网络延迟
+    // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // 将 selectedRole 首字母大写，转换为 UserRole 类型
+    // Convert selectedRole to UserRole format
     const roleFormatted = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) as UserRole;
     
-    // 本地验证逻辑 - 模拟后端验证
+    // Local validation logic - simulate backend validation using centralized mock data
     const matchedUser = MOCK_USERS.find(user => 
       user.username === username && user.password === password
     );
     
     if (matchedUser) {
-      // 检查选择的角色是否匹配用户角色
+      // Check if selected role matches user role
       if (matchedUser.role !== roleFormatted) {
-        setError(`Invalid role selected. You are a ${matchedUser.role}.`);
+        const errorMsg = `Invalid role selected. You are a ${matchedUser.role}.`;
+        setError(errorMsg);
         setIsLoading(false);
-        return;
+        return {
+          status: 'error',
+          message: errorMsg,
+          token: null,
+          role: null,
+          redirect_url: null
+        };
       }
       
-      // 模拟登录成功
+      // Simulate successful login
       setIsAuthenticated(true);
       setRole(matchedUser.role);
+      setUsername(matchedUser.username);
       
-      // 存储到本地存储
+      // Store to localStorage
       localStorage.setItem('auth', JSON.stringify({
         isAuthenticated: true,
-        role: matchedUser.role
+        role: matchedUser.role,
+        username: matchedUser.username
       }));
       
       setIsLoading(false);
       
-      // 模拟一个符合 LoginResponse 类型的响应
+      // Return successful LoginResponse
       const response: LoginResponse = {
         status: 'success',
         message: 'Login successful',
@@ -96,35 +92,41 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         redirect_url: `/dashboard/${matchedUser.role.toLowerCase()}`
       };
       
-      console.log('Login response:', response);
+      console.log('Login successful:', response);
+      return response;
     } else {
-      // 模拟登录失败
-      setError('Invalid username or password');
+      // Simulate login failure
+      const errorMsg = 'Invalid username or password';
+      setError(errorMsg);
       setIsLoading(false);
       
-      // 模拟一个失败的 LoginResponse
+      // Return failed LoginResponse
       const response: LoginResponse = {
         status: 'error',
-        message: 'Invalid credentials',
+        message: errorMsg,
         token: null,
         role: null,
         redirect_url: null
       };
       
       console.log('Login failed:', response);
+      return response;
     }
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setRole(null);
+    setUsername(null);
     localStorage.removeItem('auth');
+    console.log('User logged out');
   };
 
   return (
     <AuthContext.Provider value={{ 
       isAuthenticated, 
       role, 
+      username,
       login, 
       logout,
       isLoading,

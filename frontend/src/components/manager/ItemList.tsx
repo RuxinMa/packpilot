@@ -1,16 +1,7 @@
 import React from 'react';
-import { FaEdit, FaSync, FaTrash, FaCheck } from 'react-icons/fa';
-
-// Item interface from original file
-interface Item {
-  id: number;
-  length: number;
-  width: number;
-  height: number;
-  direction: string;
-  notes?: string;
-  createdAt?: Date;
-}
+import { FaEdit, FaSync, FaTrash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import Button from '../common/Button';
+import { Item } from '../../types';
 
 interface ItemListProps {
   items: Item[];
@@ -20,7 +11,10 @@ interface ItemListProps {
   selectionMode?: boolean;
   selectedItems?: number[];
   onToggleItemSelection?: (itemId: number) => void;
+  onSelectAll?: () => void;
+  onClearAll?: () => void;
   onContinueSelection?: () => void;
+  loading?: boolean;
 }
 
 const ItemList: React.FC<ItemListProps> = ({ 
@@ -31,7 +25,10 @@ const ItemList: React.FC<ItemListProps> = ({
   selectionMode = false,
   selectedItems = [],
   onToggleItemSelection,
-  onContinueSelection
+  onSelectAll,
+  onClearAll,
+  onContinueSelection,
+  loading = false
 }) => {
   // Format date function
   const formatDate = (date: Date) => {
@@ -41,6 +38,21 @@ const ItemList: React.FC<ItemListProps> = ({
   // Check if item is selected
   const isItemSelected = (itemId: number) => {
     return selectedItems.includes(itemId);
+  };
+
+  // Check if all items are selected
+  const areAllItemsSelected = items.length > 0 && selectedItems.length === items.length;
+  
+  // Check if some items are selected (for indeterminate state)  
+  const areSomeItemsSelected = selectedItems.length > 0 && selectedItems.length < items.length;
+
+  // Handle select all toggle
+  const handleSelectAllToggle = () => {
+    if (areAllItemsSelected && onClearAll) {
+      onClearAll();
+    } else if (onSelectAll) {
+      onSelectAll();
+    }
   };
   
   return (
@@ -52,24 +64,40 @@ const ItemList: React.FC<ItemListProps> = ({
             : `Total Items: ${items.length}`}
         </h3>
         {selectionMode ? (
-          <button
-            onClick={onContinueSelection}
-            disabled={selectedItems.length === 0}
-            className={`px-4 py-2 rounded-md ${
-              selectedItems.length > 0 
-                ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            Continue
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Select All / Clear All Button */}
+            {items.length > 0 && (
+              <Button
+                onClick={handleSelectAllToggle}
+                variant="secondary"
+                size="sm"
+                className="px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300"
+              >
+                {areAllItemsSelected ? 'Clear All' : 'Select All'}
+              </Button>
+            )}
+            <Button
+              onClick={onContinueSelection}
+              disabled={selectedItems.length === 0}
+              variant={selectedItems.length > 0 ? "primary" : "secondary"}
+              size="sm"
+              className="px-4 py-2"
+            >
+              Continue
+            </Button>
+          </div>
         ) : (
-          <button
+          <Button
             onClick={onRefresh}
-            className="flex items-center text-blue-600 hover:text-blue-800"
+            disabled={loading}
+            isLoading={loading}
+            variant="outline"
+            size="sm"
+            leftIcon={<FaSync />}
+            className="text-blue-600 hover:text-blue-800"
           >
-            <FaSync className="mr-1" /> Refresh
-          </button>
+            Refresh
+          </Button>
         )}
       </div>
       
@@ -85,7 +113,23 @@ const ItemList: React.FC<ItemListProps> = ({
               <tr>
                 {selectionMode && (
                   <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Select
+                    <div className="flex items-center">
+                      <div 
+                        className={`w-5 h-5 border rounded flex items-center justify-center cursor-pointer transition-colors ${
+                          areAllItemsSelected 
+                            ? 'bg-blue-600 border-blue-600' 
+                            : areSomeItemsSelected
+                            ? 'bg-blue-200 border-blue-400'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                        onClick={handleSelectAllToggle}
+                        title={areAllItemsSelected ? 'Deselect all' : 'Select all'}
+                      >
+                        {areAllItemsSelected && <FaCheck className="text-white text-xs" />}
+                        {areSomeItemsSelected && <div className="w-2 h-2 bg-blue-600 rounded-sm"></div>}
+                      </div>
+                      <span className="ml-2">Select</span>
+                    </div>
                   </th>
                 )}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -95,10 +139,13 @@ const ItemList: React.FC<ItemListProps> = ({
                   Dimensions (L×W×H)
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Direction
+                  Fragile
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Notes
+                  Orientation
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Remarks
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Added Time
@@ -138,14 +185,26 @@ const ItemList: React.FC<ItemListProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {`${item.length} × ${item.width} × ${item.height}`}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center">
+                      {item.is_fragile ? (
+                        <>
+                          <FaExclamationTriangle className="text-red-500 mr-1" />
+                          <span className="text-red-600 font-medium">Yes</span>
+                        </>
+                      ) : (
+                        <span className="text-green-600 font-medium">No</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.direction}
+                    {item.orientation || "-"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                    {item.notes || "-"}
+                    {item.remarks || "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.createdAt ? formatDate(item.createdAt) : "-"}
+                    {item.created_at ? formatDate(item.created_at) : "-"}
                   </td>
                   {!selectionMode && (
                     <td className="px-6 py-4 whitespace-nowrap text-right font-medium">

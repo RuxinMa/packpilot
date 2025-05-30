@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ItemConfirmation from './ItemConfirmation';
-import { useItems } from '../../services/itemService';
+import Button from '../common/Button';
+import { ItemInput } from '../../types';
 
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
-  onItemAdded: (newItemData: any) => void; // MODIFIED: Now accepts item data
+  onItemAdded: (newItemData: ItemInput) => void; // Use ItemInput type
 }
 
 const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
-  // Get add item function from service
-  const { addItem } = useItems();
-  
   // Form state
   const [formData, setFormData] = useState({
     length: '',
     width: '',
     height: '',
-    direction: '',
-    note: ''
+    is_fragile: '',
+    orientation: '', 
+    remarks: ''      
   });
 
   // Form validation state
@@ -27,7 +26,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     length: false,
     width: false,
     height: false,
-    direction: false
+    is_fragile: false
   });
 
   // State for showing confirmation modal
@@ -42,18 +41,25 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
         length: '',
         width: '',
         height: '',
-        direction: '',
-        note: ''
+        is_fragile: '',
+        orientation: '',
+        remarks: ''
       });
     }
   }, [isOpen]);
 
-  // Direction options
-  const directionOptions = [
+  // Orientation options (changed from direction)
+  const orientationOptions = [
     { value: 'face_up', label: 'Face up' },
     { value: 'face_down', label: 'Face down' },
     { value: 'side_a', label: 'Side A' },
     { value: 'side_b', label: 'Side B' }
+  ];
+
+  // Fragile options
+  const fragileOptions = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' }
   ];
 
   // Handle input changes
@@ -80,7 +86,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       length: !formData.length,
       width: !formData.width,
       height: !formData.height,
-      direction: !formData.direction
+      is_fragile: !formData.is_fragile
     };
 
     setFormErrors(errors);
@@ -102,14 +108,15 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       length: '',
       width: '',
       height: '',
-      direction: '',
-      note: ''
+      is_fragile: '',
+      orientation: '',
+      remarks: ''
     });
     setFormErrors({
       length: false,
       width: false,
       height: false,
-      direction: false
+      is_fragile: false
     });
     setShowConfirmation(false);
     onClose();
@@ -117,24 +124,22 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
 
   // Check if form is valid for enabling/disabling continue button
   const isFormValid = () => {
-    return !!formData.length && !!formData.width && !!formData.height && !!formData.direction;
+    return !!formData.length && !!formData.width && !!formData.height && !!formData.is_fragile;
   };
 
-  // MODIFIED: Save the item to the database and pass data to parent
+  // Save the item to the database and pass data to parent
   const saveItem = async () => {
     setIsSubmitting(true);
     try {
-      // Create the new item data
-      const newItemData = {
+      // Create the new item data matching ItemInput interface
+      const newItemData: ItemInput = {
         length: parseFloat(formData.length),
         width: parseFloat(formData.width),
         height: parseFloat(formData.height),
-        direction: getDirectionLabel(formData.direction),
-        notes: formData.note
+        is_fragile: formData.is_fragile === 'yes',
+        orientation: formData.orientation || '', // Default to empty string if not selected
+        remarks: formData.remarks
       };
-      
-      // In a real app, you would call the API here
-      // await addItem(newItemData);
       
       // Pass the new item data to the parent component
       onItemAdded(newItemData);
@@ -160,8 +165,9 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       length: '',
       width: '',
       height: '',
-      direction: '',
-      note: ''
+      is_fragile: '',
+      orientation: '',
+      remarks: ''
     });
   };
 
@@ -169,9 +175,9 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     setShowConfirmation(false);
   };
 
-  // Get direction label from value
-  const getDirectionLabel = (value: string) => {
-    const option = directionOptions.find(opt => opt.value === value);
+  // Get orientation label from value
+  const getOrientationLabel = (value: string) => {
+    const option = orientationOptions.find(opt => opt.value === value);
     return option ? option.label : value;
   };
 
@@ -190,8 +196,8 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
             </p>
           </div>
           
-          {/* Dimensions */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Dimensions - all in one row */}
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <label htmlFor="length" className="block text-sm font-medium text-gray-700">
                 Length* (cm)
@@ -228,79 +234,100 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
                 <p className="mt-1 text-sm text-red-500">Width is required</p>
               )}
             </div>
+            <div>
+              <label htmlFor="height" className="block text-sm font-medium text-gray-700">
+                Height* (cm)
+              </label>
+              <input
+                type="number"
+                id="height"
+                name="height"
+                value={formData.height}
+                onChange={handleChange}
+                min="0"
+                step="0.1"
+                className={`mt-1 block w-full px-3 py-2 border ${formErrors.height ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+              />
+              {formErrors.height && (
+                <p className="mt-1 text-sm text-red-500">Height is required</p>
+              )}
+            </div>
           </div>
           
+          {/* Fragile - required field */}
           <div>
-            <label htmlFor="height" className="block text-sm font-medium text-gray-700">
-              Height* (cm)
-            </label>
-            <input
-              type="number"
-              id="height"
-              name="height"
-              value={formData.height}
-              onChange={handleChange}
-              min="0"
-              step="0.1"
-              className={`mt-1 block w-full px-3 py-2 border ${formErrors.height ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
-            />
-            {formErrors.height && (
-              <p className="mt-1 text-sm text-red-500">Height is required</p>
-            )}
-          </div>
-          
-          {/* Direction */}
-          <div>
-            <label htmlFor="direction" className="block text-sm font-medium text-gray-700">
-              Direction*
+            <label htmlFor="is_fragile" className="block text-sm font-medium text-gray-700">
+              Is Fragile*
             </label>
             <select
-              id="direction"
-              name="direction"
-              value={formData.direction}
+              id="is_fragile"
+              name="is_fragile"
+              value={formData.is_fragile}
               onChange={handleChange}
-              className={`mt-1 block w-full px-3 py-2 border ${formErrors.direction ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
+              className={`mt-1 block w-full px-3 py-2 border ${formErrors.is_fragile ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
             >
-              <option value="">Select direction</option>
-              {directionOptions.map(option => (
+              <option value="">Select fragile status</option>
+              {fragileOptions.map(option => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </select>
-            {formErrors.direction && (
-              <p className="mt-1 text-sm text-red-500">Direction is required</p>
+            {formErrors.is_fragile && (
+              <p className="mt-1 text-sm text-red-500">Fragile status is required</p>
             )}
           </div>
           
-          {/* Note */}
+          {/* Orientation - now optional */}
           <div>
-            <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-              Note (Optional)
+            <label htmlFor="orientation" className="block text-sm font-medium text-gray-700">
+              Orientation (Optional)
+            </label>
+            <select
+              id="orientation"
+              name="orientation"
+              value={formData.orientation}
+              onChange={handleChange}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select orientation</option>
+              {orientationOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          {/* Remarks */}
+          <div>
+            <label htmlFor="remarks" className="block text-sm font-medium text-gray-700">
+              Remarks (Optional)
             </label>
             <textarea
-              id="note"
-              name="note"
-              value={formData.note}
+              id="remarks"
+              name="remarks"
+              value={formData.remarks}
               onChange={handleChange}
               rows={3}
               maxLength={200}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
             <p className="mt-1 text-xs text-gray-500">
-              {formData.note.length}/200 characters maximum
+              {formData.remarks.length}/200 characters maximum
             </p>
           </div>
           
           {/* Action buttons */}
           <div className="flex justify-end space-x-3 pt-4 border-t">
-            <button 
+            <Button 
               type="submit" 
+              variant={isFormValid() && !isSubmitting ? "primary" : "secondary"}
               disabled={!isFormValid() || isSubmitting}
-              className={`px-4 py-2 ${isFormValid() && !isSubmitting ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed'} rounded-md`}
+              className="px-4 py-2"
             >
               Continue
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>
@@ -316,8 +343,9 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
           length: parseFloat(formData.length) || 0,
           width: parseFloat(formData.width) || 0,
           height: parseFloat(formData.height) || 0,
-          direction: getDirectionLabel(formData.direction),
-          note: formData.note
+          is_fragile: formData.is_fragile === 'yes',
+          orientation: formData.orientation ? getOrientationLabel(formData.orientation) : '',
+          remarks: formData.remarks
         }}
         isSubmitting={isSubmitting}
       />
