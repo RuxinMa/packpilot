@@ -22,14 +22,15 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
 
     results = [{
         "item_id": box.item_id,
-        "x": box.x,
-        "y": box.y,
-        "z": box.z,
+        "placement_order": idx + 1,
+        "x": box.x - box.width / 2,
+        "y": box.y - box.height / 2,
+        "z": box.z - box.depth / 2,
         "width": box.width,
         "height": box.height,
         "depth": box.depth,
         "is_fragile": box.is_fragile
-    } for box in best_solution]
+    } for idx, box in enumerate(best_solution)]
 
     return {
         "status": "success",
