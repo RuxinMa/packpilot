@@ -3,8 +3,8 @@ import { Item, Task, TaskHistoryItem, User, Worker } from '../types';
 
 export const mockItems: Item[] = [
   { 
-    id: 1, 
-    name: '20250517-0034',
+    id: 99618143, 
+    name: 'ITEM-001',
     length: 50,  
     width: 30, 
     height: 20, 
@@ -14,8 +14,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-01T10:30:00')
   },
   { 
-    id: 2, 
-    name: '20250517-0035',
+    id: 56763234, 
+    name: 'ITEM-002',
     length: 100, 
     width: 45, 
     height: 35, 
@@ -25,8 +25,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-03T14:15:00')
   },
   { 
-    id: 3, 
-    name: '20250517-0036',
+    id: 56788533, 
+    name: 'ITEM-003',
     length: 75, 
     width: 60, 
     height: 40, 
@@ -36,8 +36,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-05T09:45:00')
   },
   { 
-    id: 4, 
-    name: '20250517-0037',
+    id: 66733455, 
+    name: 'ITEM-004',
     length: 120, 
     width: 80, 
     height: 50, 
@@ -47,8 +47,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-07T16:20:00')
   },
   { 
-    id: 5, 
-    name: '20250517-0038',
+    id: 5788444, 
+    name: 'ITEM-005',
     length: 90, 
     width: 65, 
     height: 45, 
@@ -58,8 +58,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-08T11:10:00')
   },
   { 
-    id: 6, 
-    name: '20250517-0039',
+    id: 6567843, 
+    name: 'ITEM-006',
     length: 60, 
     width: 65, 
     height: 45, 
@@ -69,8 +69,8 @@ export const mockItems: Item[] = [
     created_at: new Date('2025-05-08T11:10:00')
   },
   { 
-    id: 7, 
-    name: '20250517-0040',
+    id: 7677743, 
+    name: 'ITEM-007',
     length: 60, 
     width: 60, 
     height: 45, 

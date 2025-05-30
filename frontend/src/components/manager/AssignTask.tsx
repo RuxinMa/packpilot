@@ -28,7 +28,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
   selectedItems,
   onClearSelection,
   onTaskAssigned,
-  items
+  // items
 }) => {
   const [formData, setFormData] = useState({
     worker: '',
@@ -195,7 +195,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
               <FaInfoCircle className="h-5 w-5 text-blue-400" />
             </div>
             <div className="mx-4">
-              <p className="text-lg text-blue-700">
+              <p className="text-base text-blue-700">
                 <span className="font-medium">{selectedItems.length}</span> items selected for this task
               </p>
               <p className="mt-2 text-sm text-blue-600">

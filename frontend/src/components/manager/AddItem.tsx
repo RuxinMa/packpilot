@@ -7,11 +7,11 @@ import { ItemInput } from '../../types';
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
-  onItemAdded: (newItemData: ItemInput) => void; // Use ItemInput type
+  onItemAdded: (newItemData: ItemInput) => void;
 }
 
 const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
-  // Form state
+  // Form state (pure UI state)
   const [formData, setFormData] = useState({
     length: '',
     width: '',
@@ -29,26 +29,28 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     is_fragile: false
   });
 
-  // State for showing confirmation modal
+  // UI state
   const [showConfirmation, setShowConfirmation] = useState(false);
-  // State for loading
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewName, setPreviewName] = useState('');
   
   // Reset form when modal opens
   useEffect(() => {
     if (isOpen) {
-      setFormData({
-        length: '',
-        width: '',
-        height: '',
-        is_fragile: '',
-        orientation: '',
-        remarks: ''
-      });
+      resetForm();
+      // Generate adaptive preview name
+      const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
+      let paddedCount: string;
+      if (count < 1000) {
+        paddedCount = count.toString().padStart(3, '0');
+      } else {
+        paddedCount = count.toString();
+      }
+      setPreviewName(`ITEM-${paddedCount}`);
     }
   }, [isOpen]);
 
-  // Orientation options (changed from direction)
+  // Form configuration
   const orientationOptions = [
     { value: 'face_up', label: 'Face up' },
     { value: 'face_down', label: 'Face down' },
@@ -56,54 +58,13 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     { value: 'side_b', label: 'Side B' }
   ];
 
-  // Fragile options
   const fragileOptions = [
     { value: 'yes', label: 'Yes' },
     { value: 'no', label: 'No' }
   ];
 
-  // Handle input changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    
-    setFormData({
-      ...formData,
-      [name]: value
-    });
-
-    // Clear validation error when field is changed
-    if (name in formErrors) {
-      setFormErrors({
-        ...formErrors,
-        [name]: false
-      });
-    }
-  };
-
-  // Validate form
-  const validateForm = () => {
-    const errors = {
-      length: !formData.length,
-      width: !formData.width,
-      height: !formData.height,
-      is_fragile: !formData.is_fragile
-    };
-
-    setFormErrors(errors);
-    return !Object.values(errors).some(error => error);
-  };
-
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (validateForm()) {
-      setShowConfirmation(true);
-    }
-  };
-
-  // Handle modal close and reset form
-  const handleModalClose = () => {
+  // UI Helper functions
+  const resetForm = () => {
     setFormData({
       length: '',
       width: '',
@@ -118,31 +79,81 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       height: false,
       is_fragile: false
     });
+  };
+
+  const isFormValid = () => {
+    return !!formData.length && 
+           !!formData.width && 
+           !!formData.height && 
+           !!formData.is_fragile &&
+           parseFloat(formData.length) > 0 &&
+           parseFloat(formData.width) > 0 &&
+           parseFloat(formData.height) > 0;
+  };
+
+  const getOrientationLabel = (value: string) => {
+    const option = orientationOptions.find(opt => opt.value === value);
+    return option ? option.label : value;
+  };
+
+  // Form event handlers
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Clear validation error when field is changed
+    if (name in formErrors) {
+      setFormErrors(prev => ({ ...prev, [name]: false }));
+    }
+  };
+
+  const validateForm = () => {
+    const errors = {
+      length: !formData.length || parseFloat(formData.length) <= 0,
+      width: !formData.width || parseFloat(formData.width) <= 0,
+      height: !formData.height || parseFloat(formData.height) <= 0,
+      is_fragile: !formData.is_fragile
+    };
+
+    setFormErrors(errors);
+    return !Object.values(errors).some(error => error);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (validateForm()) {
+      setShowConfirmation(true);
+    }
+  };
+
+  // Modal event handlers
+  const handleModalClose = () => {
+    resetForm();
     setShowConfirmation(false);
+    setPreviewName('');
     onClose();
   };
 
-  // Check if form is valid for enabling/disabling continue button
-  const isFormValid = () => {
-    return !!formData.length && !!formData.width && !!formData.height && !!formData.is_fragile;
+  const handleBackToEdit = () => {
+    setShowConfirmation(false);
   };
 
-  // Save the item to the database and pass data to parent
+  // Item operations (delegate to parent)
   const saveItem = async () => {
     setIsSubmitting(true);
     try {
-      // Create the new item data matching ItemInput interface
       const newItemData: ItemInput = {
         length: parseFloat(formData.length),
         width: parseFloat(formData.width),
         height: parseFloat(formData.height),
         is_fragile: formData.is_fragile === 'yes',
-        orientation: formData.orientation || '', // Default to empty string if not selected
-        remarks: formData.remarks
+        orientation: formData.orientation || '',
+        remarks: formData.remarks || ''
       };
       
-      // Pass the new item data to the parent component
-      onItemAdded(newItemData);
+      await onItemAdded(newItemData);
     } catch (error) {
       console.error('Error adding item:', error);
     } finally {
@@ -150,7 +161,6 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     }
   };
 
-  // Handle confirmation actions
   const handleConfirmAndClose = async () => {
     await saveItem();
     handleModalClose();
@@ -159,26 +169,16 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
   const handleConfirmAndAddNext = async () => {
     await saveItem();
     setShowConfirmation(false);
-    
-    // Reset form but keep the modal open
-    setFormData({
-      length: '',
-      width: '',
-      height: '',
-      is_fragile: '',
-      orientation: '',
-      remarks: ''
-    });
-  };
-
-  const handleBackToEdit = () => {
-    setShowConfirmation(false);
-  };
-
-  // Get orientation label from value
-  const getOrientationLabel = (value: string) => {
-    const option = orientationOptions.find(opt => opt.value === value);
-    return option ? option.label : value;
+    resetForm();
+    // Generate next adaptive preview name
+    const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
+    let paddedCount: string;
+    if (count < 1000) {
+      paddedCount = count.toString().padStart(3, '0');
+    } else {
+      paddedCount = count.toString();
+    }
+    setPreviewName(`ITEM-${paddedCount}`);
   };
 
   return (
@@ -189,14 +189,26 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
         title="Add Item"
       >
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Note about auto ID generation */}
+          {/* Auto-generated preview */}
           <div className="bg-blue-50 p-4 rounded-md mb-4">
-            <p className="text-sm text-blue-700">
-              An ID will be automatically assigned to this item upon creation.
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-blue-700 font-medium">Auto-generated Item Details:</p>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  {/* Name: Sequential identifier */}
+                  <span className="text-blue-600 font-medium">Name: </span>
+                  <span className="text-blue-700">{previewName}</span>
+                </div>
+                <div>
+                  {/* ID: Unique 8-digit database key */}
+                  <span className="text-blue-600 font-medium">ID: </span>
+                  <span className="text-blue-700">Generated on save</span>
+                </div>
+              </div>
+            </div>
           </div>
           
-          {/* Dimensions - all in one row */}
+          {/* Dimensions */}
           <div className="grid grid-cols-3 gap-4">
             <div>
               <label htmlFor="length" className="block text-sm font-medium text-gray-700">
@@ -208,12 +220,14 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
                 name="length"
                 value={formData.length}
                 onChange={handleChange}
-                min="0"
+                min="0.1"
                 step="0.1"
                 className={`mt-1 block w-full px-3 py-2 border ${formErrors.length ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
               />
               {formErrors.length && (
-                <p className="mt-1 text-sm text-red-500">Length is required</p>
+                <p className="mt-1 text-sm text-red-500">
+                  {!formData.length ? 'Length is required' : 'Length must be greater than 0'}
+                </p>
               )}
             </div>
             <div>
@@ -226,12 +240,14 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
                 name="width"
                 value={formData.width}
                 onChange={handleChange}
-                min="0"
+                min="0.1"
                 step="0.1"
                 className={`mt-1 block w-full px-3 py-2 border ${formErrors.width ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
               />
               {formErrors.width && (
-                <p className="mt-1 text-sm text-red-500">Width is required</p>
+                <p className="mt-1 text-sm text-red-500">
+                  {!formData.width ? 'Width is required' : 'Width must be greater than 0'}
+                </p>
               )}
             </div>
             <div>
@@ -244,17 +260,19 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
                 name="height"
                 value={formData.height}
                 onChange={handleChange}
-                min="0"
+                min="0.1"
                 step="0.1"
                 className={`mt-1 block w-full px-3 py-2 border ${formErrors.height ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500`}
               />
               {formErrors.height && (
-                <p className="mt-1 text-sm text-red-500">Height is required</p>
+                <p className="mt-1 text-sm text-red-500">
+                  {!formData.height ? 'Height is required' : 'Height must be greater than 0'}
+                </p>
               )}
             </div>
           </div>
           
-          {/* Fragile - required field */}
+          {/* Fragile */}
           <div>
             <label htmlFor="is_fragile" className="block text-sm font-medium text-gray-700">
               Is Fragile*
@@ -278,7 +296,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
             )}
           </div>
           
-          {/* Orientation - now optional */}
+          {/* Orientation */}
           <div>
             <label htmlFor="orientation" className="block text-sm font-medium text-gray-700">
               Orientation (Optional)
@@ -312,9 +330,10 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
               rows={3}
               maxLength={200}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Add any additional notes about this item..."
             />
             <p className="mt-1 text-xs text-gray-500">
-              {formData.remarks.length}/200 characters maximum
+              {formData.remarks.length}/200 characters
             </p>
           </div>
           
@@ -340,6 +359,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
         onConfirmAndClose={handleConfirmAndClose}
         onConfirmAndAddNext={handleConfirmAndAddNext}
         item={{
+          name: previewName,
           length: parseFloat(formData.length) || 0,
           width: parseFloat(formData.width) || 0,
           height: parseFloat(formData.height) || 0,
