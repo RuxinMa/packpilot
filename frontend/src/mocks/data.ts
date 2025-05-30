@@ -1,7 +1,7 @@
 export const roomDatabase = [
     {
-      width: 15,
-      height: 2,
+      width: 20,
+      height: 10,
       depth: 7,
     }
 ]

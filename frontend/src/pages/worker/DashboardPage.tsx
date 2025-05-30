@@ -34,7 +34,7 @@ const WorkerDashboardPage: React.FC = () => {
   // 转换AI输出数据为与原来兼容的格式
   const transformedData = (aiOutput as AIOutput).results.map(box => ({
     id: `Box-${box.box_id}`,
-    Inf: box.is_fragile ? 'Fragile' : 'Non-fragile',
+    is_fragile: box.is_fragile,
     width: box.width,
     height: box.height,
     depth: box.depth,
@@ -203,8 +203,8 @@ const handlePreviousTask = () => {
               <ThreeScene 
                 ref={threeSceneRef}
                 onItemClick={(itemId) => {
-                  const item = itemDatabase.find(item => item.id === itemId);
-                  
+                  // 直接使用itemId查找，而不是依赖索引
+                  const item = transformedData.find(item => item.id === itemId);
                   if (item) {
                     setCurrentItem({
                       id: item.id,
@@ -213,12 +213,20 @@ const handlePreviousTask = () => {
                       height: item.height,
                       depth: item.depth,
                     });
+                    
+                    // 更新进度到当前物品
+                    const itemIndex = transformedData.findIndex(i => i.id === itemId);
+                    if (itemIndex !== -1) {
+                      setPackingProgress({
+                        current: itemIndex + 1, // +1因为current表示已完成的数量
+                        total: transformedData.length
+                      });
+                    }
                   }
                 }}
                 onEmptyClick={() => {
                   console.log('点击了空白区域，准备切回最新物体');
                 }}
-                            
               />
                 <div className="absolute bottom-8 right-8 flex space-x-4">
                   <Button

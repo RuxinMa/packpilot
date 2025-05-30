@@ -3,6 +3,33 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { roomDatabase } from '../../mocks/data';
 import { itemDatabase } from '../../mocks/data';
+import aiOutput from '../../mocks/sample_ai_output.json'; // 导入新的数据源
+
+interface AIBox {
+  box_id: number;
+  width: number;
+  height: number;
+  depth: number;
+  is_fragile: boolean;
+  x: number;
+  y: number;
+  z: number;
+}
+
+interface AIOutput {
+  cost: number;
+  results: AIBox[];
+  status: string;
+}
+  // 转换AI输出数据
+const transformedData = (aiOutput as AIOutput).results.map(box => ({
+  id: `Box-${box.box_id}`,
+  is_fragile: box.is_fragile,
+  width: box.width,
+  height: box.height,
+  depth: box.depth,
+  position: [box.x, box.y, box.z] as [number, number, number]
+  }));
 
 // Define types for the cube creation parameters
 interface CubeParams {
@@ -41,14 +68,18 @@ function createCube(
   const material = new THREE.MeshBasicMaterial({ color });
   const cube = new THREE.Mesh(geometry, material);
   cube.name = 'cube'; 
-  cube.position.set(...position);
+  cube.position.set(
+    position[0] + width / 2,  // X轴向右移动半宽
+    position[1] + height / 2, // Y轴向上移动半高
+    position[2] + depth / 2   // Z轴向内移动半深
+  );
 
   // create frame
   const edges = new THREE.EdgesGeometry(geometry);
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
   const line = new THREE.LineSegments(edges, lineMaterial);
   line.name = 'edge'; 
-  line.position.set(...position);
+  line.position.copy(cube.position); // 保持与立方体相同的位置
 
   // Group
   const group = new THREE.Group();
@@ -116,7 +147,7 @@ function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
   const floorGeometry = new THREE.PlaneGeometry(width, depth);
   const floor = new THREE.Mesh(floorGeometry, material);
   floor.rotation.x = -Math.PI / 2;
-  floor.position.set(width / 2, 0, depth / 2);
+  floor.position.set(width / 2, 0, depth / 2 );
   floor.name = 'floor';
   roomGroup.add(floor);
 
@@ -463,7 +494,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         const group = picked.parent as THREE.Group;
         const index = itemsRef.current.findIndex(item => item === group);
         if (index !== -1) {
-          const item = itemDatabase[index];
+          const item = transformedData[index];
           if (item) {
             props.onItemClick(item.id); // 传回id
           }
