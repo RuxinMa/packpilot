@@ -5,13 +5,12 @@ import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
-import { itemDatabase } from '../../mocks/data';
 import Button from '../../components/common/Button';
 import aiOutput from '../../mocks/sample_ai_output.json';
 
 // 定义AI输出数据的类型
 interface AIBox {
-  box_id: number;
+  item_id: number;
   width: number;
   height: number;
   depth: number;
@@ -33,7 +32,7 @@ const WorkerDashboardPage: React.FC = () => {
 
   // 转换AI输出数据为与原来兼容的格式
   const transformedData = (aiOutput as AIOutput).results.map(box => ({
-    id: `Box-${box.box_id}`,
+    item_id: `Box-${box.item_id}`,
     is_fragile: box.is_fragile,
     width: box.width,
     height: box.height,
@@ -44,7 +43,7 @@ const WorkerDashboardPage: React.FC = () => {
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
   const [currentItem, setCurrentItem] = useState<null | {
-    id: string;
+    item_id: string;
     is_fragile: boolean;
     width: number;
     height: number;
@@ -76,20 +75,18 @@ const handleNextItem = () => {
   if (threeSceneRef.current) {
     const currentIndex = packingProgress.current;
     if (currentIndex < transformedData.length) {
-      const item = transformedData[currentIndex];
+      const item = transformedData[currentIndex]; 
 
-      const newItemParams = {
+      threeSceneRef.current.addItem({
         width: item.width,
         height: item.height,
         depth: item.depth,
         color: 0xadd8e6,
         position: item.position,
-      };
-
-      threeSceneRef.current.addItem(newItemParams);
+      });
 
       setCurrentItem({
-        id: item.id,
+        item_id: item.item_id,
         is_fragile: item.is_fragile,
         width: item.width,
         height: item.height,
@@ -98,8 +95,8 @@ const handleNextItem = () => {
 
       setPackingProgress((prev) => ({
         ...prev,
-        current: Math.min(prev.current + 1, prev.total),
-      }));       
+        current: prev.current + 1, // 直接递增，不依赖点击
+      }));
     }
   }
 };
@@ -114,7 +111,7 @@ const handlePreviousTask = () => {
       if (newCurrent > 0) {
         const item = transformedData[newCurrent - 1]; 
         setCurrentItem({
-          id: item.id,
+          item_id: item.item_id,
           is_fragile: item.is_fragile,
           width: item.width,
           height: item.height,
@@ -174,7 +171,7 @@ const handlePreviousTask = () => {
               <div className="flex flex-col justify-start h-40 p-2 text-gray-600 space-y-1">
                 {currentItem ? (
                   <>
-                    <p><strong>Name:</strong> {currentItem.id}</p>
+                    <p><strong>Name:</strong> {currentItem.item_id}</p>
                     <p><strong>Fragile:</strong> {currentItem.is_fragile ? 'Yes' : 'No'}</p>
                     <p><strong>Width:</strong> {currentItem.width}</p>
                     <p><strong>Height:</strong> {currentItem.height}</p>
@@ -203,25 +200,15 @@ const handlePreviousTask = () => {
               <ThreeScene 
                 ref={threeSceneRef}
                 onItemClick={(itemId) => {
-                  // 直接使用itemId查找，而不是依赖索引
-                  const item = transformedData.find(item => item.id === itemId);
+                  const item = transformedData.find(item => item.item_id === itemId);
                   if (item) {
                     setCurrentItem({
-                      id: item.id,
+                      item_id: item.item_id,
                       is_fragile: item.is_fragile,
                       width: item.width,
                       height: item.height,
                       depth: item.depth,
                     });
-                    
-                    // 更新进度到当前物品
-                    const itemIndex = transformedData.findIndex(i => i.id === itemId);
-                    if (itemIndex !== -1) {
-                      setPackingProgress({
-                        current: itemIndex + 1, // +1因为current表示已完成的数量
-                        total: transformedData.length
-                      });
-                    }
                   }
                 }}
                 onEmptyClick={() => {

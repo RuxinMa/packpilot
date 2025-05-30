@@ -2,11 +2,10 @@ import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { roomDatabase } from '../../mocks/data';
-import { itemDatabase } from '../../mocks/data';
 import aiOutput from '../../mocks/sample_ai_output.json'; // 导入新的数据源
 
 interface AIBox {
-  box_id: number;
+  item_id: number;
   width: number;
   height: number;
   depth: number;
@@ -23,7 +22,7 @@ interface AIOutput {
 }
   // 转换AI输出数据
 const transformedData = (aiOutput as AIOutput).results.map(box => ({
-  id: `Box-${box.box_id}`,
+  item_id: `Box-${box.item_id}`,
   is_fragile: box.is_fragile,
   width: box.width,
   height: box.height,
@@ -496,7 +495,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         if (index !== -1) {
           const item = transformedData[index];
           if (item) {
-            props.onItemClick(item.id); // 传回id
+            props.onItemClick(item.item_id); // 传回id
           }
         }
       }
