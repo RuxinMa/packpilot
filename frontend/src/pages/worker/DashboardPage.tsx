@@ -49,6 +49,7 @@ const WorkerDashboardPage: React.FC = () => {
     height: number;
     depth: number;
   }>(null);
+  
 
   const handleLogout = () => {
     logout();
