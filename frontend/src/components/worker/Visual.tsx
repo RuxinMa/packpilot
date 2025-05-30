@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { roomDatabase } from '../../mocks/data';
 import { itemDatabase } from '../../mocks/data';
-import aiOutput from '../../mocks/sample_ai_output_2.json'; // 导入新的数据源
+import aiOutput from '../../mocks/sample_ai_output.json'; // 导入新的数据源
 
 interface AIBox {
   box_id: number;
