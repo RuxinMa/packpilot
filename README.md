@@ -1,77 +1,114 @@
-# LS1 Warehouse Packing Project Overview
+# Frontend Development Setup and Guidelines
 
-## Project Goal
-We're creating a visualization tool to help warehouse workers optimize how they pack items, transforming what is currently an experience-based process into one guided by optimization algorithms.
-
-## Project Scope
-- The project addresses the gap between AI optimization solutions and practical implementation
-- We'll be developing a web application to guide workers in following AI-recommended packing arrangements
-
-## Team Structure
-- **Supervisor:** Lia Song
-- **Team Members:**
-  - Feinan Guo
-  - Jiahui Huang
-  - Ruxin Ma
-  - Shiyu Zhao 
-  - Xuran Chen 
-  - Jiabao Ye (External)
+This document provides comprehensive setup instructions and development guidelines for the frontend of the LS1 Warehouse Packing project.
 
 ## Tech Stack
 
-| Category | Technologies |
-|----------|--------------|
-| **Frontend** | Language: TypeScript<br>Fraework: React<br>CSS: Tailwind CSS<br>Build Tool: Vite|
-| **Backend** | Language: Python<br>Fraework: Flask<br>API: RESTful API |
-| **Database** | MySQL |
-| **Visualization** | Blender |
-| **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions |
-| **Version Control** | Git with GitHub |
-| **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
+- **Language**: TypeScript
+- **Framework**: React
+- **Styling**: Tailwind CSS
+- **Build Tool**: Vite
 
+## Prerequisites
 
-## Dev Setup Instructions
-
-### Prerequisites
 - Node.js (v18 or higher)
 - npm (v9 or higher)
 - Git
 
-### Frontend Setup
+## Development Setup
+
+### Initial Setup
+
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-org/LS1.git
+   git clone https://github.cs.adelaide.edu.au/MCI-Project-2025/LS1.git
    cd LS1
-   git checkout main
    ```
 
-2. Install dependencies
+2. Switch to the frontend branch and frontend directory
+   ```bash
+   git checkout dev-frontend
+   cd frontend
+   ```
+
+3. Install dependencies
    ```bash
    npm install
    ```
 
-3. Start the development server
+4. Start the development server
    ```bash
    npm run dev
    ```
    The application will be available at http://localhost:5173
 
 
-## Meeting Schedule
-- Client Meetings: Every two weeks, on Friday 16:15-17:00 (Sprint review & Next Sprint planning) 
-- Team Meetings: Every week, on Friday 17:00-18:00 (Additional meetings as needed) 
+## Project Structure
+
+```
+src/
+├── assets/                  # Static assets (images, icons)
+├── components/              # Reusable UI components
+│   ├── common/              # Shared components
+│   │   ├── Button.tsx                    
+│   │   ├── Modal.tsx                   
+│   ├── auth/                # Authentication components
+│   │   ├── LoginForm.tsx        
+│   │   └── RegisterForm.tsx      
+│   ├── manager/             # Manager-specific components
+│   │   ├── AddItem.tsx      
+│   │   ├── EditItem.tsx       
+│   │   ├── ItemList.tsx         
+│   │   ├── AssignTask.tsx    
+│   │   └── TaskHistory.tsx    
+│   └── worker/              # Worker-specific components
+│       ├── ItemDescription.tsx   
+│       └── ProgressBar.tsx  
+├── pages/                   # Page components
+│   ├── auth/
+│   │   ├── LoginPage.tsx    
+│   │   └── RegisterPage.tsx 
+│   ├── manager/
+│   │   └── DashboardPage.tsx 
+│   ├── worker/
+│   │   └── DashboardPage.tsx 
+│   ├── common/
+│   │   └── NotFoundPage.tsx  
+├── contexts/                # React Context providers
+│   ├── AuthContext.tsx      
+│   ├── ItemContext.tsx      
+│   └── TaskContext.tsx      
+├── services/                # API integration
+│   ├── api.ts               
+│   ├── authService.ts       
+│   ├── managerService.ts   
+│   └── workerService.ts     
+├── hooks/                   # Custom React hooks
+│   ├── useAuth.ts           
+│   ├── useItems.ts          
+│   ├── useTasks.ts          
+├── types/                   # TypeScript definitions      
+├── routes/                  # Routing configuration
+├── styles/                  
+├── utils/                   
+├── App.tsx                  # Root component
+└── index.tsx                # Application entry point
+```
+
+## Development Workflow
+
+1. Environment Setup & Foundation
+2. Static Components (UI-Only Phase)
+3. Routing & Navigation
+4. State Management & API Integration
+5. User Experience Enhancements
+6. Testing & Refinement
 
 
-## Branch Structure
-- **main**: Web application production code
-- **docs**: All project documentation (project docs, meetings and timesheets)
-- **feature/[feature-name]**: Individual feature development
-- **bugfix/[bug-name]**: Bug fixes
-- **release/[version]**: Release preparation
+## Related Documentation
 
-
-## Communication Channels
-- Project management: GitHub-Kanban
-- Code repository: GitHub
-- Client meetings: Microsoft Teams
-- Team communication: Teams & WeChat
+- [React Documentation](https://react.dev/docs/getting-started)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/handbook/intro.html)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [React Icon Documentation](https://react-icons.github.io/react-icons/icons/fa/)
+- [Vite Documentation](https://vitejs.dev/guide/)
