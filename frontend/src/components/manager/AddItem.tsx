@@ -7,7 +7,7 @@ import { ItemInput } from '../../types';
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
-  onItemAdded: (newItemData: ItemInput) => void;
+  onItemAdded: (newItemData: ItemInput & { name: string }) => void; // Include name in the data passed to parent
 }
 
 const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
@@ -32,13 +32,13 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
   // UI state
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [previewName, setPreviewName] = useState('');
+  const [generatedName, setGeneratedName] = useState(''); // Frontend generates the name
   
-  // Reset form when modal opens
+  // Generate item name when modal opens
   useEffect(() => {
     if (isOpen) {
       resetForm();
-      // Generate adaptive preview name
+      // Generate sequential name based on localStorage counter
       const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
       let paddedCount: string;
       if (count < 1000) {
@@ -46,7 +46,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       } else {
         paddedCount = count.toString();
       }
-      setPreviewName(`ITEM-${paddedCount}`);
+      setGeneratedName(`ITEM-${paddedCount}`);
     }
   }, [isOpen]);
 
@@ -132,7 +132,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
   const handleModalClose = () => {
     resetForm();
     setShowConfirmation(false);
-    setPreviewName('');
+    setGeneratedName('');
     onClose();
   };
 
@@ -140,11 +140,12 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     setShowConfirmation(false);
   };
 
-  // Item operations (delegate to parent)
+  // Item operations - Pass name along with other data to parent
   const saveItem = async () => {
     setIsSubmitting(true);
     try {
-      const newItemData: ItemInput = {
+      const newItemData: ItemInput & { name: string } = {
+        name: generatedName, // Frontend generated name
         length: parseFloat(formData.length),
         width: parseFloat(formData.width),
         height: parseFloat(formData.height),
@@ -153,7 +154,13 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
         remarks: formData.remarks || ''
       };
       
+      // Parent component handles the API call and will receive backend-generated ID
       await onItemAdded(newItemData);
+      
+      // Update localStorage counter only after successful creation
+      const currentCount = parseInt(localStorage.getItem('item_counter') || '0');
+      localStorage.setItem('item_counter', (currentCount + 1).toString());
+      
     } catch (error) {
       console.error('Error adding item:', error);
     } finally {
@@ -170,7 +177,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     await saveItem();
     setShowConfirmation(false);
     resetForm();
-    // Generate next adaptive preview name
+    // Generate next sequential name
     const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
     let paddedCount: string;
     if (count < 1000) {
@@ -178,7 +185,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     } else {
       paddedCount = count.toString();
     }
-    setPreviewName(`ITEM-${paddedCount}`);
+    setGeneratedName(`ITEM-${paddedCount}`);
   };
 
   return (
@@ -192,17 +199,17 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
           {/* Auto-generated preview */}
           <div className="bg-blue-50 p-4 rounded-md mb-4">
             <div className="space-y-2">
-              <p className="text-sm text-blue-700 font-medium">Auto-generated Item Details:</p>
+              <p className="text-base text-blue-700 font-medium">Auto-generated Item Details</p>
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
-                  {/* Name: Sequential identifier */}
-                  <span className="text-blue-600 font-medium">Name: </span>
-                  <span className="text-blue-700">{previewName}</span>
+                  {/* Name: Frontend generated sequential identifier */}
+                  <span className="text-xs text-blue-700 font-medium">Name: </span>
+                  <span className="text-xs text-blue-700">{generatedName}</span>
                 </div>
                 <div>
-                  {/* ID: Unique 8-digit database key */}
-                  <span className="text-blue-600 font-medium">ID: </span>
-                  <span className="text-blue-700">Generated on save</span>
+                  {/* ID: Backend will generate unique database key */}
+                  <span className="text-xs text-blue-700 font-medium">ID: </span>
+                  <span className="text-xs text-blue-700 ">Auto-assigned on save</span>
                 </div>
               </div>
             </div>
@@ -359,7 +366,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
         onConfirmAndClose={handleConfirmAndClose}
         onConfirmAndAddNext={handleConfirmAndAddNext}
         item={{
-          name: previewName,
+          name: generatedName, // Frontend generated name
           length: parseFloat(formData.length) || 0,
           width: parseFloat(formData.width) || 0,
           height: parseFloat(formData.height) || 0,
@@ -368,6 +375,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
           remarks: formData.remarks
         }}
         isSubmitting={isSubmitting}
+        isEdit={false}
       />
     </>
   );

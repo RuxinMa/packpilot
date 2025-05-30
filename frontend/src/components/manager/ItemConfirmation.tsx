@@ -22,6 +22,7 @@ interface ItemConfirmationProps {
   onConfirmAndAddNext: () => void;
   item: ItemPreviewData; // Use shared type
   isSubmitting?: boolean;
+  isEdit?: boolean; 
 }
 
 const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
@@ -31,7 +32,8 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
   onConfirmAndClose,
   onConfirmAndAddNext,
   item,
-  isSubmitting = false
+  isSubmitting = false,
+  isEdit = false
 }) => {
   return (
     <Modal
@@ -67,10 +69,11 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
               <h4 className="text-sm font-medium text-gray-500">Item Name:</h4>
               <p className="text-base font-medium text-blue-600">{item.name}</p>
             </div>
-
             <div>
               <h4 className="text-sm font-medium text-gray-500">Item ID:</h4>
-              <p className="text-base font-medium text-gray-700">Will be automatically assigned</p>
+              <p className="text-base font-medium text-gray-700">
+                {isEdit ? "Existing ID maintained" : "Auto-assigned on save"}
+              </p>
             </div>
             
             {/* Dimensions and Fragile in one row */}
@@ -94,42 +97,57 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
                 </div>
               </div>
             </div>
-            
+
             {item.orientation && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Orientation:</h4>
                 <p className="text-base">{item.orientation}</p>
               </div>
             )}
-            
             {item.remarks && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Remarks:</h4>
                 <p className="text-base">{item.remarks}</p>
               </div>
             )}
+
           </div>
         </div>
-        
+
         {/* Action buttons */}
-        <div className="flex justify-between pt-4 border-t">
-          <Button 
-            onClick={onConfirmAndClose}
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-            variant="secondary"
-            className="bg-orange-500 hover:bg-orange-600 text-white disabled:bg-orange-300"
-          >
-            Confirm and Close
-          </Button>
-          <Button 
-            onClick={onConfirmAndAddNext}
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-            variant="primary"
-          >
-            Confirm and Add Next
-          </Button>
+        <div className={`flex pt-4 border-t ${isEdit ? 'justify-end' : 'justify-between'}`}>
+          {isEdit ? (
+            // Edit mode: Only show confirm button, right-aligned
+            <Button 
+              onClick={onConfirmAndClose}
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
+              variant="primary"
+            >
+              Confirm Changes
+            </Button>
+          ) : (
+            // Add mode: Show both buttons with space between
+            <>
+              <Button 
+                onClick={onConfirmAndClose}
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                variant="secondary"
+                className="bg-orange-500 hover:bg-orange-600 text-white disabled:bg-orange-300"
+              >
+                Confirm and Close
+              </Button>
+              <Button 
+                onClick={onConfirmAndAddNext}
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                variant="primary"
+              >
+                Confirm and Add Next
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>

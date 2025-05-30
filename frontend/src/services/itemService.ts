@@ -2,28 +2,30 @@
 import { Item, ItemInput, ItemApiPayload, ApiResponse } from '../types';
 import { mockItems } from '../mocks/dataManager';
 
-// Utility functions for ID and name generation
+// Extended ItemInput interface to include frontend-generated name
+interface ItemInputWithName extends ItemInput {
+  name: string;
+}
+
+// Utility functions for ID generation
 export const generateItemId = (): number => {
-  // Generate shorter sequential ID: 6-8 digits
+  // Generate backend-style sequential ID: 6-8 digits
   const timestamp = Date.now();
   const lastSixDigits = timestamp % 1000000; // Get last 6 digits
   const randomSuffix = Math.floor(Math.random() * 100); // Add 2 random digits
   return lastSixDigits * 100 + randomSuffix;
 };
 
+// Frontend name generation utility (for reference, but should be handled by frontend)
 export const generateItemName = (): string => {
-  // Generate adaptive sequential name with dynamic padding
-  // ITEM-001 → ITEM-999 → ITEM-1000 → ITEM-9999 → ITEM-10000
+  // This function is mainly for fallback scenarios
+  // Primary name generation should happen in frontend components
   const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
-  localStorage.setItem('item_counter', count.toString());
   
-  // Dynamic padding based on number length
   let paddedCount: string;
   if (count < 1000) {
-    // 1-999: 3 digits with leading zeros (ITEM-001, ITEM-002, ..., ITEM-999)
     paddedCount = count.toString().padStart(3, '0');
   } else {
-    // 1000+: No padding, just the number (ITEM-1000, ITEM-1001, ...)
     paddedCount = count.toString();
   }
   
@@ -68,33 +70,34 @@ export class ItemApiService {
         ...item,
         is_fragile: item.is_fragile === true || item.is_fragile === 'true' || item.is_fragile === 'yes',
         created_at: item.created_at ? new Date(item.created_at) : new Date(),
-        name: item.name || `ITEM-${item.id}`
+        name: item.name || `ITEM-${item.id}` // Fallback name if missing
       }));
     }
     
-    const itemsWithNames = mockItems.map(item => ({
+    // Initialize with mock data, ensuring all items have names
+    const itemsWithNames = mockItems.map((item, index) => ({
       ...item,
-      name: item.name || generateItemName(),
+      name: item.name || `ITEM-${(index + 1).toString().padStart(3, '0')}`,
       created_at: item.created_at || new Date()
     }));
     localStorage.setItem('warehouse_items', JSON.stringify(itemsWithNames));
     return itemsWithNames;
   }
 
-  // Add new item
-  static async addItem(itemData: ItemInput): Promise<{ success: boolean; item: Item; message?: string }> {
+  // Add new item with frontend-generated name
+  static async addItemWithName(itemData: ItemInputWithName): Promise<{ success: boolean; item: Item; message?: string }> {
     await new Promise(resolve => setTimeout(resolve, 300));
     
     const storedItems = localStorage.getItem('warehouse_items');
     const items = storedItems ? JSON.parse(storedItems) : [];
     
+    // Backend generates unique ID, frontend provides name
     const newId = generateItemId();
-    const newName = generateItemName();
     const createdAt = new Date();
     
     const newItem: Item = {
-      id: newId,
-      name: newName,
+      id: newId, // Backend-generated ID
+      name: itemData.name, // Frontend-generated name
       length: itemData.length,
       width: itemData.width,
       height: itemData.height,
@@ -110,12 +113,25 @@ export class ItemApiService {
     // Sync to backend
     try {
       await this.syncToBackend('CREATE', newItem);
-      console.log(`Item ${newName} (ID: ${newId}) synced to backend`);
+      console.log(`Item ${itemData.name} created with backend-generated ID: ${newId}`);
     } catch (error) {
       console.warn('Failed to sync item to backend:', error);
     }
     
-    return { success: true, item: newItem, message: `Item ${newName} added successfully` };
+    return { 
+      success: true, 
+      item: newItem, 
+      message: `Item ${itemData.name} created successfully with ID: ${newId}` 
+    };
+  }
+
+  // Legacy method for backward compatibility (uses auto-generated name)
+  static async addItem(itemData: ItemInput): Promise<{ success: boolean; item: Item; message?: string }> {
+    const itemWithName: ItemInputWithName = {
+      ...itemData,
+      name: generateItemName()
+    };
+    return this.addItemWithName(itemWithName);
   }
 
   // Update existing item
@@ -134,6 +150,8 @@ export class ItemApiService {
     const updatedItem = { 
       ...originalItem, 
       ...itemData,
+      id: originalItem.id, // Preserve original ID
+      name: originalItem.name, // Preserve original name (name updates not supported in edit)
       created_at: originalItem.created_at
     };
     
@@ -143,7 +161,7 @@ export class ItemApiService {
     // Sync to backend
     try {
       await this.syncToBackend('UPDATE', updatedItem);
-      console.log(`Item ${updatedItem.name} (ID: ${id}) updated in backend`);
+      console.log(`Item ${updatedItem.name} (ID: ${id}) updated successfully`);
     } catch (error) {
       console.warn('Failed to sync item update to backend:', error);
     }
@@ -169,7 +187,7 @@ export class ItemApiService {
     // Sync to backend
     try {
       await this.syncToBackend('DELETE', itemToDelete);
-      console.log(`Item ${itemToDelete.name} (ID: ${id}) deleted from backend`);
+      console.log(`Item ${itemToDelete.name} (ID: ${id}) deleted successfully`);
     } catch (error) {
       console.warn('Failed to sync item deletion to backend:', error);
     }

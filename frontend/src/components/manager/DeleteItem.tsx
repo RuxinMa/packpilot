@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import Button from '../common/Button';
 import { useItemContext } from '../../contexts/ItemContext';
-import { FaExclamationTriangle } from 'react-icons/fa';
 
 interface DeleteItemProps {
   isOpen: boolean;
@@ -61,18 +60,13 @@ const DeleteItem: React.FC<DeleteItemProps> = ({
     >
       <div className="space-y-6">
         {/* Warning */}
-        <div className="flex items-start space-x-3">
-          <div className="flex-shrink-0">
-            <FaExclamationTriangle className="h-6 w-6 text-red-500 ml-3" />
-          </div>
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">
-              Are you sure you want to delete this item?
+        <div className="bg-red-50 p-4 rounded-md">
+            <h3 className="text-base font-medium text-red-700">
+              Are you sure you want to delete this item? 
             </h3>
-            <p className="mt-2 text-sm text-gray-600">
-              This action cannot be undone. The item will be permanently removed from your inventory.
+            <p className="mt-2 text-xs text-red-700">
+              This action cannot be undone.
             </p>
-          </div>
         </div>
 
         {/* Item Details */}
