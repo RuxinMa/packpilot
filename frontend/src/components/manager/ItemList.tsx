@@ -133,7 +133,7 @@ const ItemList: React.FC<ItemListProps> = ({
                   </th>
                 )}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  ID
+                  Name
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Dimensions (L×W×H)
@@ -142,13 +142,10 @@ const ItemList: React.FC<ItemListProps> = ({
                   Fragile
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Orientation
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Remarks
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Added Time
+                  Created Time
                 </th>
                 {!selectionMode && (
                   <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -179,8 +176,10 @@ const ItemList: React.FC<ItemListProps> = ({
                       </div>
                     </td>
                   )}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {item.id}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-blue-600 font-medium">{item.name}</span>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {`${item.length} × ${item.width} × ${item.height}`}
@@ -197,11 +196,14 @@ const ItemList: React.FC<ItemListProps> = ({
                       )}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.orientation || "-"}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                    {item.remarks || "-"}
+                  <td className="px-6 py-4 text-sm text-gray-500 max-w-xs">
+                    {item.remarks ? (
+                      <div title={item.remarks} className="truncate">
+                        {item.remarks}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {item.created_at ? formatDate(item.created_at) : "-"}

@@ -1,35 +1,39 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
-import { FaSpinner, FaExclamationTriangle } from 'react-icons/fa';
-import { Item } from '../../types'; 
-
-
+import Button from '../common/Button';
+import { useItemContext } from '../../contexts/ItemContext';
 
 interface DeleteItemProps {
   isOpen: boolean;
   onClose: () => void;
   itemId: number | null;
   onItemDeleted: () => void;
-  items: Item[];
-  deleteItem: (id: number) => Promise<boolean>;
 }
 
-const DeleteItem: React.FC<DeleteItemProps> = ({ isOpen, onClose, itemId, onItemDeleted, items, deleteItem }) => {
+const DeleteItem: React.FC<DeleteItemProps> = ({ 
+  isOpen, 
+  onClose, 
+  itemId, 
+  onItemDeleted 
+}) => {
+  const { items, deleteItem } = useItemContext();
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const item = itemId ? items.find(item => item.id === itemId) : null;
+  // Find the item to delete
+  const itemToDelete = itemId ? items.find(item => item.id === itemId) : null;
 
   const handleDelete = async () => {
     if (!itemId) return;
 
     setIsDeleting(true);
     try {
-      const success = await deleteItem(itemId);
-      if (success) {
-        onItemDeleted();
+      const result = await deleteItem(itemId);
+      if (result.success) {
+        console.log('Item deleted successfully:', result.message);
+        onItemDeleted(); // Notify parent component
         onClose();
       } else {
-        console.error(`Failed to delete item with ID: ${itemId}`);
+        console.error('Failed to delete item:', result.message);
       }
     } catch (error) {
       console.error('Error deleting item:', error);
@@ -38,60 +42,91 @@ const DeleteItem: React.FC<DeleteItemProps> = ({ isOpen, onClose, itemId, onItem
     }
   };
 
+  const handleCancel = () => {
+    if (!isDeleting) {
+      onClose();
+    }
+  };
+
+  if (!itemToDelete) {
+    return null;
+  }
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleCancel}
       title="Delete Item"
     >
       <div className="space-y-6">
-        <div className="bg-red-50 p-4 rounded-md flex-col items-center justify-center">
-          <div className='flex items-center justify-center gap-4'>
-            <FaExclamationTriangle className="text-red-500" />
-            <h3 className="text-xl font-medium text-red-800">Confirm Deletion</h3>
-          </div>
-          <p className="mt-2 text-sm text-red-700 text-center">
-            Are you sure you want to delete this item? <br />
-            This action cannot be undone.
-          </p>
+        {/* Warning */}
+        <div className="bg-red-50 p-4 rounded-md">
+            <h3 className="text-base font-medium text-red-700">
+              Are you sure you want to delete this item? 
+            </h3>
+            <p className="mt-2 text-xs text-red-700">
+              This action cannot be undone.
+            </p>
         </div>
 
-        {item && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-2">Item Details:</h4>
-            <div className="space-y-2">
-              <div className="flex">
-                <span className="text-sm font-medium text-gray-500 w-24">ID:</span>
-                <span className="text-sm">{item.id}</span>
-              </div>
-              <div className="flex">
-                <span className="text-sm font-medium text-gray-500 w-24">Size:</span>
-                <span className="text-sm">{`${item.length} × ${item.width} × ${item.height} cm`}</span>
-              </div>
-              <div className="flex">
-                <span className="text-sm font-medium text-gray-500 w-24">Direction:</span>
-                <span className="text-sm">{item.orientation}</span>
-              </div>
-              {item.remarks && (
-                <div className="flex">
-                  <span className="text-sm font-medium text-gray-500 w-24">Notes:</span>
-                  <span className="text-sm">{item.remarks}</span>
-                </div>
-              )}
+        {/* Item Details */}
+        <div className="bg-gray-50 rounded-lg p-4 border">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">Item to be deleted:</h4>
+          <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-gray-600">ID:</span>
+              <span className="font-medium">{itemToDelete.id}</span>
             </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Name:</span>
+              <span className="font-medium font-mono text-blue-600">{itemToDelete.name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Dimensions:</span>
+              <span className="font-medium">
+                {itemToDelete.length} × {itemToDelete.width} × {itemToDelete.height} cm
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">Fragile:</span>
+              <span className={`font-medium ${itemToDelete.is_fragile ? 'text-red-600' : 'text-green-600'}`}>
+                {itemToDelete.is_fragile ? 'Yes' : 'No'}
+              </span>
+            </div>
+            {itemToDelete.orientation && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Orientation:</span>
+                <span className="font-medium">{itemToDelete.orientation}</span>
+              </div>
+            )}
+            {itemToDelete.remarks && (
+              <div className="flex justify-between">
+                <span className="text-gray-600">Remarks:</span>
+                <span className="font-medium">{itemToDelete.remarks}</span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
-        <div className="flex justify-end pt-4 border-t">
-          <button
-            type="button"
-            onClick={handleDelete}
+        {/* Action buttons */}
+        <div className="flex justify-between pt-4 border-t">
+          <Button
+            onClick={handleCancel}
+            variant="secondary"
             disabled={isDeleting}
-            className={`px-6 py-2 text-white rounded-md flex items-center ${isDeleting ? 'bg-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700'}`}
+            className="px-4 py-2"
           >
-            {isDeleting && <FaSpinner className="animate-spin mr-2" />}
+            Cancel
+          </Button>
+          <Button
+            onClick={handleDelete}
+            variant="primary"
+            disabled={isDeleting}
+            isLoading={isDeleting}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white disabled:bg-red-300"
+          >
             Delete Item
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

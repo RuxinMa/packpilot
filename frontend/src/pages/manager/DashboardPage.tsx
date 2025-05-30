@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
-import { ItemInput, TaskInput } from '../../types';
+import { useItemContext } from '../../contexts/ItemContext';
+import { useTaskContext } from '../../contexts/TaskContext';
+import { TaskInput } from '../../types';
 
 // Import components
 import Header from '../../components/common/Header';
@@ -14,41 +16,42 @@ import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
 
-// Import hooks
-import { useItems } from '../../hooks/useItems';
-import { useTasks } from '../../hooks/useTasks';
-
 const ManagerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuthContext();
   
+  // Use Item Context
+  const {
+    items,
+    loading: itemsLoading,
+    error: itemsError,
+    selectedItems,
+    selectionMode,
+    addItem,
+    batchDeleteItems,
+    refreshItems,
+    startSelection,
+    toggleItemSelection,
+    selectAllItems,
+    clearSelection,
+    clearSelectionMode,
+  } = useItemContext();
+  
+  // Use Task Context
+  const {
+    tasks,
+    loading: tasksLoading,
+    error: tasksError,
+    assignTask,
+    refreshTasksByManager,
+    getCurrentManagerId
+  } = useTaskContext();
+  
   // State for controlling modals
   const [openModal, setOpenModal] = useState<string | null>(null);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
-  
-  // State for items selection mode
-  const [selectionMode, setSelectionMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  
-  // Hooks for data management
-  const { 
-    items, 
-    loading: itemsLoading, 
-    error: itemsError, 
-    addItem, 
-    deleteItem, 
-    refreshItems 
-  } = useItems();
-  
-  const { 
-    tasks, 
-    loading: tasksLoading, 
-    error: tasksError, 
-    assignTask, 
-    refreshTasks 
-  } = useTasks();
 
-  // Handler functions
+  // UI Event handlers (pure UI logic)
   const handleEditItem = (itemId: number) => {
     setSelectedItemId(itemId);
     setOpenModal('editItem');
@@ -63,9 +66,8 @@ const ManagerDashboardPage: React.FC = () => {
     await refreshItems();
   };
 
-  // Handle item added with API integration
-  const handleItemAdded = async (newItemData: ItemInput) => {
-    console.log('Adding item with data:', newItemData); // Debug log
+  // Item operations (simplified - just call context methods)
+  const handleItemAdded = async (newItemData: any) => {
     const result = await addItem(newItemData);
     if (result.success) {
       console.log('Item added successfully:', result.message);
@@ -75,58 +77,27 @@ const ManagerDashboardPage: React.FC = () => {
   };
 
   const handleItemUpdated = async () => {
-    // Refresh items to get updated data
     await refreshItems();
     console.log('Item updated successfully');
   };
 
   const handleItemDeleted = async () => {
     if (selectedItemId) {
-      const success = await deleteItem(selectedItemId);
-      if (success) {
-        await refreshItems();
-        setSelectedItemId(null);
-        console.log('Item deleted successfully');
-      } else {
-        console.error('Failed to delete item');
-      }
+      // This will be handled by DeleteItem component
+      console.log('Item deletion handled by DeleteItem component');
     }
   };
-  
 
+  // Selection operations (simplified)
   const handleStartAssignTask = () => {
-    setSelectionMode(true);
-    setSelectedItems([]);
-  };
-
-  const handleToggleItemSelection = (itemId: number) => {
-    if (selectedItems.includes(itemId)) {
-      setSelectedItems(selectedItems.filter(id => id !== itemId));
-    } else {
-      setSelectedItems([...selectedItems, itemId]);
-    }
-  };
-
-  // New function to handle select all
-  const handleSelectAll = () => {
-    const allItemIds = items.map(item => item.id);
-    setSelectedItems(allItemIds);
-  };
-
-  // New function to handle clear all selections
-  const handleClearAll = () => {
-    setSelectedItems([]);
+    startSelection();
   };
 
   const handleContinueSelection = () => {
     setOpenModal('assignTask');
   };
 
-  const handleClearSelection = () => {
-    setSelectionMode(false);
-    setSelectedItems([]);
-  };
-
+  // Task assignment (using Task Context)
   const handleTaskAssigned = async (taskData: { 
     task_name: string; 
     worker: string; 
@@ -142,20 +113,18 @@ const ManagerDashboardPage: React.FC = () => {
     const result = await assignTask(taskInput);
 
     if (result.success) {
-      // Remove assigned items from the items list (they're now assigned to worker)
-      for (const itemId of selectedItems) {
-        const success = await deleteItem(itemId);
-        if (!success) {
-          console.error(`Failed to delete item ID ${itemId}`);
-        }
-      }
-      
-      setSelectionMode(false);
-      setSelectedItems([]);
+      // Remove assigned items using context method
+      await batchDeleteItems(selectedItems);
       console.log('Task assigned successfully:', result.message);
     } else {
       console.error('Failed to assign task:', result.message);
     }
+  };
+
+  // Task refresh handler for current manager
+  const handleRefreshTasks = async () => {
+    const currentManagerId = getCurrentManagerId();
+    await refreshTasksByManager(currentManagerId);
   };
 
   const handleLogout = () => {
@@ -201,7 +170,7 @@ const ManagerDashboardPage: React.FC = () => {
                 </Button>
                 {selectionMode ? (
                   <Button 
-                    onClick={handleClearSelection}
+                    onClick={clearSelectionMode}
                     variant="secondary"
                     size="md"
                     fullWidth
@@ -252,9 +221,9 @@ const ManagerDashboardPage: React.FC = () => {
                 onRefresh={handleRefreshItems}
                 selectionMode={selectionMode}
                 selectedItems={selectedItems}
-                onToggleItemSelection={handleToggleItemSelection}
-                onSelectAll={handleSelectAll}
-                onClearAll={handleClearAll}
+                onToggleItemSelection={toggleItemSelection}
+                onSelectAll={selectAllItems}
+                onClearAll={clearSelection}
                 onContinueSelection={handleContinueSelection}
                 loading={itemsLoading}
               />
@@ -281,7 +250,7 @@ const ManagerDashboardPage: React.FC = () => {
         isOpen={openModal === 'assignTask'}
         onClose={() => setOpenModal(null)}
         selectedItems={selectedItems}
-        onClearSelection={handleClearSelection}
+        onClearSelection={clearSelectionMode}
         onTaskAssigned={handleTaskAssigned}
         items={items}
       />
@@ -291,7 +260,7 @@ const ManagerDashboardPage: React.FC = () => {
         onClose={() => setOpenModal(null)}
         tasks={tasks}
         loading={tasksLoading}
-        onRefresh={refreshTasks}
+        onRefresh={handleRefreshTasks}
       />
       
       <DeleteItem
@@ -299,8 +268,6 @@ const ManagerDashboardPage: React.FC = () => {
         onClose={() => setOpenModal(null)}
         itemId={selectedItemId}
         onItemDeleted={handleItemDeleted}
-        items={items}
-        deleteItem={deleteItem}
       />
     </div>
   );
