@@ -1,0 +1,116 @@
+{
+    "cost": 4000049.675224891,
+    "results": [
+        {
+            "depth": 1.0,
+            "height": 4.0,
+            "is_fragile": false,
+            "item_id": 8,
+            "placement_order": 1,
+            "width": 1.0,
+            "x": 0,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 2.0,
+            "height": 2.0,
+            "is_fragile": true,
+            "item_id": 6,
+            "placement_order": 2,
+            "width": 2.0,
+            "x": 1,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 3.0,
+            "height": 2.0,
+            "is_fragile": false,
+            "item_id": 10,
+            "placement_order": 3,
+            "width": 3.0,
+            "x": 3,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 2.0,
+            "height": 1.0,
+            "is_fragile": true,
+            "item_id": 9,
+            "placement_order": 4,
+            "width": 2.0,
+            "x": 6,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 1.0,
+            "height": 3.0,
+            "is_fragile": true,
+            "item_id": 2,
+            "placement_order": 5,
+            "width": 2.0,
+            "x": 8,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "item_id": 3,
+            "placement_order": 6,
+            "width": 4.0,
+            "x": 10,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 3.0,
+            "height": 3.0,
+            "is_fragile": false,
+            "item_id": 7,
+            "placement_order": 7,
+            "width": 3.0,
+            "x": 14,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "item_id": 4,
+            "placement_order": 8,
+            "width": 4.0,
+            "x": 17,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 2.0,
+            "height": 5.0,
+            "is_fragile": false,
+            "item_id": 5,
+            "placement_order": 9,
+            "width": 4.0,
+            "x": 21,
+            "y": 0,
+            "z": 0
+        },
+        {
+            "depth": 3.0,
+            "height": 4.0,
+            "is_fragile": false,
+            "item_id": 1,
+            "placement_order": 10,
+            "width": 5.0,
+            "x": 25,
+            "y": 0,
+            "z": 0
+        }
+    ],
+    "status": "success"
+}
