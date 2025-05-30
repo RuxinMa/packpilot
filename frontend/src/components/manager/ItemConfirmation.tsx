@@ -20,6 +20,7 @@ interface ItemConfirmationProps {
   onConfirmAndAddNext: () => void;
   item: ItemData;
   isSubmitting?: boolean;
+  isEdit?: boolean; 
 }
 
 const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
@@ -29,7 +30,8 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
   onConfirmAndClose,
   onConfirmAndAddNext,
   item,
-  isSubmitting = false
+  isSubmitting = false,
+  isEdit = false 
 }) => {
   return (
     <Modal
@@ -57,57 +59,69 @@ const ItemConfirmation: React.FC<ItemConfirmationProps> = ({
               <h4 className="text-sm font-medium text-gray-500">Item ID:</h4>
               <p className="text-base font-medium">Will be automatically assigned</p>
             </div>
-            
             <div>
               <h4 className="text-sm font-medium text-gray-500">Size cm³:</h4>
               <p className="text-base font-medium">
                 {item.length.toFixed(1)} × {item.width.toFixed(1)} × {item.height.toFixed(1)}
               </p>
             </div>
-            
             <div>
               <h4 className="text-sm font-medium text-gray-500">Is Fragile:</h4>
               <p className={`text-base font-medium ${item.is_fragile ? 'text-red-600' : 'text-green-600'}`}>
                 {item.is_fragile ? 'Yes' : 'No'}
               </p>
             </div>
-            
+
             {item.orientation && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Orientation:</h4>
                 <p className="text-base font-medium">{item.orientation}</p>
               </div>
             )}
-            
             {item.remarks && (
               <div>
                 <h4 className="text-sm font-medium text-gray-500">Remarks:</h4>
                 <p className="text-base">{item.remarks}</p>
               </div>
             )}
+
           </div>
         </div>
-        
+
         {/* Action buttons */}
         <div className="flex justify-between pt-4 border-t">
-          <Button 
-            onClick={onConfirmAndClose}
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-            variant="secondary"
-            className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white disabled:bg-orange-300"
-          >
-            Confirm and Close
-          </Button>
-          <Button 
-            onClick={onConfirmAndAddNext}
-            disabled={isSubmitting}
-            isLoading={isSubmitting}
-            variant="primary"
-            className="px-4 py-2"
-          >
-            Confirm and Add Next
-          </Button>
+          {isEdit ? (
+            <Button 
+              onClick={onConfirmAndClose}
+              disabled={isSubmitting}
+              isLoading={isSubmitting}
+              variant="primary"
+              className="px-4 py-2"
+            >
+              Save the change
+            </Button>
+          ) : (
+            <>
+              <Button 
+                onClick={onConfirmAndClose}
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                variant="secondary"
+                className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white disabled:bg-orange-300"
+              >
+                Confirm and Close
+              </Button>
+              <Button 
+                onClick={onConfirmAndAddNext}
+                disabled={isSubmitting}
+                isLoading={isSubmitting}
+                variant="primary"
+                className="px-4 py-2"
+              >
+                Confirm and Add Next
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </Modal>

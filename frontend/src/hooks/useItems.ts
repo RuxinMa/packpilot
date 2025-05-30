@@ -89,7 +89,7 @@ interface UseItemsReturn {
   error: string | null;
   addItem: (itemData: ItemInput) => Promise<{ success: boolean; message?: string }>;
   updateItem: (id: number, itemData: Partial<ItemInput>) => Promise<{ success: boolean; message?: string }>;
-  deleteItem: (id: number) => Promise<{ success: boolean; message?: string }>;
+  deleteItem: (id: number) => Promise<boolean>;
   refreshItems: () => Promise<void>;
 }
 
@@ -167,7 +167,7 @@ export const useItems = (): UseItemsReturn => {
   };
 
   // Delete item
-  const deleteItem = async (id: number) => {
+  const deleteItem = async (id: number): Promise<boolean> => {
     setLoading(true);
     setError(null);
     
@@ -175,20 +175,21 @@ export const useItems = (): UseItemsReturn => {
       const response = await itemService.deleteItem(id);
       if (response.success) {
         setItems(prevItems => prevItems.filter(item => item.id !== id));
-        return { success: true, message: response.message };
+        return true;
       } else {
         setError(response.message || 'Failed to delete item');
-        return { success: false, message: response.message };
+        return false;
       }
     } catch (err) {
       const errorMessage = 'Failed to delete item';
       setError(errorMessage);
       console.error('Error deleting item:', err);
-      return { success: false, message: errorMessage };
+      return false;
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     refreshItems();
