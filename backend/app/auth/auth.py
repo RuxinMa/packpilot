@@ -6,7 +6,8 @@ from flask import request, jsonify
 from functools import wraps
 from .schemas import TokenData
 from .models import UserRole
-from ..core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
+from backend.app.auth.models import UserRole
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -33,7 +34,8 @@ def verify_token(token: str) -> Optional[TokenData]:
         role: str = payload.get("role")
         if username is None or role is None:
             return None
-        return TokenData(username=username, role=UserRole(role))
+        return TokenData(sub=payload.get("sub"), role=payload.get("role"))
+
     except JWTError:
         return None 
 
@@ -55,3 +57,8 @@ def token_required(f):
             
         return f(token_data=token_data, *args, **kwargs)
     return decorated 
+
+class TokenData:
+    def __init__(self, sub: str, role: str):
+        self.sub = sub  # username from token
+        self.role = UserRole(role)
