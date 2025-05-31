@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify
 from datetime import timedelta
 from app.db.database import SessionLocal
 from app.auth.models import User, UserRole
-# from app.auth.schemas import UserLogin
 from app.auth import auth
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 import app.auth.schemas as schemas

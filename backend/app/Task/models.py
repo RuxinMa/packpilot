@@ -1,11 +1,9 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, ForeignKey, Enum
-from app.db.database import Base
-from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 import enum
 from sqlalchemy import Enum
+from app.db.database import Base
+from sqlalchemy.orm import relationship
 
-# ----- Task -----
 class TaskStatus(enum.Enum):
     Assigned = "Assigned"
     Completed = "Completed"

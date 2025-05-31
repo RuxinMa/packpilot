@@ -1,12 +1,7 @@
-from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, ForeignKey, Enum
+from sqlalchemy import Column, Integer, String, Numeric, Boolean, Text, ForeignKey
 from app.db.database import Base
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
-import enum
-from sqlalchemy import Enum
 
-
-# # ----- Item -----
 class Item(Base):
     __tablename__ = "items"
 
