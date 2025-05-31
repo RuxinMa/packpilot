@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from app.auth.routes import bp as auth_bp
 from app.Item.item import bp as item_bp
 from app.Task.task import bp as task_bp
@@ -57,6 +57,19 @@ def create_app():
     
     # Config
     app.config.from_mapping(SECRET_KEY="dev")
+
+    # add root path route
+    @app.route('/')
+    def index():
+        return jsonify({
+            "message": "Flask Backend API is running!",
+            "endpoints": {
+                "auth": "/api/auth/token",
+                "items": "/api/manager/add_item",
+                "tasks": "/api/manager/assign_task", 
+                "containers": "/api/manager/add_container"
+            }
+        })
 
     # Register blueprints
     app.register_blueprint(auth_bp)
