@@ -49,36 +49,3 @@ def add_item(token_data):
 
     finally:
         db.close()
-
-# update item placement
-@bp.route("/api/manager/update_item_placement", methods=["POST"])
-@token_required
-def update_item_placement(token_data):
-    db: Session = SessionLocal()
-    try:
-        data = request.get_json()
-        item_id = data.get("item_id")
-        placement_data = ItemPlacementUpdate(**data)
-        
-        db_item = db.query(Item).filter(Item.item_id == item_id).first()
-        if not db_item:
-            return jsonify({"status": "error", "message": "Item not found"}), 404
-            
-        # update AI generated placement info
-        db_item.x = placement_data.x
-        db_item.y = placement_data.y
-        db_item.z = placement_data.z
-        db_item.placement_order = placement_data.placement_order
-        
-        db.commit()
-        
-        return jsonify({
-            "status": "success", 
-            "message": "Item placement updated successfully"
-        }), 200
-        
-    except Exception as e:
-        db.rollback()
-        return jsonify({"status": "error", "message": str(e)}), 400
-    finally:
-        db.close()
