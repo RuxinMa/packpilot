@@ -9,8 +9,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend files
 COPY backend/ .
 
-# Create necessary directories if not exist
+# Create necessary directories and database file
 RUN mkdir -p /app/instance
+RUN touch /app/app.db
+RUN chmod 666 /app/app.db
 
 EXPOSE 8000
 

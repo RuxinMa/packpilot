@@ -10,9 +10,10 @@ services:
       - "8000:8000"
     restart: always
     volumes:
-      - ./backend/app.db:/app/app.db
+      - ./backend:/app
     environment:
       - FLASK_ENV=production
+      - DATABASE_URL=sqlite:////app/app/db/app.db
 
   frontend:
     build:
