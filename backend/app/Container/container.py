@@ -47,3 +47,56 @@ def add_container(token_data):
         return jsonify({"status": "error", "message": str(e)}), 400
     finally:
         db.close()
+
+@bp.route("/api/manager/get_containers", methods=["GET"])
+@token_required
+def get_containers(token_data):
+    db: Session = SessionLocal()
+    try:
+        containers = db.query(Container).all()
+        
+        return jsonify({
+            "status": "success",
+            "containers": [
+                {
+                    "container_id": container.container_id,
+                    "width": float(container.width),
+                    "height": float(container.height),
+                    "depth": float(container.depth),
+                    "label": container.label
+                }
+                for container in containers
+            ]
+        }), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()
+
+
+@bp.route("/api/manager/get_container/<int:container_id>", methods=["GET"])
+@token_required
+def get_container(token_data, container_id):
+    db: Session = SessionLocal()
+    try:
+        container = db.query(Container).filter(Container.container_id == container_id).first()
+        
+        if not container:
+            return jsonify({"status": "error", "message": "Container not found"}), 404
+        
+        return jsonify({
+            "status": "success",
+            "container": {
+                "container_id": container.container_id,
+                "width": float(container.width),
+                "height": float(container.height),
+                "depth": float(container.depth),
+                "label": container.label
+            }
+        }), 200
+
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()
