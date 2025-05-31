@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 import enum
-from sqlalchemy import Enum
 from app.db.database import Base
 from sqlalchemy.orm import relationship
 
@@ -20,10 +19,6 @@ class Task(Base):
     deadline = Column(DateTime, nullable=True)
 
     items = relationship("Item", back_populates="task")
-
-class TaskStatusEnum(enum.Enum):
-    Assigned = "Assigned"
-    Completed = "Completed"
 
 class TaskItem(Base):
     __tablename__ = "task_items"

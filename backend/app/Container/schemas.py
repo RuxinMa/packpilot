@@ -1,44 +1,19 @@
 from pydantic import BaseModel
 from typing import Optional, List
 
-# ----- Item -----
-class ItemCreate(BaseModel):
-    length: float
-    width: float
-    height: float
-    orientation: Optional[str] = "Face Up"
-    remarks: Optional[str] = None
-
-class ItemOut(ItemCreate):
-    item_id: int
-    item_name: str
-
-    class Config:
-        from_orm = True
-
-# ----- Task -----
-class TaskCreate(BaseModel):
-    worker_id: int
-    item_ids: List[int]
-
-class TaskOut(BaseModel):
-    task_id: int
-    task_name: str
-    worker_id: int
-    status: str
-
-    class Config:
-        from_orm = True
-
-# ----- Container -----
 class ContainerCreate(BaseModel):
-    length: float
     width: float
     height: float
+    depth: float
     label: Optional[str] = None
 
-class ContainerOut(ContainerCreate):
+class ContainerOut(BaseModel):
     container_id: int
+    width: float
+    height: float
+    depth: float
+    label: Optional[str] = None
 
     class Config:
-        from_orm = True
+        from_attributes = True
+

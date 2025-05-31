@@ -7,14 +7,11 @@ from app.Container.schemas import ContainerCreate
 
 bp = Blueprint('container', __name__)
 
+# create container
 @bp.route("/api/manager/add_container", methods=["POST"])
 @token_required
 def add_container(token_data):
-    print("DEBUG: token_data.role =", token_data.role)
-
     if token_data.role.value != "Manager":
-
-
         return jsonify({"status": "error", "message": "Forbidden"}), 403
 
     db: Session = SessionLocal()
@@ -23,9 +20,9 @@ def add_container(token_data):
         container = ContainerCreate(**container_data)
 
         db_container = Container(
-            length=container.length,
             width=container.width,
             height=container.height,
+            depth=container.depth,
             label=container.label
         )
 
@@ -35,13 +32,18 @@ def add_container(token_data):
 
         return jsonify({
             "status": "success",
-            "message": "Container added",
-            "container_id": db_container.container_id
+            "message": "Container added successfully",
+            "container": {
+                "container_id": db_container.container_id,
+                "width": float(db_container.width),
+                "height": float(db_container.height),
+                "depth": float(db_container.depth),
+                "label": db_container.label
+            }
         }), 201
 
     except Exception as e:
         db.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
-
     finally:
         db.close()
