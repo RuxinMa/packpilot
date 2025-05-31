@@ -1,10 +1,10 @@
 from flask import Flask
-from backend.app.auth.routes import bp as auth_bp
-from backend.app.Item.item import bp as item_bp
-from backend.app.Task.task import bp as task_bp
-from backend.app.Container.container import bp as container_bp
-from backend.app.db.database import engine, close_db
-from backend.app.auth.models import Base
+from app.auth.routes import bp as auth_bp
+from app.Item.item import bp as item_bp
+from app.Task.task import bp as task_bp
+from app.Container.container import bp as container_bp
+from app.db.database import engine, close_db
+from app.auth.models import Base
 
 def create_app():
     app = Flask(__name__)

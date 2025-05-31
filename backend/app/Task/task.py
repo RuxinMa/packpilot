@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 # from ..models import Task, TaskItem, Item
 # from ..schemas import TaskCreate
 from datetime import datetime
-from backend.app.db.database import SessionLocal
-from backend.app.auth.auth import token_required
-from backend.app.Task.models import Task, TaskStatus,TaskItem, Item
-from backend.app.Task.schemas import TaskCreate
-from backend.app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
-from backend.app.auth.models import UserRole
+from app.db.database import SessionLocal
+from app.auth.auth import token_required
+from app.Task.models import Task, TaskStatus, TaskItem, Item
+from app.Task.schemas import TaskCreate
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from app.auth.models import UserRole
 # bp = Blueprint('task', __name__)
 
 # @bp.route("/api/manager/assign_task", methods=["POST"])

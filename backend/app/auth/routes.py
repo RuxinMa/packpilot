@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify
 from datetime import timedelta
-from backend.app.db.database import SessionLocal
-from backend.app.auth.models import User, UserRole
-# from backend.app.auth.schemas import UserLogin
-from backend.app.auth import auth
-from backend.app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
-import backend.app.auth.schemas as schemas
-import backend.app.auth.models as models
+from app.db.database import SessionLocal
+from app.auth.models import User, UserRole
+# from app.auth.schemas import UserLogin
+from app.auth import auth
+from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
+import app.auth.schemas as schemas
+import app.auth.models as models
 
 bp = Blueprint('auth', __name__)
 

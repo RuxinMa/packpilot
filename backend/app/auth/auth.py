@@ -5,9 +5,8 @@ from passlib.context import CryptContext
 from flask import request, jsonify
 from functools import wraps
 from .schemas import TokenData
-from .models import UserRole
-from backend.app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
-from backend.app.auth.models import UserRole
+from app.auth.models import UserRole
+from app.core.config import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

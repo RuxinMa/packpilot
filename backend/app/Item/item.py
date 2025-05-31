@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 # from ..auth.auth import token_required
 # from ..models import Item
 # from ..schemas import ItemCreate
-from backend.app.db.database import SessionLocal
-from backend.app.auth.auth import token_required
-from backend.app.Item.models import Item
-from backend.app.Item.schemas import ItemCreate
+from app.db.database import SessionLocal
+from app.auth.auth import token_required
+from app.Item.models import Item
+from app.Item.schemas import ItemCreate
 
 
 bp = Blueprint('item', __name__)
