@@ -1,4 +1,4 @@
-import { ApiResponse, LoginResponse, UserRole } from '../types/auth';
+import { LoginResponse, UserRole } from '../types/auth';
 
 const API_URL = 'http://localhost:8000';
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
-import { FaInfoCircle, FaSpinner } from 'react-icons/fa';
+import Button from '../common/Button';
+import { FaInfoCircle } from 'react-icons/fa';
 import { Item } from '../../types';
 import { MOCK_WORKERS } from '../../mocks/dataManager';
 
@@ -27,7 +28,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
   selectedItems,
   onClearSelection,
   onTaskAssigned,
-  items
+  // items
 }) => {
   const [formData, setFormData] = useState({
     worker: '',
@@ -101,7 +102,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({
     formData.container_height !== '';
 
   // Get selected items details
-  const selectedItemsDetails = items.filter(item => selectedItems.includes(item.id));
+  // const selectedItemsDetails = items.filter(item => selectedItems.includes(item.id));
 
   return (
     <Modal
@@ -193,49 +194,27 @@ const AssignTask: React.FC<AssignTaskProps> = ({
             <div className="flex-shrink-0">
               <FaInfoCircle className="h-5 w-5 text-blue-400" />
             </div>
-            <div className="ml-3">
-              <p className="text-sm text-blue-700">
+            <div className="mx-4">
+              <p className="text-base text-blue-700">
                 <span className="font-medium">{selectedItems.length}</span> items selected for this task
               </p>
-              <p className="mt-1 text-xs text-blue-600">
+              <p className="mt-2 text-sm text-blue-600">
                 The assigned items will be removed from the inventory after the task is created.
               </p>
-              {selectedItemsDetails.length > 0 && (
-                <div className="mt-2 text-xs text-blue-600">
-                  <p className="font-medium">Selected items:</p>
-                  <ul className="mt-1 space-y-1">
-                    {selectedItemsDetails.map(item => (
-                      <li key={item.id}>
-                        ID: {item.id} - {item.length}×{item.width}×{item.height} cm
-                        {item.is_fragile && ' (Fragile)'}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           </div>
         </div>
 
         <div className="flex justify-end space-x-3 pt-4 border-t">
-          <button 
+          <Button 
             type="submit" 
-            className={`px-4 py-2 bg-blue-600 text-white rounded-md ${
-              isFormValid && !isSubmitting 
-                ? 'hover:bg-blue-700' 
-                : 'opacity-50 cursor-not-allowed'
-            }`}
+            variant="primary"
             disabled={!isFormValid || isSubmitting}
+            isLoading={isSubmitting}
+            className="px-4 py-2"
           >
-            {isSubmitting ? (
-              <span className="flex items-center">
-                <FaSpinner className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                Assigning...
-              </span>
-            ) : (
-              'Assign Task'
-            )}
-          </button>
+            Assign Task
+          </Button>
         </div>
       </form>
     </Modal>
