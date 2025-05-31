@@ -1,16 +1,6 @@
 import React from 'react';
-import { FaEdit, FaSync, FaTrash, FaCheck } from 'react-icons/fa';
-
-// Item interface from original file
-interface Item {
-  id: number;
-  length: number;
-  width: number;
-  height: number;
-  direction: string;
-  notes?: string;
-  createdAt?: Date;
-}
+import { FaEdit, FaSync, FaTrash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { Item } from '../../types';
 
 interface ItemListProps {
   items: Item[];
@@ -21,6 +11,7 @@ interface ItemListProps {
   selectedItems?: number[];
   onToggleItemSelection?: (itemId: number) => void;
   onContinueSelection?: () => void;
+  loading?: boolean;
 }
 
 const ItemList: React.FC<ItemListProps> = ({ 
@@ -31,7 +22,8 @@ const ItemList: React.FC<ItemListProps> = ({
   selectionMode = false,
   selectedItems = [],
   onToggleItemSelection,
-  onContinueSelection
+  onContinueSelection,
+  loading = false
 }) => {
   // Format date function
   const formatDate = (date: Date) => {
@@ -67,8 +59,10 @@ const ItemList: React.FC<ItemListProps> = ({
           <button
             onClick={onRefresh}
             className="flex items-center text-blue-600 hover:text-blue-800"
+            disabled={loading}
           >
-            <FaSync className="mr-1" /> Refresh
+            <FaSync className={`mr-1 ${loading ? 'animate-spin' : ''}`} /> 
+            {loading ? 'Loading...' : 'Refresh'}
           </button>
         )}
       </div>
@@ -95,10 +89,13 @@ const ItemList: React.FC<ItemListProps> = ({
                   Dimensions (L×W×H)
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Direction
+                  Fragile
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Notes
+                  Orientation
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Remarks
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Added Time
@@ -138,14 +135,26 @@ const ItemList: React.FC<ItemListProps> = ({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {`${item.length} × ${item.width} × ${item.height}`}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    <div className="flex items-center">
+                      {item.is_fragile ? (
+                        <>
+                          <FaExclamationTriangle className="text-red-500 mr-1" />
+                          <span className="text-red-600 font-medium">Yes</span>
+                        </>
+                      ) : (
+                        <span className="text-green-600 font-medium">No</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.direction}
+                    {item.orientation || "-"}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-                    {item.notes || "-"}
+                    {item.remarks || "-"}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {item.createdAt ? formatDate(item.createdAt) : "-"}
+                    {item.created_at ? formatDate(item.created_at) : "-"}
                   </td>
                   {!selectionMode && (
                     <td className="px-6 py-4 whitespace-nowrap text-right font-medium">
