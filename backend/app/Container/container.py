@@ -16,7 +16,7 @@ from sqlalchemy.orm import Session
 # from ..schemas import ItemCreate
 from app.db.database import SessionLocal
 from app.auth.auth import token_required
-from app.Container.models import Item
+from app.Item.models import Item
 from app.Container.schemas import ItemCreate
 
 

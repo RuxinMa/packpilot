@@ -7,7 +7,8 @@ from sqlalchemy.orm import Session
 from datetime import datetime
 from app.db.database import SessionLocal
 from app.auth.auth import token_required
-from app.Task.models import Task, TaskStatus, TaskItem, Item
+from app.Task.models import Task, TaskStatus, TaskItem
+from app.Item.models import Item
 from app.Task.schemas import TaskCreate
 from app.core.config import ACCESS_TOKEN_EXPIRE_MINUTES
 from app.auth.models import UserRole
