@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from app.auth.routes import bp as auth_bp
 from app.Item.item import bp as item_bp
 from app.Task.task import bp as task_bp
@@ -54,6 +55,11 @@ def create_default_users():
 
 def create_app():
     app = Flask(__name__)
+    
+    # Enable CORS for all routes
+    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"], 
+         allow_headers=["Content-Type", "Authorization"], 
+         methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     
     # Config
     app.config.from_mapping(SECRET_KEY="dev")
