@@ -2,21 +2,42 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
 import { useAuthContext } from '../../contexts/AuthContext';
-// import { useMockAuthContext } from '../../mocks/MockAuthContext';
 
 const LoginPage: React.FC = () => {
-  const { login, isLoading, error, isAuthenticated, role } = useAuthContext();
+  const { 
+    login, 
+    isLoading, 
+    error, 
+    isAuthenticated, 
+    role, 
+    clearError 
+  } = useAuthContext();
   const navigate = useNavigate();
     
-  // if user already logged, redireact to certain page
+  // If user already logged in, redirect to certain page
   useEffect(() => {
     if (isAuthenticated && role) {
+      console.log('User already authenticated, redirecting to dashboard:', role);
       navigate(`/dashboard/${role.toLowerCase()}`);
     }
   }, [isAuthenticated, role, navigate]);
 
-  const handleLogin = async (username: string, password: string, role: 'manager' | 'worker') => {
-    await login(username, password, role)
+  const handleLogin = async (username: string, password: string, selectedRole: 'manager' | 'worker') => {
+    console.log('LoginPage handling login for:', { username, selectedRole });
+    
+    try {
+      const response = await login(username, password, selectedRole);
+      
+      if (response.status === 'success' && response.role) {
+        console.log('Login successful, will redirect via useEffect');
+        // Redirect will be handled by useEffect above
+      } else {
+        console.log('Login failed:', response.message);
+        // Error will be displayed automatically through LoginForm
+      }
+    } catch (error) {
+      console.error('Login error in LoginPage:', error);
+    }
   };
 
   return (
@@ -34,10 +55,11 @@ const LoginPage: React.FC = () => {
             onSubmit={handleLogin}
             isLoading={isLoading}
             error={error}
+            onClearError={clearError}
           />
 
           <div className="mt-6 text-center text-sm text-gray-600">
-            Don’t have an account?{' '}
+            Don't have an account?{' '}
             <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
               Sign up
             </Link>
@@ -45,8 +67,19 @@ const LoginPage: React.FC = () => {
           
         </div>
       </div>
+
+      {/* Development debug info - only visible in development mode */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs max-w-xs">
+          <div className="font-semibold mb-1">Debug Info:</div>
+          <div>Auth: {isAuthenticated.toString()}</div>
+          <div>Role: {role || 'None'}</div>
+          <div>Loading: {isLoading.toString()}</div>
+          <div>Error: {error ? 'Yes' : 'No'}</div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default LoginPage
+export default LoginPage;

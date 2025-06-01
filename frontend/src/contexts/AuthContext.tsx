@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { UserRole, LoginResponse } from '../types/auth';
-import { MOCK_USERS } from '../mocks/dataManager';
+import { authService } from '../services/authService';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -10,11 +10,12 @@ interface AuthContextType {
   error: string | null;
   login: (username: string, password: string, role: 'manager' | 'worker') => Promise<LoginResponse>;
   logout: () => void;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Mock Auth Provider
+// Auth Provider using authService (unified storage approach)
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
@@ -22,104 +23,104 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Check existing login status from localStorage
+  // Use authService's storage approach to check login status
   useEffect(() => {
-    const storedAuth = localStorage.getItem('auth');
-    if (storedAuth) {
-      try {
-        const { isAuthenticated, role, username } = JSON.parse(storedAuth);
-        setIsAuthenticated(isAuthenticated);
-        setRole(role as UserRole);
-        setUsername(username);
-      } catch (err) {
-        // Clear invalid storage if parsing fails
-        localStorage.removeItem('auth');
+    const initializeAuth = () => {
+      const isAuth = authService.isAuthenticated();
+      const storedRole = authService.getRole();
+      const storedUsername = authService.getUsername();
+      
+      console.log('Initializing auth state:', { isAuth, storedRole, storedUsername });
+      
+      if (isAuth && storedRole && storedUsername) {
+        setIsAuthenticated(true);
+        setRole(storedRole);
+        setUsername(storedUsername);
+      } else {
+        // If auth info is incomplete, clear all state
+        authService.logout();
+        setIsAuthenticated(false);
+        setRole(null);
+        setUsername(null);
       }
-    }
+    };
+
+    initializeAuth();
   }, []);
 
-  // Mock login process
+  // Login function
   const login = async (username: string, password: string, selectedRole: 'manager' | 'worker'): Promise<LoginResponse> => {
     setIsLoading(true);
     setError(null);
     
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    console.log('Starting login process:', { username, role: selectedRole });
     
-    // Convert selectedRole to UserRole format
-    const roleFormatted = selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1) as UserRole;
-    
-    // Local validation logic - simulate backend validation using centralized mock data
-    const matchedUser = MOCK_USERS.find(user => 
-      user.username === username && user.password === password
-    );
-    
-    if (matchedUser) {
-      // Check if selected role matches user role
-      if (matchedUser.role !== roleFormatted) {
-        const errorMsg = `Invalid role selected. You are a ${matchedUser.role}.`;
-        setError(errorMsg);
-        setIsLoading(false);
-        return {
-          status: 'error',
-          message: errorMsg,
-          token: null,
-          role: null,
-          redirect_url: null
-        };
+    try {
+      // Use authService for login
+      const response = await authService.login(username, password, selectedRole);
+      
+      console.log('Login API response:', response);
+      
+      if (response.status === 'success' && response.token && response.role) {
+        // Login successful, update Context state
+        setIsAuthenticated(true);
+        setRole(response.role);
+        setUsername(username);
+        setError(null);
+        
+        console.log('Login successful, state updated');
+      } else {
+        // Login failed, update error state
+        setError(response.message);
+        setIsAuthenticated(false);
+        setRole(null);
+        setUsername(null);
+        
+        console.log('Login failed:', response.message);
       }
       
-      // Simulate successful login
-      setIsAuthenticated(true);
-      setRole(matchedUser.role);
-      setUsername(matchedUser.username);
-      
-      // Store to localStorage
-      localStorage.setItem('auth', JSON.stringify({
-        isAuthenticated: true,
-        role: matchedUser.role,
-        username: matchedUser.username
-      }));
-      
-      setIsLoading(false);
-      
-      // Return successful LoginResponse
-      const response: LoginResponse = {
-        status: 'success',
-        message: 'Login successful',
-        token: 'mock-jwt-token',
-        role: matchedUser.role,
-        redirect_url: `/dashboard/${matchedUser.role.toLowerCase()}`
-      };
-      
-      console.log('Login successful:', response);
       return response;
-    } else {
-      // Simulate login failure
-      const errorMsg = 'Invalid username or password';
-      setError(errorMsg);
-      setIsLoading(false);
       
-      // Return failed LoginResponse
-      const response: LoginResponse = {
+    } catch (error) {
+      console.error('Error during login process:', error);
+      
+      const errorMessage = error instanceof Error ? error.message : 'Network error, please check your connection';
+      const errorResponse: LoginResponse = {
         status: 'error',
-        message: errorMsg,
+        message: errorMessage,
         token: null,
         role: null,
         redirect_url: null
       };
       
-      console.log('Login failed:', response);
-      return response;
+      setError(errorMessage);
+      setIsAuthenticated(false);
+      setRole(null);
+      setUsername(null);
+      
+      return errorResponse;
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  // Logout function
   const logout = () => {
+    console.log('User logging out');
+    
+    // Use authService to clear auth info
+    authService.logout();
+    
+    // Update Context state
     setIsAuthenticated(false);
     setRole(null);
     setUsername(null);
-    localStorage.removeItem('auth');
-    console.log('User logged out');
+    setError(null);
+  };
+
+  // Clear error
+  const clearError = () => {
+    setError(null);
   };
 
   return (
@@ -130,7 +131,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       login, 
       logout,
       isLoading,
-      error
+      error,
+      clearError
     }}>
       {children}
     </AuthContext.Provider>

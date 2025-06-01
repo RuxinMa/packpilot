@@ -19,17 +19,22 @@ export const authService = {
         }),
       });
       
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data: LoginResponse = await response.json();
       
       // Successfully logged in
       if (data.status === 'success' && data.token) {
         localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role);
+        localStorage.setItem('role', data.role || '');
         localStorage.setItem('username', username);
       }
       
-      return data as LoginResponse;
+      return data;
     } catch (error) {
+      console.error('Login error:', error);
       return {
         status: 'error',
         message: 'Network error, please check your connection',
@@ -46,23 +51,23 @@ export const authService = {
     localStorage.removeItem('username');
   },
   
-  isAuthenticated() {
+  isAuthenticated(): boolean {
     return !!localStorage.getItem('token');
   },
   
-  getToken() {
+  getToken(): string | null {
     return localStorage.getItem('token');
   },
   
-  getRole() {
+  getRole(): UserRole | null {
     return localStorage.getItem('role') as UserRole | null;
   },
   
-  getUsername() {
+  getUsername(): string | null {
     return localStorage.getItem('username');
   },
   
-  getAuthHeader() {
+  getAuthHeader(): Record<string, string> {
     const token = this.getToken();
     return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
