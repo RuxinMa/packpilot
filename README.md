@@ -158,7 +158,7 @@ Use this for hot-reload development when working on frontend or backend code sep
 Open terminal and run the following commands **one by one**:
 
 ```bash
-cd docker
+cd frontend
 npm install
 npm run dev
 ```
