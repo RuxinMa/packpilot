@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     } catch (error) {
       console.error('Error during login process:', error);
       
-      const errorMessage = error instanceof Error ? error.message : 'Network error, please check your connection';
+      const errorMessage = error instanceof Error ? error.message : 'Unable to connect to server. Please check your internet connection.';
       const errorResponse: LoginResponse = {
         status: 'error',
         message: errorMessage,

@@ -1,6 +1,6 @@
 import { LoginResponse, UserRole } from '../types/auth';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = 'http://localhost:5173';
 
 export const authService = { 
   async login(username: string, password: string, role: string): Promise<LoginResponse> {
@@ -20,7 +20,40 @@ export const authService = {
       });
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        // Handle different HTTP status codes with specific messages
+        if (response.status === 401) {
+          return {
+            status: 'error',
+            message: 'Invalid username or password',
+            token: null,
+            role: null,
+            redirect_url: null
+          };
+        } else if (response.status === 403) {
+          return {
+            status: 'error',
+            message: 'Access denied. Please check your role.',
+            token: null,
+            role: null,
+            redirect_url: null
+          };
+        } else if (response.status >= 500) {
+          return {
+            status: 'error',
+            message: 'Server error. Please try again later.',
+            token: null,
+            role: null,
+            redirect_url: null
+          };
+        } else {
+          return {
+            status: 'error',
+            message: 'Login failed. Please check your credentials.',
+            token: null,
+            role: null,
+            redirect_url: null
+          };
+        }
       }
       
       const data: LoginResponse = await response.json();
@@ -37,7 +70,7 @@ export const authService = {
       console.error('Login error:', error);
       return {
         status: 'error',
-        message: 'Network error, please check your connection',
+        message: 'Unable to connect to server. Please check your internet connection.',
         token: null,
         role: null,
         redirect_url: null

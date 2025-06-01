@@ -10,7 +10,6 @@ const LoginPage: React.FC = () => {
     error, 
     isAuthenticated, 
     role, 
-    clearError 
   } = useAuthContext();
   const navigate = useNavigate();
     
@@ -55,7 +54,6 @@ const LoginPage: React.FC = () => {
             onSubmit={handleLogin}
             isLoading={isLoading}
             error={error}
-            onClearError={clearError}
           />
 
           <div className="mt-6 text-center text-sm text-gray-600">
@@ -67,17 +65,6 @@ const LoginPage: React.FC = () => {
           
         </div>
       </div>
-
-      {/* Development debug info - only visible in development mode */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="fixed bottom-4 right-4 bg-gray-800 text-white p-3 rounded-lg text-xs max-w-xs">
-          <div className="font-semibold mb-1">Debug Info:</div>
-          <div>Auth: {isAuthenticated.toString()}</div>
-          <div>Role: {role || 'None'}</div>
-          <div>Loading: {isLoading.toString()}</div>
-          <div>Error: {error ? 'Yes' : 'No'}</div>
-        </div>
-      )}
     </div>
   );
 };
