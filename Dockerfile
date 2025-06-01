@@ -22,11 +22,8 @@ FROM nginx:stable-alpine
 # Copy built files from previous stage to Nginx public directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Copy nginx configuration if exists, otherwise use default
-RUN if [ -f /app/nginx.conf ]; then \
-    cp /app/nginx.conf /etc/nginx/conf.d/default.conf; \
-    else echo "nginx.conf not found, using default"; \
-    fi
+# Copy nginx configuration from frontend folder to handle SPA routing
+COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80 for serving
 EXPOSE 80
