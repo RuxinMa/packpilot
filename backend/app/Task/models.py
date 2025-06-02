@@ -22,10 +22,3 @@ class Task(Base):
 
     items = relationship("Item", back_populates="task")
 
-class TaskItem(Base):
-    __tablename__ = "task_items"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    task_id = Column(Integer, ForeignKey('tasks.task_id'))
-    item_id = Column(Integer, ForeignKey('items.item_id'))
-

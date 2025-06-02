@@ -7,6 +7,10 @@ from app.Container.container import bp as container_bp
 from app.AI.routes import bp as ai_bp
 from app.db.database import engine, close_db, SessionLocal
 from app.auth.models import Base, User, UserRole
+from app.Item.models import Item
+from app.Task.models import Task, TaskStatus
+from app.Container.models import Container
+
 from app.auth.auth import get_password_hash
 
 def create_default_users():
