@@ -21,25 +21,58 @@ def assign_task(token_data):
     try:
         data = request.get_json()
 
-        # Generate task_name if not provided (e.g. based on timestamp)
+        # Generate task_name if not provided
         task_name = data.get("task_name", f"Task-{datetime.utcnow().isoformat()}")
 
+        # 创建任务
         task = Task(
             task_name=task_name,
             container_id=data["container_id"],
             assigned_to=data["assigned_to"],
-            manager_name=token_data.sub,  # from token
+            manager_name=token_data.sub,
             deadline=datetime.fromisoformat(data["deadline"]) if data.get("deadline") else None,
             status=TaskStatus.Assigned
         )
         db.add(task)
+        db.flush()  # 获取task_id但不提交
+
+        # 分配物品给任务（只标记，不删除记录）
+        assigned_items_count = 0
+        
+        if "item_ids" in data and data["item_ids"]:
+            items = db.query(Item).filter(Item.item_id.in_(data["item_ids"])).all()
+            
+            if not items:
+                db.rollback()
+                return jsonify({
+                    "status": "error",
+                    "message": "No items found with the provided IDs"
+                }), 404
+            
+            # 检查是否有已分配的物品
+            already_assigned = [item for item in items if item.is_assigned or item.task_id is not None]
+            if already_assigned:
+                assigned_names = [item.item_name for item in already_assigned]
+                db.rollback()
+                return jsonify({
+                    "status": "error",
+                    "message": f"Cannot assign already assigned items: {', '.join(assigned_names)}"
+                }), 400
+            
+            # 只标记分配，不删除记录
+            for item in items:
+                item.task_id = task.task_id
+                item.is_assigned = True
+                assigned_items_count += 1
+
         db.commit()
-        db.refresh(task)
 
         return jsonify({
             "status": "success",
-            "message": "Task assigned",
-            "task_id": task.task_id
+            "message": "Task assigned successfully",
+            "task_id": task.task_id,
+            "assigned_to": task.assigned_to,
+            "items_assigned": assigned_items_count
         }), 200
 
     except Exception as e:

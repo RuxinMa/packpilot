@@ -113,8 +113,9 @@ const ManagerDashboardPage: React.FC = () => {
     const result = await assignTask(taskInput);
 
     if (result.success) {
-      // Remove assigned items using context method
-      await batchDeleteItems(selectedItems);
+      // 不调用批量删除！只是刷新列表，已分配的物品会被过滤掉
+      clearSelectionMode(); // 清除选择状态
+      await refreshItems(); // 刷新物品列表，已分配的物品不会显示
       console.log('Task assigned successfully:', result.message);
     } else {
       console.error('Failed to assign task:', result.message);

@@ -199,15 +199,7 @@ def batch_delete_items(token_data):
         if not items_to_delete:
             return jsonify({"status": "error", "message": "No items found with the provided IDs"}), 404
         
-        # 检查是否有已分配的items
-        assigned_items = [item for item in items_to_delete if item.is_assigned or item.task_id is not None]
-        if assigned_items:
-            assigned_names = [item.item_name for item in assigned_items]
-            return jsonify({
-                "status": "error", 
-                "message": f"Cannot delete assigned items: {', '.join(assigned_names)}"
-            }), 400
-        
+        # 允许删除已分配的物品（因为manager想让它们从列表中消失）
         # 删除所有items
         deleted_items = []
         for item in items_to_delete:
