@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
+import { authService } from '../services/authService';
 
 // 添加API配置
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -46,10 +47,11 @@ export const useTaskData = () => {
   const [aiOutput, setAiOutput] = useState<AIOutput | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { token } = useAuthContext();
+  const { isAuthenticated } = useAuthContext();
 
   // 获取工人的任务列表
   const fetchTasks = async () => {
+    const token = authService.getToken();
     if (!token) {
       setLoading(false);
       return;
@@ -93,6 +95,7 @@ export const useTaskData = () => {
 
   // 手动获取任务的优化布局
   const fetchTaskLayout = async (taskId: number) => {
+    const token = authService.getToken();
     setLoading(true);
     setError(null);
     try {
@@ -135,10 +138,10 @@ export const useTaskData = () => {
   };
 
   useEffect(() => {
-    if (token) {
+    if (isAuthenticated) {
       fetchTasks();
     }
-  }, [token]);
+  }, [isAuthenticated]);
 
   return {
     tasks,

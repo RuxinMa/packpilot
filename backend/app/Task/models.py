@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
 import enum
+from datetime import datetime
 from app.db.database import Base
 from sqlalchemy.orm import relationship
 
@@ -17,6 +18,7 @@ class Task(Base):
     manager_name = Column(String(50), nullable=False)
     status = Column(Enum(TaskStatus), default=TaskStatus.Assigned)
     deadline = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
     items = relationship("Item", back_populates="task")
 
