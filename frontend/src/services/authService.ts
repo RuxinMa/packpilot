@@ -1,6 +1,6 @@
 import { LoginResponse, UserRole } from '../types/auth';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 export const authService = { 
   async login(username: string, password: string, role: string): Promise<LoginResponse> {

@@ -5,6 +5,9 @@ from app.db.database import SessionLocal
 from app.auth.auth import token_required
 from app.Task.models import Task, TaskStatus
 from app.auth.models import UserRole
+from app.AI.ai import run_ai_optimizer
+from app.Container.models import Container
+from app.Item.models import Item
 
 bp = Blueprint('task', __name__)
 
@@ -271,6 +274,67 @@ def get_worker_task(token_data, task_id):
         }), 200
 
     except Exception as e:
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()
+
+@bp.route("/api/manager/optimize_task/<int:task_id>", methods=["POST"])
+@token_required
+def optimize_task_placement(token_data, task_id):
+    """Manager优化任务中货物的摆放"""
+    if token_data.role != UserRole.Manager:
+        return jsonify({"status": "error", "message": "Forbidden"}), 403
+    
+    db: Session = SessionLocal()
+    try:
+        # 获取任务
+        task = db.query(Task).filter(Task.task_id == task_id).first()
+        if not task:
+            return jsonify({"status": "error", "message": "Task not found"}), 404
+        
+        # 获取容器
+        container = db.query(Container).filter(Container.container_id == task.container_id).first()
+        if not container:
+            return jsonify({"status": "error", "message": "Container not found"}), 404
+        
+        # 获取任务中的物品
+        items = db.query(Item).filter(Item.task_id == task_id).all()
+        if not items:
+            return jsonify({"status": "error", "message": "No items found for this task"}), 404
+        
+        # 转换为AI API需要的格式
+        container_data = {
+            "width": float(container.width),
+            "height": float(container.height), 
+            "depth": float(container.depth)
+        }
+        
+        boxes_data = [{
+            "item_id": item.item_id,
+            "width": float(item.width),
+            "height": float(item.height),
+            "depth": float(item.depth),
+            "is_fragile": item.is_fragile
+        } for item in items]
+        
+        # 直接调用AI优化函数（不用requests）
+        result = run_ai_optimizer(container_data, boxes_data)
+        
+        # 保存优化结果到数据库
+        if result.get("status") == "success":
+            for item_result in result["results"]:
+                item = db.query(Item).filter(Item.item_id == item_result["item_id"]).first()
+                if item:
+                    item.x = item_result["x"]
+                    item.y = item_result["y"] 
+                    item.z = item_result["z"]
+                    item.placement_order = item_result["placement_order"]
+            db.commit()
+            
+        return jsonify(result), 200
+        
+    except Exception as e:
+        db.rollback()
         return jsonify({"status": "error", "message": str(e)}), 400
     finally:
         db.close()

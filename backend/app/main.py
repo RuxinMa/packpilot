@@ -4,6 +4,7 @@ from app.auth.routes import bp as auth_bp
 from app.Item.item import bp as item_bp
 from app.Task.task import bp as task_bp
 from app.Container.container import bp as container_bp
+from app.AI.routes import bp as ai_bp
 from app.db.database import engine, close_db, SessionLocal
 from app.auth.models import Base, User, UserRole
 from app.auth.auth import get_password_hash
@@ -73,7 +74,10 @@ def create_app():
                 "auth": "/api/auth/token",
                 "items": "/api/manager/add_item",
                 "tasks": "/api/manager/assign_task", 
-                "containers": "/api/manager/add_container"
+                "containers": "/api/manager/add_container",
+                "ai_optimize": "/api/ai/optimize",
+                "ai_optimize_task": "/api/ai/optimize_task/<task_id>",
+                "ai_get_layout": "/api/ai/get_task_layout/<task_id>"
             }
         })
 
@@ -82,6 +86,7 @@ def create_app():
     app.register_blueprint(item_bp)
     app.register_blueprint(task_bp)
     app.register_blueprint(container_bp)
+    app.register_blueprint(ai_bp)
 
     # Teardown
     app.teardown_appcontext(close_db)

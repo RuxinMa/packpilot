@@ -118,3 +118,116 @@ def get_item(token_data, item_id):
         return jsonify({"status": "error", "message": str(e)}), 400
     finally:
         db.close()
+
+@bp.route("/api/manager/update_item/<int:item_id>", methods=["PUT"])
+@token_required
+def update_item(token_data, item_id):
+    db: Session = SessionLocal()
+    try:
+        item = db.query(Item).filter(Item.item_id == item_id).first()
+        if not item:
+            return jsonify({"status": "error", "message": "Item not found"}), 404
+        
+        if item.is_assigned:
+            return jsonify({"status": "error", "message": "Cannot update assigned item"}), 400
+        
+        item_data = request.get_json()
+        
+        # 更新字段（注意前端length对应后端depth）
+        if 'width' in item_data:
+            item.width = item_data['width']
+        if 'height' in item_data:
+            item.height = item_data['height']
+        if 'length' in item_data:  # 前端传length
+            item.depth = item_data['length']  # 后端存depth
+        if 'orientation' in item_data:
+            item.orientation = item_data['orientation']
+        if 'remarks' in item_data:
+            item.remarks = item_data['remarks']
+        if 'is_fragile' in item_data:
+            item.is_fragile = item_data['is_fragile']
+        
+        db.commit()
+        return jsonify({"status": "success", "message": "Item updated successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()
+
+@bp.route("/api/manager/delete_item/<int:item_id>", methods=["DELETE"])
+@token_required
+def delete_item(token_data, item_id):
+    db: Session = SessionLocal()
+    try:
+        item = db.query(Item).filter(Item.item_id == item_id).first()
+        if not item:
+            return jsonify({"status": "error", "message": "Item not found"}), 404
+        
+        if item.is_assigned:
+            return jsonify({"status": "error", "message": "Cannot delete assigned item"}), 400
+        
+        item_name = item.item_name
+        db.delete(item)
+        db.commit()
+        
+        return jsonify({"status": "success", "message": f"Item {item_name} deleted successfully"}), 200
+
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()
+
+@bp.route("/api/manager/batch_delete_items", methods=["POST"])
+@token_required
+def batch_delete_items(token_data):
+    db: Session = SessionLocal()
+    try:
+        request_data = request.get_json()
+        if not request_data or 'item_ids' not in request_data:
+            return jsonify({"status": "error", "message": "Missing item_ids parameter"}), 400
+        
+        item_ids = request_data['item_ids']
+        if not isinstance(item_ids, list) or not item_ids:
+            return jsonify({"status": "error", "message": "item_ids must be a non-empty list"}), 400
+        
+        # 查询要删除的items
+        items_to_delete = db.query(Item).filter(Item.item_id.in_(item_ids)).all()
+        
+        if not items_to_delete:
+            return jsonify({"status": "error", "message": "No items found with the provided IDs"}), 404
+        
+        # 检查是否有已分配的items
+        assigned_items = [item for item in items_to_delete if item.is_assigned or item.task_id is not None]
+        if assigned_items:
+            assigned_names = [item.item_name for item in assigned_items]
+            return jsonify({
+                "status": "error", 
+                "message": f"Cannot delete assigned items: {', '.join(assigned_names)}"
+            }), 400
+        
+        # 删除所有items
+        deleted_items = []
+        for item in items_to_delete:
+            deleted_items.append(item.item_name)
+            # 确保清空外键引用
+            item.task_id = None
+            item.is_assigned = False
+            db.delete(item)
+        
+        db.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Successfully deleted {len(deleted_items)} items",
+            "deleted_items": deleted_items
+        }), 200
+
+    except Exception as e:
+        db.rollback()
+        print(f"Error batch deleting items: {str(e)}")
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()

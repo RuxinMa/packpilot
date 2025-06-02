@@ -6,7 +6,7 @@ import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import Button from '../../components/common/Button';
-import aiOutput from '../../mocks/sample_ai_output.json';
+import { useTaskData } from '../../hooks/useTaskData';
 
 interface AIBox {
   item_id: number;
@@ -29,15 +29,19 @@ const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
+  
+  // 使用API数据替换静态数据
+  const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error } = useTaskData();
 
-  const transformedData = (aiOutput as AIOutput).results.map(box => ({
+  // 数据转换逻辑保持不变，但添加空值检查
+  const transformedData = aiOutput?.results?.map(box => ({
     item_id: `Box-${box.item_id}`,
     is_fragile: box.is_fragile,
     width: box.width,
     height: box.height,
     depth: box.depth,
     position: [box.x, box.y, box.z] as [number, number, number]
-  }));
+  })) || [];
 
   const [packingProgress, setPackingProgress] = useState({ current: 0, total: transformedData.length });
   const [is2DView, setIs2DView] = useState(false);
@@ -49,6 +53,13 @@ const WorkerDashboardPage: React.FC = () => {
     height: number;
     depth: number;
   }>(null);
+
+  // 更新total当数据变化时
+  React.useEffect(() => {
+    setPackingProgress(prev => ({ ...prev, total: transformedData.length, current: 0 }));
+    setCurrentItem(null);
+    setIsLastItem(false);
+  }, [transformedData.length]);
 
   const handleLogout = () => {
     logout();
@@ -149,6 +160,38 @@ return (
         {/* Left Sidebar - Control Panel */}
         <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
           <div className="p-8 flex-auto">
+            {/* 添加任务选择 */}
+            {tasks.length > 1 && (
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Task:
+                </label>
+                <select
+                  value={selectedTaskId || ''}
+                  onChange={(e) => setSelectedTaskId(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                >
+                  {tasks.map((task) => (
+                    <option key={task.task_id} value={task.task_id}>
+                      {task.task_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* 显示当前任务信息 */}
+            {aiOutput?.task_info && (
+              <div className="mb-4 p-3 bg-blue-50 rounded-md">
+                <p className="text-sm font-medium text-blue-800">
+                  Task: {aiOutput.task_info.task_name}
+                </p>
+                <p className="text-xs text-blue-600">
+                  Container: {aiOutput.task_info.container.width}×{aiOutput.task_info.container.height}×{aiOutput.task_info.container.depth}
+                </p>
+              </div>
+            )}
+
             {/* actions */}
             <div className="space-y-6">
               {/* change buttion from next item to finish*/}
