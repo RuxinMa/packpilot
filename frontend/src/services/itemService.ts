@@ -1,11 +1,22 @@
 // src/services/itemService.ts
-import { Item, ItemInput, ItemApiPayload, ApiResponse } from '../types';
-import { mockItems } from '../mocks/dataManager';
+import { Item, ItemInput, ItemApiPayload } from '../types';
+import { authService } from './authService';
 
 // Extended ItemInput interface to include frontend-generated name
 interface ItemInputWithName extends ItemInput {
   name: string;
 }
+
+// API配置
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
+// 获取auth token的辅助函数
+const getAuthHeaders = () => {
+  return {
+    'Content-Type': 'application/json',
+    ...authService.getAuthHeader(),
+  };
+};
 
 // Utility functions for ID generation
 export const generateItemId = (): number => {
@@ -16,11 +27,10 @@ export const generateItemId = (): number => {
   return lastSixDigits * 100 + randomSuffix;
 };
 
-// Frontend name generation utility (for reference, but should be handled by frontend)
+// Frontend name generation utility
 export const generateItemName = (): string => {
-  // This function is mainly for fallback scenarios
-  // Primary name generation should happen in frontend components
   const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
+  localStorage.setItem('item_counter', count.toString());
   
   let paddedCount: string;
   if (count < 1000) {
@@ -57,194 +67,198 @@ export const apiPayloadToItem = (payload: ItemApiPayload): Item => ({
   created_at: new Date(payload.created_at)
 });
 
+// 数据转换：后端格式 -> 前端格式
+const backendToFrontend = (backendItem: any): Item => ({
+  id: backendItem.item_id,           // 后端item_id -> 前端id
+  name: backendItem.item_name,       // 后端item_name -> 前端name
+  length: parseFloat(backendItem.depth || 0),  // 后端depth -> 前端length
+  width: parseFloat(backendItem.width || 0),
+  height: parseFloat(backendItem.height || 0),
+  orientation: backendItem.orientation || 'Face Up',
+  remarks: backendItem.remarks || '',
+  is_fragile: Boolean(backendItem.is_fragile),
+  created_at: new Date() // 后端没有created_at字段，使用当前时间
+});
+
+// 数据转换：前端格式 -> 后端格式
+const frontendToBackend = (frontendItem: ItemInput): any => ({
+  width: frontendItem.width,
+  height: frontendItem.height,
+  depth: frontendItem.length,        // 前端length -> 后端depth
+  orientation: frontendItem.orientation || 'Face Up',
+  remarks: frontendItem.remarks || '',
+  is_fragile: Boolean(frontendItem.is_fragile)
+});
+
 // API Service class
 export class ItemApiService {
-  // Get all items
+  // 获取所有items
   static async getItems(): Promise<Item[]> {
-    await new Promise(resolve => setTimeout(resolve, 500));
-    
-    const storedItems = localStorage.getItem('warehouse_items');
-    if (storedItems) {
-      const items = JSON.parse(storedItems);
-      return items.map((item: any) => ({
-        ...item,
-        is_fragile: item.is_fragile === true || item.is_fragile === 'true' || item.is_fragile === 'yes',
-        created_at: item.created_at ? new Date(item.created_at) : new Date(),
-        name: item.name || `ITEM-${item.id}` // Fallback name if missing
-      }));
-    }
-    
-    // Initialize with mock data, ensuring all items have names
-    const itemsWithNames = mockItems.map((item, index) => ({
-      ...item,
-      name: item.name || `ITEM-${(index + 1).toString().padStart(3, '0')}`,
-      created_at: item.created_at || new Date()
-    }));
-    localStorage.setItem('warehouse_items', JSON.stringify(itemsWithNames));
-    return itemsWithNames;
-  }
-
-  // Add new item with frontend-generated name
-  static async addItemWithName(itemData: ItemInputWithName): Promise<{ success: boolean; item: Item; message?: string }> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const storedItems = localStorage.getItem('warehouse_items');
-    const items = storedItems ? JSON.parse(storedItems) : [];
-    
-    // Backend generates unique ID, frontend provides name
-    const newId = generateItemId();
-    const createdAt = new Date();
-    
-    const newItem: Item = {
-      id: newId, // Backend-generated ID
-      name: itemData.name, // Frontend-generated name
-      length: itemData.length,
-      width: itemData.width,
-      height: itemData.height,
-      orientation: itemData.orientation || '',
-      remarks: itemData.remarks || '',
-      is_fragile: Boolean(itemData.is_fragile),
-      created_at: createdAt
-    };
-    
-    const updatedItems = [...items, newItem];
-    localStorage.setItem('warehouse_items', JSON.stringify(updatedItems));
-    
-    // Sync to backend
     try {
-      await this.syncToBackend('CREATE', newItem);
-      console.log(`Item ${itemData.name} created with backend-generated ID: ${newId}`);
+      const response = await fetch(`${API_BASE_URL}/api/manager/get_items`, {
+        method: 'GET',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'success' && data.items) {
+        return data.items.map(backendToFrontend);
+      } else {
+        throw new Error(data.message || 'Failed to fetch items');
+      }
     } catch (error) {
-      console.warn('Failed to sync item to backend:', error);
+      console.error('Error fetching items:', error);
+      throw error;
     }
-    
-    return { 
-      success: true, 
-      item: newItem, 
-      message: `Item ${itemData.name} created successfully with ID: ${newId}` 
-    };
   }
 
-  // Legacy method for backward compatibility (uses auto-generated name)
+  // 添加新item
   static async addItem(itemData: ItemInput): Promise<{ success: boolean; item: Item; message?: string }> {
-    const itemWithName: ItemInputWithName = {
-      ...itemData,
-      name: generateItemName()
-    };
-    return this.addItemWithName(itemWithName);
-  }
-
-  // Update existing item
-  static async updateItem(id: number, itemData: Partial<ItemInput>): Promise<{ success: boolean; message?: string }> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const storedItems = localStorage.getItem('warehouse_items');
-    const items = storedItems ? JSON.parse(storedItems) : [];
-    
-    const itemIndex = items.findIndex((item: Item) => item.id === id);
-    if (itemIndex === -1) {
-      return { success: false, message: 'Item not found' };
-    }
-    
-    const originalItem = items[itemIndex];
-    const updatedItem = { 
-      ...originalItem, 
-      ...itemData,
-      id: originalItem.id, // Preserve original ID
-      name: originalItem.name, // Preserve original name (name updates not supported in edit)
-      created_at: originalItem.created_at
-    };
-    
-    items[itemIndex] = updatedItem;
-    localStorage.setItem('warehouse_items', JSON.stringify(items));
-    
-    // Sync to backend
     try {
-      await this.syncToBackend('UPDATE', updatedItem);
-      console.log(`Item ${updatedItem.name} (ID: ${id}) updated successfully`);
-    } catch (error) {
-      console.warn('Failed to sync item update to backend:', error);
-    }
-    
-    return { success: true, message: `Item ${updatedItem.name} updated successfully` };
-  }
+      const backendPayload = frontendToBackend(itemData);
+      
+      const response = await fetch(`${API_BASE_URL}/api/manager/add_item`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(backendPayload),
+      });
 
-  // Delete item
-  static async deleteItem(id: number): Promise<{ success: boolean; message?: string }> {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    const storedItems = localStorage.getItem('warehouse_items');
-    const items = storedItems ? JSON.parse(storedItems) : [];
-    
-    const itemToDelete = items.find((item: Item) => item.id === id);
-    if (!itemToDelete) {
-      return { success: false, message: 'Item not found' };
-    }
-    
-    const filteredItems = items.filter((item: Item) => item.id !== id);
-    localStorage.setItem('warehouse_items', JSON.stringify(filteredItems));
-    
-    // Sync to backend
-    try {
-      await this.syncToBackend('DELETE', itemToDelete);
-      console.log(`Item ${itemToDelete.name} (ID: ${id}) deleted successfully`);
-    } catch (error) {
-      console.warn('Failed to sync item deletion to backend:', error);
-    }
-    
-    return { success: true, message: `Item ${itemToDelete.name} deleted successfully` };
-  }
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-  // Batch delete items (for task assignment)
-  static async batchDeleteItems(ids: number[]): Promise<{ success: boolean; message?: string }> {
-    const results = await Promise.allSettled(
-      ids.map(id => this.deleteItem(id))
-    );
-    
-    const failedDeletes = results.filter(result => 
-      result.status === 'rejected' || 
-      (result.status === 'fulfilled' && !result.value.success)
-    );
-    
-    if (failedDeletes.length > 0) {
-      return { 
-        success: false, 
-        message: `Failed to delete ${failedDeletes.length} out of ${ids.length} items` 
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        // 构造前端格式的item对象
+        const newItem: Item = {
+          id: data.item_id,           // 使用后端返回的ID
+          name: data.item_name,       // 使用后端生成的name
+          length: itemData.length,
+          width: itemData.width,
+          height: itemData.height,
+          orientation: itemData.orientation,
+          remarks: itemData.remarks,
+          is_fragile: itemData.is_fragile,
+          created_at: new Date()
+        };
+        
+        return {
+          success: true,
+          item: newItem,
+          message: data.message || 'Item added successfully'
+        };
+      } else {
+        throw new Error(data.message || 'Failed to add item');
+      }
+    } catch (error) {
+      console.error('Error adding item:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to add item'
       };
     }
-    
-    return { 
-      success: true, 
-      message: `Successfully deleted ${ids.length} items` 
-    };
   }
 
-  // Sync operations to backend
-  private static async syncToBackend(operation: 'CREATE' | 'UPDATE' | 'DELETE', item: Item): Promise<ApiResponse> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    
-    const payload = itemToApiPayload(item);
-    
-    switch (operation) {
-      case 'CREATE':
-        console.log('POST /api/items', payload);
-        // Real API call: await fetch('/api/items', { method: 'POST', body: JSON.stringify(payload) })
-        break;
-      case 'UPDATE':
-        console.log(`PUT /api/items/${item.id}`, payload);
-        // Real API call: await fetch(`/api/items/${item.id}`, { method: 'PUT', body: JSON.stringify(payload) })
-        break;
-      case 'DELETE':
-        console.log(`DELETE /api/items/${item.id}`);
-        // Real API call: await fetch(`/api/items/${item.id}`, { method: 'DELETE' })
-        break;
+  // 更新existing item
+  static async updateItem(id: number, itemData: Partial<ItemInput>): Promise<{ success: boolean; message?: string }> {
+    try {
+      const backendPayload = frontendToBackend(itemData as ItemInput);
+      
+      const response = await fetch(`${API_BASE_URL}/api/manager/update_item/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(backendPayload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        return {
+          success: true,
+          message: data.message || 'Item updated successfully'
+        };
+      } else {
+        throw new Error(data.message || 'Failed to update item');
+      }
+    } catch (error) {
+      console.error('Error updating item:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to update item'
+      };
     }
-    
-    // Simulate random API failures (10% chance)
-    if (Math.random() < 0.1) {
-      throw new Error('Backend sync failed');
+  }
+
+  // 删除item
+  static async deleteItem(id: number): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/manager/delete_item/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        return {
+          success: true,
+          message: data.message || 'Item deleted successfully'
+        };
+      } else {
+        throw new Error(data.message || 'Failed to delete item');
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to delete item'
+      };
     }
-    
-    return { success: true, message: `${operation} operation synced successfully` };
+  }
+
+  // 批量删除items
+  static async batchDeleteItems(ids: number[]): Promise<{ success: boolean; message?: string }> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/manager/batch_delete_items`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ item_ids: ids }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.status === 'success') {
+        return {
+          success: true,
+          message: data.message || `Successfully deleted ${ids.length} items`
+        };
+      } else {
+        throw new Error(data.message || 'Failed to delete items');
+      }
+    } catch (error) {
+      console.error('Error batch deleting items:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to delete items'
+      };
+    }
   }
 }
