@@ -31,11 +31,12 @@ const WorkerDashboardPage: React.FC = () => {
   const [isLastItem, setIsLastItem] = useState(false);
   
   // 使用API数据替换静态数据
-  const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error } = useTaskData();
+  const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout } = useTaskData();
 
   // 根据产品文档的状态逻辑
   const hasNoTasks = tasks.length === 0;
   const hasNoLayout = !aiOutput || !aiOutput.results || aiOutput.results.length === 0;
+  const hasTaskButNoLayout = !hasNoTasks && hasNoLayout; // 新增：有任务但没有布局
   
   // 数据转换逻辑保持不变，但添加空值检查
   const transformedData = aiOutput?.results?.map(box => ({
@@ -95,7 +96,14 @@ const switchTo3D = () => {
 };
 
 
-const handleNextItem = () => {
+const handleNextItem = async () => {
+  // 如果有任务但没有布局，先获取布局
+  if (hasTaskButNoLayout && selectedTaskId) {
+    await fetchTaskLayout(selectedTaskId);
+    return; // 布局获取后，用户需要再次点击Next
+  }
+  
+  // 原来的逻辑
   if (threeSceneRef.current) {
     const currentIndex = packingProgress.current;
     if (currentIndex < transformedData.length) {
@@ -229,14 +237,14 @@ return (
               {/* 根据状态禁用/启用按钮 */}
               <button 
                 className={`w-full py-3 px-4 rounded-md ${
-                  hasNoTasks || hasNoLayout
+                  hasNoTasks
                     ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
                 onClick={isLastItem ? handleFinish : handleNextItem}  
-                disabled={hasNoTasks || hasNoLayout}
+                disabled={hasNoTasks}
               >
-                {isLastItem ? "Finish" : "Next Item"}
+                {hasTaskButNoLayout ? "Start Task" : (isLastItem ? "Finish" : "Next Item")}
               </button>
 
               <button 
