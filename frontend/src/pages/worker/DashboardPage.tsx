@@ -33,6 +33,10 @@ const WorkerDashboardPage: React.FC = () => {
   // 使用API数据替换静态数据
   const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error } = useTaskData();
 
+  // 根据产品文档的状态逻辑
+  const hasNoTasks = tasks.length === 0;
+  const hasNoLayout = !aiOutput || !aiOutput.results || aiOutput.results.length === 0;
+  
   // 数据转换逻辑保持不变，但添加空值检查
   const transformedData = aiOutput?.results?.map(box => ({
     item_id: `Box-${box.item_id}`,
@@ -42,6 +46,15 @@ const WorkerDashboardPage: React.FC = () => {
     depth: box.depth,
     position: [box.x, box.y, box.z] as [number, number, number]
   })) || [];
+
+  // 状态显示逻辑
+  const getInitialDisplay = () => {
+    if (loading) return "Loading...";
+    if (error) return `Error: ${error}`;
+    if (hasNoTasks) return "You don't have tasks";
+    if (hasNoLayout) return "Click Next to start task";
+    return "Ready to start";
+  };
 
   const [packingProgress, setPackingProgress] = useState({ current: 0, total: transformedData.length });
   const [is2DView, setIs2DView] = useState(false);
@@ -160,7 +173,26 @@ return (
         {/* Left Sidebar - Control Panel */}
         <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
           <div className="p-8 flex-auto">
-            {/* 添加任务选择 */}
+            {/* 根据产品文档显示状态 */}
+            {loading && (
+              <div className="mb-4 p-3 bg-yellow-50 rounded-md">
+                <p className="text-sm text-yellow-800">Loading tasks...</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 rounded-md">
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            {hasNoTasks && !loading && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-md">
+                <p className="text-sm text-gray-800">You don't have tasks</p>
+              </div>
+            )}
+
+            {/* 任务选择 - 只在有多个任务时显示 */}
             {tasks.length > 1 && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -194,25 +226,35 @@ return (
 
             {/* actions */}
             <div className="space-y-6">
-              {/* change buttion from next item to finish*/}
+              {/* 根据状态禁用/启用按钮 */}
               <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
+                className={`w-full py-3 px-4 rounded-md ${
+                  hasNoTasks || hasNoLayout
+                    ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
                 onClick={isLastItem ? handleFinish : handleNextItem}  
+                disabled={hasNoTasks || hasNoLayout}
               >
                 {isLastItem ? "Finish" : "Next Item"}
               </button>
 
               <button 
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-md"
-                onClick={handlePreviousTask} 
+                className={`w-full py-3 px-4 rounded-md ${
+                  hasNoTasks || hasNoLayout
+                    ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-700'
+                }`}
+                onClick={handlePreviousTask}
+                disabled={hasNoTasks || hasNoLayout}
               >
                 Previous Item
               </button>
 
-              {/* progress bar */}
+              {/* progress bar - 根据状态显示 */}
               <ProgressBar 
-                current={packingProgress.current} 
-                total={packingProgress.total} 
+                current={hasNoTasks || hasNoLayout ? 0 : packingProgress.current} 
+                total={hasNoTasks || hasNoLayout ? 0 : packingProgress.total} 
               />
             </div>
 
@@ -228,7 +270,7 @@ return (
                     <p><strong>Depth:</strong> {currentItem.depth}</p>
                   </>
                 ) : (
-                  <p>No item selected.</p>
+                  <p>{getInitialDisplay()}</p>
                 )}
               </div>
             </div>

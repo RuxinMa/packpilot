@@ -92,29 +92,30 @@ const frontendToBackend = (frontendItem: ItemInput): any => ({
 
 // API Service class
 export class ItemApiService {
-  // 获取所有items
-  static async getItems(): Promise<Item[]> {
+  // 修改getAllItems方法，默认只获取未分配的物品
+  static async getAllItems(): Promise<Item[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/manager/get_items`, {
-        method: 'GET',
-        headers: getAuthHeaders(),
+      // 为manager页面只获取未分配的物品
+      const response = await fetch(`${API_BASE_URL}/api/manager/get_items?assigned=false`, {
+        headers: getAuthHeaders()
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
       
-      if (data.status === 'success' && data.items) {
-        return data.items.map(backendToFrontend);
+      if (response.ok) {
+        const data = await response.json();
+        return (data.items || []).map(backendToFrontend);
       } else {
-        throw new Error(data.message || 'Failed to fetch items');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch items');
       }
     } catch (error) {
       console.error('Error fetching items:', error);
       throw error;
     }
+  }
+
+  // 添加getItems作为getAllItems的别名，兼容现有代码
+  static async getItems(): Promise<Item[]> {
+    return this.getAllItems();
   }
 
   // 添加新item

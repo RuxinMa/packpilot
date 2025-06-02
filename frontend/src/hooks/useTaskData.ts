@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuthContext } from '../contexts/AuthContext';
 
+// 添加API配置
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 interface AIBox {
   item_id: number;
   width: number;
@@ -41,39 +44,61 @@ export const useTaskData = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
   const [aiOutput, setAiOutput] = useState<AIOutput | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { token } = useAuthContext();
 
   // 获取工人的任务列表
   const fetchTasks = async () => {
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
     try {
-      const response = await fetch('/api/worker/my_tasks', {
+      console.log('Fetching worker tasks...');
+      const response = await fetch(`${API_BASE_URL}/api/worker/my_tasks`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });
+      
+      console.log('Fetch tasks response:', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        console.log('Tasks data:', data);
         setTasks(data.tasks || []);
-        // 自动选择第一个任务
+        // 自动选择第一个任务，但不获取布局
         if (data.tasks && data.tasks.length > 0) {
           setSelectedTaskId(data.tasks[0].task_id);
+        } else {
+          setSelectedTaskId(null);
         }
+      } else {
+        const errorData = await response.json();
+        console.error('Error fetching tasks:', errorData);
+        setError(`Failed to fetch tasks: ${errorData.message || 'Unknown error'}`);
       }
     } catch (err) {
-      setError('Failed to fetch tasks');
+      console.error('Network error fetching tasks:', err);
+      setError('Network error: Unable to fetch tasks');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 获取任务的优化布局
+  // 手动获取任务的优化布局
   const fetchTaskLayout = async (taskId: number) => {
     setLoading(true);
     setError(null);
     try {
+      console.log(`Fetching layout for task ${taskId}...`);
       // 先尝试获取已有布局
-      let response = await fetch(`/api/ai/get_task_layout/${taskId}`, {
+      let response = await fetch(`${API_BASE_URL}/api/ai/get_task_layout/${taskId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -82,7 +107,8 @@ export const useTaskData = () => {
 
       // 如果没有布局，则进行优化
       if (!response.ok) {
-        response = await fetch(`/api/ai/optimize_task/${taskId}?save=true`, {
+        console.log('No existing layout, optimizing...');
+        response = await fetch(`${API_BASE_URL}/api/ai/optimize_task/${taskId}?save=true`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -93,11 +119,15 @@ export const useTaskData = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('AI output data:', data);
         setAiOutput(data);
       } else {
+        const errorData = await response.json();
+        console.error('Error fetching layout:', errorData);
         setError('Failed to get task layout');
       }
     } catch (err) {
+      console.error('Network error fetching layout:', err);
       setError('Network error');
     } finally {
       setLoading(false);
@@ -110,12 +140,6 @@ export const useTaskData = () => {
     }
   }, [token]);
 
-  useEffect(() => {
-    if (selectedTaskId) {
-      fetchTaskLayout(selectedTaskId);
-    }
-  }, [selectedTaskId]);
-
   return {
     tasks,
     selectedTaskId,
@@ -123,6 +147,7 @@ export const useTaskData = () => {
     aiOutput,
     loading,
     error,
+    fetchTaskLayout, // 导出方法供手动调用
     refetch: () => selectedTaskId && fetchTaskLayout(selectedTaskId),
   };
 };

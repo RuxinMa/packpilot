@@ -1,5 +1,5 @@
 // src/contexts/TaskContext.tsx
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Task, TaskInput, TaskHistoryItem } from '../types';
 import { TaskApiService } from '../services/taskService';
 
@@ -228,12 +228,6 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     // TODO: Get from auth context
     return 'manager1';
   };
-
-  // Load tasks for current manager on mount
-  useEffect(() => {
-    const currentManagerId = getCurrentManagerId();
-    refreshTasksByManager(currentManagerId);
-  }, []);
 
   const value: TaskContextType = {
     ...state,
