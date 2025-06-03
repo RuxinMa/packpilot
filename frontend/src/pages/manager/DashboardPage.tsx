@@ -18,7 +18,7 @@ import Button from '../../components/common/Button';
 
 const ManagerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuthContext();
+  const { logout, username, isLoading: authLoading } = useAuthContext();
   
   // Use Item Context
   const {
@@ -28,7 +28,7 @@ const ManagerDashboardPage: React.FC = () => {
     selectedItems,
     selectionMode,
     addItem,
-    batchDeleteItems,
+    // batchDeleteItems,
     refreshItems,
     startSelection,
     toggleItemSelection,
@@ -134,6 +134,9 @@ const ManagerDashboardPage: React.FC = () => {
     navigate('/login');
   };
 
+  // Get display username - fallback if not available
+  const displayUsername = username || 'Manager';
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -203,7 +206,11 @@ const ManagerDashboardPage: React.FC = () => {
             </div>
             
             {/* User log */}
-            <UserLog userType="Manager" onLogout={handleLogout}/>
+            <UserLog 
+              username={displayUsername}
+              loading={authLoading}
+              onLogout={handleLogout}
+            />
           </div>
           
           {/* Right Content - Item List */}

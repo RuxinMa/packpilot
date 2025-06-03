@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
+import { useTaskData } from '../../hooks/useTaskData';
+
+// Import components
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import Button from '../../components/common/Button';
-import { useTaskData } from '../../hooks/useTaskData';
 
 interface AIBox {
   item_id: number;
@@ -27,7 +29,7 @@ interface AIOutput {
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
-  const { logout } = useAuthContext();
+  const { logout, username, isLoading: authLoading } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
   
   // 使用API数据替换静态数据
@@ -80,6 +82,9 @@ const WorkerDashboardPage: React.FC = () => {
     console.log('User logged out');
     navigate('/login');
   };
+  
+  // Get display username - fallback if not available
+  const displayUsername = username || 'User';
 
 const switchTo2D = () => {
   if (threeSceneRef.current) {
@@ -169,7 +174,6 @@ const handleFinish = () => {
 };
   
   
-
 return (
   <div className="min-h-screen">
     {/* Header */}
@@ -284,8 +288,12 @@ return (
             </div>
           </div>
           
-          {/* user log */}
-          <UserLog userType="Worker1" onLogout={handleLogout}/>
+          {/* User log */}
+            <UserLog 
+              username={displayUsername}
+              loading={authLoading}
+              onLogout={handleLogout}
+            />
         </div>
         
         {/* Right Content - Visualization */}
