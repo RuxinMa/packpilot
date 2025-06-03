@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaEdit, FaSync, FaTrash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import Button from '../common/Button';
 import { Item } from '../../types';
 
@@ -7,7 +7,6 @@ interface ItemListProps {
   items: Item[];
   onEdit: (itemId: number) => void;
   onDelete: (itemId: number) => void;
-  onRefresh: () => void;
   selectionMode?: boolean;
   selectedItems?: number[];
   onToggleItemSelection?: (itemId: number) => void;
@@ -21,7 +20,6 @@ const ItemList: React.FC<ItemListProps> = ({
   items, 
   onEdit, 
   onDelete, 
-  onRefresh,
   selectionMode = false,
   selectedItems = [],
   onToggleItemSelection,
@@ -63,7 +61,7 @@ const ItemList: React.FC<ItemListProps> = ({
             ? `Select items (${selectedItems.length} selected)` 
             : `Total Items: ${items.length}`}
         </h3>
-        {selectionMode ? (
+        {selectionMode && (
           <div className="flex items-center space-x-3">
             {/* Select All / Clear All Button */}
             {items.length > 0 && (
@@ -86,25 +84,22 @@ const ItemList: React.FC<ItemListProps> = ({
               Continue
             </Button>
           </div>
-        ) : (
-          <Button
-            onClick={onRefresh}
-            disabled={loading}
-            isLoading={loading}
-            variant="outline"
-            size="sm"
-            leftIcon={<FaSync />}
-            className="text-blue-600 hover:text-blue-800"
-          >
-            Refresh
-          </Button>
         )}
       </div>
       
       {items.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg border border-gray-200">
-          <p className="text-gray-500 text-lg mb-4">No items available</p>
-          <p className="text-gray-400">Add new items using the sidebar button</p>
+          {loading ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mr-3"></div>
+              <p className="text-gray-500 text-lg">Loading items...</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-gray-500 text-lg mb-4">No items available</p>
+              <p className="text-gray-400">Add new items using the sidebar button</p>
+            </>
+          )}
         </div>
       ) : (
         <div className="overflow-x-auto shadow-sm rounded-lg">

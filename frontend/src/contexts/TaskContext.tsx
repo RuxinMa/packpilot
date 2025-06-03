@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+// src/contexts/TaskContext.tsx
+import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Task, TaskInput, TaskHistoryItem } from '../types';
 import { TaskApiService } from '../services/taskService';
 import { authService } from '../services/authService';
@@ -234,8 +235,19 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const getCurrentManagerId = (): string => {
     // 从认证服务获取当前用户名
     const currentUser = authService.getUsername();
-    return currentUser || 'manager';
+    console.log('Current manager ID:', currentUser);
+    return currentUser || 'manager1'; // 使用manager1作为fallback
   };
+
+  // 在组件挂载时自动加载任务
+  useEffect(() => {
+    const loadInitialTasks = async () => {
+      console.log('TaskContext: Loading initial tasks...');
+      await refreshTasks();
+    };
+    
+    loadInitialTasks();
+  }, []); // 空依赖数组，只在挂载时执行一次
 
   const value: TaskContextType = {
     ...state,

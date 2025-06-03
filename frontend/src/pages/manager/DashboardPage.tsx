@@ -16,7 +16,6 @@ import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
 
 const ManagerDashboardPage: React.FC = () => {
-  // const navigate = useNavigate(); // 如果不使用路由，注释掉这行
   const { logout, username, isLoading: authLoading } = useAuthContext();
   
   // Use Item Context
@@ -41,9 +40,7 @@ const ManagerDashboardPage: React.FC = () => {
     tasks,
     loading: tasksLoading,
     error: tasksError,
-    assignTask,
-    refreshTasksByManager,
-    getCurrentManagerId
+    assignTask
   } = useTaskContext();
   
   // State for controlling modals
@@ -59,10 +56,6 @@ const ManagerDashboardPage: React.FC = () => {
   const handleDeleteItem = (itemId: number) => {
     setSelectedItemId(itemId);
     setOpenModal('deleteItem');
-  };
-  
-  const handleRefreshItems = async () => {
-    await refreshItems();
   };
 
   // Item operations (simplified - just call context methods)
@@ -119,12 +112,6 @@ const ManagerDashboardPage: React.FC = () => {
     } else {
       console.error('Failed to assign task:', result.message);
     }
-  };
-
-  // Task refresh handler for current manager
-  const handleRefreshTasks = async () => {
-    const currentManagerId = getCurrentManagerId();
-    await refreshTasksByManager(currentManagerId);
   };
 
   const handleLogout = () => {
@@ -227,7 +214,6 @@ const ManagerDashboardPage: React.FC = () => {
                 items={items} 
                 onEdit={handleEditItem}
                 onDelete={handleDeleteItem}
-                onRefresh={handleRefreshItems}
                 selectionMode={selectionMode}
                 selectedItems={selectedItems}
                 onToggleItemSelection={toggleItemSelection}
@@ -269,7 +255,6 @@ const ManagerDashboardPage: React.FC = () => {
         onClose={() => setOpenModal(null)}
         tasks={tasks}
         loading={tasksLoading}
-        onRefresh={handleRefreshTasks}
       />
       
       <DeleteItem
