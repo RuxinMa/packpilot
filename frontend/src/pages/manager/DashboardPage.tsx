@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useItemContext } from '../../contexts/ItemContext';
 import { useTaskContext } from '../../contexts/TaskContext';
@@ -17,8 +16,8 @@ import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
 
 const ManagerDashboardPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { logout } = useAuthContext();
+  // const navigate = useNavigate(); // 如果不使用路由，注释掉这行
+  const { logout, username, isLoading: authLoading } = useAuthContext();
   
   // Use Item Context
   const {
@@ -28,7 +27,7 @@ const ManagerDashboardPage: React.FC = () => {
     selectedItems,
     selectionMode,
     addItem,
-    batchDeleteItems,
+    // batchDeleteItems,
     refreshItems,
     startSelection,
     toggleItemSelection,
@@ -131,8 +130,13 @@ const ManagerDashboardPage: React.FC = () => {
   const handleLogout = () => {
     logout();
     console.log('User logged out');
-    navigate('/login');
+    // navigate('/login'); // 如果不使用路由，注释掉这行
+    // 或者使用 window.location.href = '/login'; 
+    // 或者刷新页面 window.location.reload();
   };
+
+  // Get display username - fallback if not available
+  const displayUsername = username || 'Unknown User';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -202,8 +206,12 @@ const ManagerDashboardPage: React.FC = () => {
               </div>
             </div>
             
-            {/* User log */}
-            <UserLog userType="Manager" onLogout={handleLogout}/>
+            {/* User log - now shows actual username only */}
+            <UserLog 
+              username={displayUsername}
+              loading={authLoading}
+              onLogout={handleLogout}
+            />
           </div>
           
           {/* Right Content - Item List */}

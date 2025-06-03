@@ -1,7 +1,7 @@
-// src/contexts/TaskContext.tsx
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Task, TaskInput, TaskHistoryItem } from '../types';
 import { TaskApiService } from '../services/taskService';
+import { authService } from '../services/authService';
 
 // Context state interface
 interface TaskState {
@@ -88,7 +88,7 @@ interface TaskProviderProps {
 export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
 
-  // Data operations
+  // 刷新所有任务
   const refreshTasks = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -96,8 +96,9 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     try {
       const tasks = await TaskApiService.getTasks();
       dispatch({ type: 'SET_TASKS', payload: tasks });
+      console.log(`Loaded ${tasks.length} tasks from API`);
     } catch (error) {
-      const errorMessage = 'Failed to load tasks';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load tasks';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error loading tasks:', error);
     } finally {
@@ -105,7 +106,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // Refresh tasks for specific manager
+  // 根据管理员刷新任务
   const refreshTasksByManager = async (managerId: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -115,7 +116,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
       dispatch({ type: 'SET_TASKS', payload: tasks });
       console.log(`Loaded ${tasks.length} tasks for manager: ${managerId}`);
     } catch (error) {
-      const errorMessage = 'Failed to load manager tasks';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load manager tasks';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error loading manager tasks:', error);
     } finally {
@@ -123,13 +124,14 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
+  // 分配任务
   const assignTask = async (taskData: TaskInput) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
     
     try {
       const response = await TaskApiService.assignTask(taskData);
-      if (response.success) {
+      if (response.success && response.task) {
         dispatch({ type: 'ADD_TASK', payload: response.task });
         return { success: true, message: response.message, task: response.task };
       } else {
@@ -137,7 +139,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const errorMessage = 'Failed to assign task';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to assign task';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error assigning task:', error);
       return { success: false, message: errorMessage };
@@ -146,6 +148,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
+  // 更新任务状态
   const updateTaskStatus = async (taskId: number, status: Task['status']) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -169,7 +172,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const errorMessage = 'Failed to update task status';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update task status';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error updating task status:', error);
       return { success: false, message: errorMessage };
@@ -178,6 +181,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
+  // 删除任务
   const deleteTask = async (taskId: number) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -192,7 +196,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
         return { success: false, message: response.message };
       }
     } catch (error) {
-      const errorMessage = 'Failed to delete task';
+      const errorMessage = error instanceof Error ? error.message : 'Failed to delete task';
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
       console.error('Error deleting task:', error);
       return { success: false, message: errorMessage };
@@ -201,6 +205,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
+  // 获取任务历史
   const getTaskHistory = async (): Promise<TaskHistoryItem[]> => {
     try {
       return await TaskApiService.getTaskHistory();
@@ -210,23 +215,26 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // Utility functions
+  // 工具函数：根据ID获取任务
   const getTaskById = (taskId: number): Task | undefined => {
     return state.tasks.find(task => task.id === taskId);
   };
 
+  // 工具函数：根据worker获取任务
   const getTasksByWorker = (worker: string): Task[] => {
     return state.tasks.filter(task => task.worker === worker);
   };
 
+  // 工具函数：根据状态获取任务
   const getTasksByStatus = (status: Task['status']): Task[] => {
     return state.tasks.filter(task => task.status === status);
   };
 
-  // Get current manager ID (placeholder - should come from auth context)
+  // 获取当前管理员ID
   const getCurrentManagerId = (): string => {
-    // TODO: Get from auth context
-    return 'manager1';
+    // 从认证服务获取当前用户名
+    const currentUser = authService.getUsername();
+    return currentUser || 'manager';
   };
 
   const value: TaskContextType = {
