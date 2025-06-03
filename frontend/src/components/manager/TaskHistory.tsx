@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import Modal from '../common/Modal';
-import { FaSync, FaSpinner } from 'react-icons/fa';
+import { FaSpinner } from 'react-icons/fa';
 import { Task } from '../../types';
 
 interface TaskHistoryProps {
@@ -8,22 +8,24 @@ interface TaskHistoryProps {
   onClose: () => void;
   tasks: Task[];
   loading?: boolean;
-  onRefresh?: () => void;
 }
 
 const TaskHistory: React.FC<TaskHistoryProps> = ({ 
   isOpen, 
   onClose, 
   tasks,
-  loading = false,
-  onRefresh 
+  loading = false
 }) => {
+  // 当模态框打开时，如果没有任务且不在加载中，打印调试信息
   useEffect(() => {
-    if (isOpen && tasks.length === 0 && !loading && onRefresh) {
-      // Only refresh if modal is open, no tasks are loaded, and not currently loading
-      onRefresh();
+    if (isOpen) {
+      console.log('TaskHistory opened:', { 
+        tasksCount: tasks.length, 
+        loading,
+        tasks: tasks.slice(0, 3) // 只打印前3个任务用于调试
+      });
     }
-  }, [isOpen]); // Remove onRefresh from dependency array to prevent infinite loop
+  }, [isOpen, tasks.length, loading]);
 
   const formatTaskName = (taskName: string): string => {
     // Remove "Task-" prefix if it exists
@@ -57,12 +59,6 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 
-  const handleRefresh = () => {
-    if (!loading && onRefresh) {
-      onRefresh();
-    }
-  };
-
   return (
     <Modal
       isOpen={isOpen}
@@ -70,9 +66,8 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
       title="Task History"
     >
       <div className="min-h-[400px]">
-        {/* Summary and Refresh Button Row */}
-        <div className="flex justify-between items-center mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          {/* Summary Stats */}
+        {/* Summary Stats */}
+        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
           {!loading ? (
             <div className="flex items-center space-x-6">
               <div className="text-center">
@@ -95,23 +90,12 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
               </div>
             </div>
           ) : (
-            <div></div> // Empty div to maintain layout when loading
-          )}
-
-          {/* Refresh Button */}
-          {onRefresh && (
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="flex items-center px-3 py-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50 bg-white rounded-md border border-gray-300 hover:bg-blue-50 transition-colors"
-            >
-              {loading ? (
-                <FaSpinner className="animate-spin mr-1" />
-              ) : (
-                <FaSync className="mr-1" />
-              )}
-              {loading ? 'Loading...' : 'Refresh'}
-            </button>
+            <div className="flex justify-center">
+              <div className="flex items-center">
+                <FaSpinner className="animate-spin mr-2" />
+                <p className="text-gray-500">Loading statistics...</p>
+              </div>
+            </div>
           )}
         </div>
 
