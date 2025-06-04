@@ -22,7 +22,7 @@ def optimize():
         result = run_ai_optimizer(container, boxes)
 
         # 检查优化结果
-        if result.get("cost", float("inf")) > 1e10:
+        if result.get("cost", float("inf")) > 1e12:
             return jsonify({
                 "status": "error",
                 "message": "Optimization failed: unable to pack all boxes into container."
@@ -76,9 +76,9 @@ def optimize_task(token_data, task_id):
         # 转换为AI API需要的格式 - 验证转换过程
         print("📊 Converting container data:")
         container_data = {
-            "width": float(container.width) / 100,  # 转换为米
-            "height": float(container.height) / 100, 
-            "depth": float(container.depth) / 100
+            "width": float(container.width / 100),  # 转换为米
+            "height": float(container.height / 100), 
+            "depth": float(container.depth / 100)
         }
         print(f"  Before conversion (cm): {float(container.width)} x {float(container.height)} x {float(container.depth)}")
         print(f"  After conversion (m):   {container_data['width']} x {container_data['height']} x {container_data['depth']}")
@@ -90,9 +90,9 @@ def optimize_task(token_data, task_id):
         
         boxes_data = [{
             "item_id": item.item_id,
-            "width": float(item.width) / 100,  # 转换为米
-            "height": float(item.height) / 100,
-            "depth": float(item.depth) / 100,
+            "width": float(item.width / 100),  # 转换为米
+            "height": float(item.height / 100) ,
+            "depth": float(item.depth / 100),
             "is_fragile": item.is_fragile
         } for item in items]
         
@@ -124,7 +124,7 @@ def optimize_task(token_data, task_id):
         print("=" * 60)
 
         # 检查优化结果
-        if result.get("cost", float("inf")) > 1e10:
+        if result.get("cost", float("inf")) > 1e12:
             return jsonify({
                 "status": "error",
                 "message": f"Optimization failed: unable to pack all boxes into container. Container: {container_data}, Items: {len(boxes_data)}, Total volume ratio: {items_volume/container_volume:.2%}"
@@ -136,9 +136,9 @@ def optimize_task(token_data, task_id):
             for item_result in result["results"]:
                 item = db.query(Item).filter(Item.item_id == item_result["item_id"]).first()
                 if item:
-                    item.x = item_result["x"] * 100  # 转换回厘米
-                    item.y = item_result["y"] * 100
-                    item.z = item_result["z"] * 100
+                    item.x = item_result["x"]  # 转换回厘米
+                    item.y = item_result["y"]
+                    item.z = item_result["z"]
                     item.placement_order = item_result["placement_order"]
             db.commit()
             
@@ -200,10 +200,10 @@ def get_task_layout(token_data, task_id):
             "item_id": item.item_id,
             "placement_order": item.placement_order,
             "x": float(item.x) if item.x is not None else 0,
-            "y": float(item.y) if item.y is not None else 0,
+            "y": float(item.y ) if item.y is not None else 0,
             "z": float(item.z) if item.z is not None else 0,
-            "width": float(item.width),
-            "height": float(item.height),
+            "width": float(item.width),  # 转换回厘米
+            "height": float(item.height ),
             "depth": float(item.depth),
             "is_fragile": item.is_fragile
         } for item in items]

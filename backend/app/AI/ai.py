@@ -21,7 +21,7 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
             best_cost = cost
             best_solution = solution
 
-    if best_solution is None or best_cost > 1e10:
+    if best_solution is None or best_cost > 1e12:
         return {
             "status": "error",
             "cost": float("inf"),
@@ -34,12 +34,12 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
     results = [{
         "item_id": box.item_id,
         "placement_order": idx + 1,
-        "x": box.x,
-        "y": box.y,
-        "z": box.z,
-        "width": box.width,
-        "height": box.height,
-        "depth": box.depth,
+        "x": box.x * 100,  # Convert to cm
+        "y": box.y * 100, 
+        "z": box.z * 100, 
+        "width": box.width * 100,  # Convert to cm
+        "height": box.height * 100,
+        "depth": box.depth * 100,
         "is_fragile": box.is_fragile
     } for idx, box in enumerate(sorted_solution)]
 
