@@ -28,19 +28,23 @@ def overlap_on_xy(b1, b2):
         b1.y + b1.height <= b2.y or b2.y + b2.height <= b1.y
     )
 
-def total_spacing_penalty(box, placed_boxes):
-    penalty = 0
+def is_gap_too_large(box, placed_boxes, threshold=1.5):
     for other in placed_boxes:
+        if box == other:
+            continue
         if overlap_on_yz(box, other):
             dx = min(abs(box.x + box.width - other.x), abs(other.x + other.width - box.x))
-            penalty += dx
+            if dx < threshold:
+                return False
         if overlap_on_xz(box, other):
             dy = min(abs(box.y + box.height - other.y), abs(other.y + other.height - box.y))
-            penalty += dy
+            if dy < threshold:
+                return False
         if overlap_on_xy(box, other):
             dz = min(abs(box.z + box.depth - other.z), abs(other.z + other.depth - box.z))
-            penalty += dz
-    return penalty
+            if dz < threshold:
+                return False
+    return True
 
 def support_area_ratio(box, placed_boxes, step=None):
     # 自动计算合适步长
@@ -152,10 +156,10 @@ def advanced_cost_function(order, container):
     total_x = total_y = total_z = 0
     fragile_penalty = 0
     edge_penalty = 0
+    base_bias_penalty = 0
     wall_bonus = 0
     slope_penalty_total = 0
     max_z = 0
-    gap_penalty = 0
 
     for box in order:
         placed = False
@@ -177,12 +181,15 @@ def advanced_cost_function(order, container):
                     if any(overlap(other, box) and other.z > box.z for other in placed_boxes if other != box):
                         fragile_penalty += 1e6
 
-                # 计算间隙惩罚
-                gap_penalty += total_spacing_penalty(box, placed_boxes)
-
                 # 计算小箱子在边缘的惩罚
                 if is_small_box(box) and is_on_edge(box, container):
                     edge_penalty += 1e6
+
+                # 计算基础偏差惩罚 （越靠近原点惩罚越小）
+                if is_gap_too_large(box, placed_boxes):
+                    base_bias_penalty += 10
+                else:
+                    base_bias_penalty -= 5
 
                 # 如果箱子放在墙边，给予奖励
                 if box.x == 0 or box.y == 0 or box.z == 0:
@@ -228,6 +235,7 @@ def advanced_cost_function(order, container):
 
     # 计算总惩罚
     return (
+        base_bias_penalty * 1.0 +
         slope_penalty_total * 2.0 +
         wall_bonus -
         touching_bonus +
@@ -235,6 +243,5 @@ def advanced_cost_function(order, container):
         1.0 * edge_penalty +
         2.0 * volume_penalty +
         3.0 * height_penalty +
-        center_penalty +
-        0.2 * gap_penalty
+        center_penalty
     )
