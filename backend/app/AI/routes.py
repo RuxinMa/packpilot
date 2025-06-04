@@ -45,26 +45,48 @@ def optimize_task(token_data, task_id):
         if not task:
             return jsonify({"status": "error", "message": "Task not found"}), 404
         
+        print(f"=== CONTAINER DATA VERIFICATION FOR TASK {task_id} ===")
+        print(f"Task found: ID={task.task_id}, name='{task.task_name}'")
+        print(f"Task.container_id = {task.container_id}")
+        
         # 检查权限：Manager可以看所有任务，Worker只能看分配给自己的任务
         if token_data.role.value == "Worker" and task.assigned_to != token_data.sub:
             return jsonify({"status": "error", "message": "Access denied"}), 403
         
-        # 获取容器
+        # 获取容器 - 添加详细验证
         container = db.query(Container).filter(Container.container_id == task.container_id).first()
         if not container:
+            print(f"❌ Container NOT FOUND for container_id = {task.container_id}")
             return jsonify({"status": "error", "message": "Container not found"}), 404
+        
+        print(f"✅ Container found:")
+        print(f"  Container ID: {container.container_id}")
+        print(f"  Label: {container.label}")
+        print(f"  Raw dimensions (from DB): width={container.width}, height={container.height}, depth={container.depth}")
+        print(f"  Data types: width={type(container.width)}, height={type(container.height)}, depth={type(container.depth)}")
         
         # 获取任务中的物品
         items = db.query(Item).filter(Item.task_id == task_id).all()
         if not items:
+            print(f"❌ No items found for task {task_id}")
             return jsonify({"status": "error", "message": "No items found for this task"}), 404
         
-        # 转换为AI API需要的格式
+        print(f"✅ Found {len(items)} items for task {task_id}")
+        
+        # 转换为AI API需要的格式 - 验证转换过程
+        print("📊 Converting container data:")
         container_data = {
             "width": float(container.width) / 100,  # 转换为米
             "height": float(container.height) / 100, 
             "depth": float(container.depth) / 100
         }
+        print(f"  Before conversion (cm): {float(container.width)} x {float(container.height)} x {float(container.depth)}")
+        print(f"  After conversion (m):   {container_data['width']} x {container_data['height']} x {container_data['depth']}")
+        
+        # 验证转换后的数据
+        if container_data['width'] <= 0 or container_data['height'] <= 0 or container_data['depth'] <= 0:
+            print(f"❌ Invalid container dimensions after conversion: {container_data}")
+            return jsonify({"status": "error", "message": "Invalid container dimensions"}), 400
         
         boxes_data = [{
             "item_id": item.item_id,
@@ -74,14 +96,38 @@ def optimize_task(token_data, task_id):
             "is_fragile": item.is_fragile
         } for item in items]
         
+        print(f"📦 Items data converted:")
+        for i, box in enumerate(boxes_data):
+            original_item = items[i]
+            print(f"  Item {box['item_id']}: {float(original_item.width)}x{float(original_item.height)}x{float(original_item.depth)}cm -> {box['width']:.3f}x{box['height']:.3f}x{box['depth']:.3f}m")
+        
+        # 计算总体积 - 验证数据合理性
+        container_volume = container_data["width"] * container_data["height"] * container_data["depth"]
+        items_volume = sum(box["width"] * box["height"] * box["depth"] for box in boxes_data)
+        print(f"📐 Volume analysis:")
+        print(f"  Container volume: {container_volume:.4f} m³")
+        print(f"  Items total volume: {items_volume:.4f} m³")
+        print(f"  Volume ratio: {items_volume/container_volume:.2%}")
+        
+        print(f"🚀 Calling AI optimizer with:")
+        print(f"  Container: {container_data}")
+        print(f"  Number of boxes: {len(boxes_data)}")
+        print("=" * 60)
+        
         # 调用AI优化算法
         result = run_ai_optimizer(container_data, boxes_data)
+        
+        print(f"🎯 AI optimizer returned:")
+        print(f"  Status: {result.get('status', 'unknown')}")
+        print(f"  Cost: {result.get('cost', 'unknown')}")
+        print(f"  Results count: {len(result.get('results', []))}")
+        print("=" * 60)
 
         # 检查优化结果
         if result.get("cost", float("inf")) > 1e10:
             return jsonify({
                 "status": "error",
-                "message": "Optimization failed: unable to pack all boxes into container."
+                "message": f"Optimization failed: unable to pack all boxes into container. Container: {container_data}, Items: {len(boxes_data)}, Total volume ratio: {items_volume/container_volume:.2%}"
             }), 400
         
         # 可选：保存优化结果到数据库
