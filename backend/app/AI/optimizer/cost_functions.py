@@ -106,24 +106,13 @@ def is_touching(box, others):
     return False
 
 
-def try_place_with_contact_priority(box, placed_boxes, container, min_support_ratio=0.6):
+def try_place_with_contact_priority(box, placed_boxes, container, min_support_ratio=0.9):
     x_range = list(range(int(container['width'] - box.width + 1)))
     y_range = list(range(int(container['height'] - box.height + 1)))
     z_range = list(range(int(container['depth'] - box.depth + 1)))
 
     positions = [(x, y, z) for y in y_range for z in z_range for x in x_range]
-
-    def contact_score(pos, placed_boxes, box):
-        x, y, z = pos
-        score = x + y + z  # 越小越靠近原点
-        for other in placed_boxes:
-            dx = min(abs(x - (other.x + other.width)), abs((x + box.width) - other.x))
-            dy = min(abs(y - (other.y + other.height)), abs((y + box.height) - other.y))
-            dz = min(abs(z - (other.z + other.depth)), abs((z + box.depth) - other.z))
-            score += dx + dy + dz
-        return score
-
-    positions.sort(key=lambda pos: contact_score(pos, placed_boxes, box))
+    positions.sort(key=lambda pos: (pos[0] + pos[1] + pos[2]))
 
     for x, y, z in positions:
         box.x, box.y, box.z = x, y, z
