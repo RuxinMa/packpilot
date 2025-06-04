@@ -137,6 +137,15 @@ export const useTaskData = () => {
     }
   };
 
+  // 添加一个新的 effect 来监听 selectedTaskId 的变化
+  useEffect(() => {
+    // 当选择的任务改变时，清除之前的 aiOutput
+    if (selectedTaskId !== null) {
+      setAiOutput(null);
+      // 这里不自动获取布局，让用户手动点击 "Start Task" 按钮
+    }
+  }, [selectedTaskId]);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchTasks();
