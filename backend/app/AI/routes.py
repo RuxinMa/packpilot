@@ -136,9 +136,9 @@ def optimize_task(token_data, task_id):
             for item_result in result["results"]:
                 item = db.query(Item).filter(Item.item_id == item_result["item_id"]).first()
                 if item:
-                    item.x = item_result["x"]  # 转换回厘米
-                    item.y = item_result["y"]
-                    item.z = item_result["z"]
+                    item.x = item_result["x"] * 100  # 转换回厘米
+                    item.y = item_result["y"] * 100
+                    item.z = item_result["z"] * 100
                     item.placement_order = item_result["placement_order"]
             db.commit()
             
@@ -199,12 +199,12 @@ def get_task_layout(token_data, task_id):
         results = [{
             "item_id": item.item_id,
             "placement_order": item.placement_order,
-            "x": float(item.x) if item.x is not None else 0,
-            "y": float(item.y ) if item.y is not None else 0,
-            "z": float(item.z) if item.z is not None else 0,
-            "width": float(item.width),  # 转换回厘米
-            "height": float(item.height ),
-            "depth": float(item.depth),
+            "x": float(item.x * 100) if item.x is not None else 0,
+            "y": float(item.y * 100) if item.y is not None else 0,
+            "z": float(item.z * 100) if item.z is not None else 0,
+            "width": float(item.width * 100),  # 转换回厘米
+            "height": float(item.height * 100),
+            "depth": float(item.depth * 100),
             "is_fragile": item.is_fragile
         } for item in items]
         

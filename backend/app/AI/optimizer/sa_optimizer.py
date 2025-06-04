@@ -31,17 +31,24 @@ def simulated_annealing(boxes, container, initial_temp=1000, cooling_rate=0.95, 
 
         T = initial_temp
         iteration = 0
+        invalid_count = 0
+        max_invalid = 50
+
 
         while T > stop_T and iteration < max_iter:
             neighbor = perturb(current_solution)
             neighbor_cost = advanced_cost_function(neighbor, container)
 
-            # Stop early if invalid placement
             if neighbor_cost >= 1e12:
                 print("Invalid neighbor solution detected, skipping...")
+                invalid_count += 1
+                if invalid_count >= max_invalid:
+                    print("⚠️ Too many invalid neighbors. Breaking early.")
+                    break
                 iteration += 1
                 T *= cooling_rate
                 continue
+            invalid_count = 0
 
             delta = neighbor_cost - current_cost
             if delta < 0 or random.random() < math.exp(-delta / T):

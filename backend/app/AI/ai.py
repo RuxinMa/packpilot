@@ -3,13 +3,19 @@ from app.AI.optimizer.box import Box
 
 def run_ai_optimizer(container, boxes_raw, runs=5):
 
+    container = {
+        "width": container["width"],  # Convert to m
+        "height": container["height"],
+        "depth": container["depth"]
+    }
+
     best_solution = None
     best_cost = float("inf")
 
     for _ in range(runs):
         boxes = [Box(
             item_id=box["item_id"],
-            original_width=box["width"],
+            original_width=box["width"],  # Convert to m
             original_height=box["height"],
             original_depth=box["depth"],
             is_fragile=box.get("is_fragile", False)
@@ -34,12 +40,12 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
     results = [{
         "item_id": box.item_id,
         "placement_order": idx + 1,
-        "x": box.x * 100,  # Convert to cm
-        "y": box.y * 100, 
-        "z": box.z * 100, 
-        "width": box.width * 100,  # Convert to cm
-        "height": box.height * 100,
-        "depth": box.depth * 100,
+        "x": box.x,  # Convert to cm
+        "y": box.y, 
+        "z": box.z, 
+        "width": box.width,  # Convert to cm
+        "height": box.height,
+        "depth": box.depth,
         "is_fragile": box.is_fragile
     } for idx, box in enumerate(sorted_solution)]
 
