@@ -2,6 +2,7 @@ from app.AI.optimizer.sa_optimizer import simulated_annealing
 from app.AI.optimizer.box import Box
 
 def run_ai_optimizer(container, boxes_raw, runs=5):
+
     best_solution = None
     best_cost = float("inf")
 
@@ -19,6 +20,14 @@ def run_ai_optimizer(container, boxes_raw, runs=5):
         if cost < best_cost:
             best_cost = cost
             best_solution = solution
+
+    if best_solution is None or best_cost > 1e10:
+        return {
+            "status": "error",
+            "cost": float("inf"),
+            "results": [],
+            "message": "Unable to pack all boxes into container"
+        }
 
     sorted_solution = sorted(best_solution, key=lambda b: (b.z, b.y, b.x))
     
