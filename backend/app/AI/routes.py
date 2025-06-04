@@ -20,6 +20,13 @@ def optimize():
         boxes = [box.dict() for box in request_model.boxes]
 
         result = run_ai_optimizer(container, boxes)
+
+        # 检查优化结果
+        if result.get("cost", float("inf")) > 1e10:
+            return jsonify({
+                "status": "error",
+                "message": "Optimization failed: unable to pack all boxes into container."
+            }), 400
         return jsonify(result), 200
     
     except ValueError as ve:
@@ -54,21 +61,28 @@ def optimize_task(token_data, task_id):
         
         # 转换为AI API需要的格式
         container_data = {
-            "width": float(container.width),
-            "height": float(container.height), 
-            "depth": float(container.depth)
+            "width": float(container.width) / 100,  # 转换为米
+            "height": float(container.height) / 100, 
+            "depth": float(container.depth) / 100
         }
         
         boxes_data = [{
             "item_id": item.item_id,
-            "width": float(item.width),
-            "height": float(item.height),
-            "depth": float(item.depth),
+            "width": float(item.width) / 100,  # 转换为米
+            "height": float(item.height) / 100,
+            "depth": float(item.depth) / 100,
             "is_fragile": item.is_fragile
         } for item in items]
         
         # 调用AI优化算法
         result = run_ai_optimizer(container_data, boxes_data)
+
+        # 检查优化结果
+        if result.get("cost", float("inf")) > 1e10:
+            return jsonify({
+                "status": "error",
+                "message": "Optimization failed: unable to pack all boxes into container."
+            }), 400
         
         # 可选：保存优化结果到数据库
         save_to_db = request.args.get('save', 'false').lower() == 'true'
@@ -76,9 +90,9 @@ def optimize_task(token_data, task_id):
             for item_result in result["results"]:
                 item = db.query(Item).filter(Item.item_id == item_result["item_id"]).first()
                 if item:
-                    item.x = item_result["x"]
-                    item.y = item_result["y"] 
-                    item.z = item_result["z"]
+                    item.x = item_result["x"] * 100  # 转换回厘米
+                    item.y = item_result["y"] * 100
+                    item.z = item_result["z"] * 100
                     item.placement_order = item_result["placement_order"]
             db.commit()
             

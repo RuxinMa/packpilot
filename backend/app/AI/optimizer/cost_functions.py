@@ -137,7 +137,6 @@ def advanced_cost_function(order, container):
     edge_penalty = 0
     base_bias_penalty = 0
     wall_bonus = 0
-    ground_bonus = 0
     slope_penalty_total = 0
     max_z = 0
 
@@ -217,7 +216,6 @@ def advanced_cost_function(order, container):
     return (
         base_bias_penalty * 1.0 +
         slope_penalty_total * 2.0 +
-        ground_bonus +
         wall_bonus +
         -0.1 * touching_bonus +
         fragile_penalty +
