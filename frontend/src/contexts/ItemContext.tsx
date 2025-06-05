@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Item, ItemInput } from '../types';
 import { ItemApiService, generateItemName } from '../services/itemService';
+import { authService } from '../services/authService';
 
 // Context state interface
 interface ItemState {
@@ -142,6 +143,12 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
 
   // Data operations
   const refreshItems = async () => {
+    // Check authentication status before making API calls
+    if (!authService.isAuthenticated()) {
+      console.log('ItemContext: Not authenticated, skipping refresh');
+      return;
+    }
+
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
     
@@ -280,9 +287,35 @@ export const ItemProvider: React.FC<ItemProviderProps> = ({ children }) => {
     return state.items.filter(item => state.selectedItems.includes(item.id));
   };
 
-  // Load items on mount
+  // Load items on mount - wait for authentication
   useEffect(() => {
-    refreshItems();
+    const loadInitialData = () => {
+      // Check authentication status
+      if (!authService.isAuthenticated()) {
+        console.log('ItemContext: Not authenticated, skipping initial load');
+        return;
+      }
+      
+      console.log('ItemContext: Loading initial items...');
+      refreshItems();
+    };
+
+    // Check immediately
+    loadInitialData();
+    
+    // Listen for storage changes to detect auth state changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        console.log('ItemContext: Auth token changed, reloading items');
+        loadInitialData();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   const value: ItemContextType = {

@@ -91,6 +91,12 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
 
   // 刷新所有任务
   const refreshTasks = async () => {
+    // Check authentication status before making API calls
+    if (!authService.isAuthenticated()) {
+      console.log('TaskContext: Not authenticated, skipping refresh');
+      return;
+    }
+
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
     
@@ -239,15 +245,36 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     return currentUser || 'manager1'; // 使用manager1作为fallback
   };
 
-  // 在组件挂载时自动加载任务
+  // 在组件挂载时自动加载任务 - wait for authentication
   useEffect(() => {
-    const loadInitialTasks = async () => {
+    const loadInitialTasks = () => {
+      // Check authentication status
+      if (!authService.isAuthenticated()) {
+        console.log('TaskContext: Not authenticated, skipping initial load');
+        return;
+      }
+      
       console.log('TaskContext: Loading initial tasks...');
-      await refreshTasks();
+      refreshTasks();
     };
-    
+
+    // Check immediately
     loadInitialTasks();
-  }, []); // 空依赖数组，只在挂载时执行一次
+    
+    // Listen for storage changes to detect auth state changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'token') {
+        console.log('TaskContext: Auth token changed, reloading tasks');
+        loadInitialTasks();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, []);
 
   const value: TaskContextType = {
     ...state,

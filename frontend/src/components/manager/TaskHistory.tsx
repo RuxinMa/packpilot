@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import Modal from '../common/Modal';
 import { FaSpinner } from 'react-icons/fa';
 import { Task } from '../../types';
+import { useTaskContext } from '../../contexts/TaskContext';
 
 interface TaskHistoryProps {
   isOpen: boolean;
@@ -16,16 +17,18 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
   tasks,
   loading = false
 }) => {
-  // 当模态框打开时，如果没有任务且不在加载中，打印调试信息
+  const { refreshTasks } = useTaskContext();
+
+  // 当模态框打开时，主动刷新任务数据以确保最新状态
   useEffect(() => {
     if (isOpen) {
-      console.log('TaskHistory opened:', { 
-        tasksCount: tasks.length, 
-        loading,
-        tasks: tasks.slice(0, 3) // 只打印前3个任务用于调试
+      console.log('TaskHistory opened, refreshing tasks once...', { 
+        currentTasksCount: tasks.length, 
+        loading
       });
+      refreshTasks();
     }
-  }, [isOpen, tasks.length, loading]);
+  }, [isOpen]);
 
   const formatTaskName = (taskName: string): string => {
     // Remove "Task-" prefix if it exists
