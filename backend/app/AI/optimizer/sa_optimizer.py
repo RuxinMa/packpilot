@@ -49,4 +49,9 @@ def simulated_annealing(boxes, container, initial_temp=1000, cooling_rate=0.99, 
         T *= cooling_rate
         iteration += 1
 
+    if best_cost >= 1e12:
+            print("❌ Final result invalid. No feasible solution found.")
+            return None, float("inf")
+    
+    print(f"✅ Optimization finished. Best cost: {best_cost:.2f}")
     return best_solution, best_cost

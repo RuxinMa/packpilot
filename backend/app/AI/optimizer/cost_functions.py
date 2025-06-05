@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 # 检查两个箱子是否重叠
 def overlap(box1, box2):
@@ -45,28 +46,36 @@ def is_gap_too_large(box, placed_boxes, threshold=1.5):
                 return False
     return True
 
-def support_area_ratio(box, placed_boxes, step=0.5):
+def support_area_ratio(box, placed_boxes, step=None):
+    # 自动计算合适步长
+    if step is None:
+        step = max(min(box.width, box.depth) / 4.0, 0.1)
+
     supported = 0
     total = 0
-    x_steps = int(box.width / step)
-    z_steps = int(box.depth / step)
+    x_steps = max(1, int(box.width / step))
+    z_steps = max(1, int(box.depth / step))
+
     for i in range(x_steps):
         for k in range(z_steps):
             px = box.x + i * step + step / 2
             pz = box.z + k * step + step / 2
             py = box.y
+
             is_supported = False
-            if abs(py) < 1e-3:
-                is_supported = True  # 贴地
+            if np.isclose(py, 0.0, atol=1e-3):  # 贴地认为支撑
+                is_supported = True
             else:
                 for other in placed_boxes:
-                    if (abs(other.y + other.height - py) < 1e-3 and
+                    if (np.isclose(other.y + other.height, py, atol=1e-3) and
                         other.x <= px <= other.x + other.width and
                         other.z <= pz <= other.z + other.depth):
                         is_supported = True
                         break
+
             supported += int(is_supported)
             total += 1
+
     return supported / total if total > 0 else 0
 
 
@@ -111,6 +120,7 @@ def try_place_with_contact_priority(box, placed_boxes, container, min_support_ra
             if support_area_ratio(box, placed_boxes) >= min_support_ratio:
                 return True
     return False
+
 
 # 检查箱子是否小于给定体积
 def is_small_box(box, threshold_volume=10):
@@ -216,11 +226,11 @@ def advanced_cost_function(order, container):
     return (
         base_bias_penalty * 1.0 +
         slope_penalty_total * 2.0 +
-        wall_bonus +
-        -0.1 * touching_bonus +
-        fragile_penalty +
-        edge_penalty +
-        volume_penalty +
-        height_penalty +
+        wall_bonus -
+        touching_bonus +
+        5.0 * fragile_penalty +
+        1.0 * edge_penalty +
+        2.0 * volume_penalty +
+        3.0 * height_penalty +
         center_penalty
     )
