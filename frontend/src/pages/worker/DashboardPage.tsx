@@ -76,6 +76,24 @@ const WorkerDashboardPage: React.FC = () => {
     setCurrentItem(null);
     setIsLastItem(false);
   }, [transformedData.length]);
+  
+  React.useEffect(() => {
+    const container = aiOutput?.task_info?.container;
+    if (container && threeSceneRef.current?.createRoom) {
+      threeSceneRef.current.createRoom(
+        container.width,
+        container.height,
+        container.depth
+      );
+      threeSceneRef.current.switchToDefaultView();
+    }
+  }, [aiOutput?.task_info?.container]);
+
+  React.useEffect(() => {
+    if (threeSceneRef.current) {
+      threeSceneRef.current.resetScene();
+    }
+  }, [selectedTaskId]);
 
   const handleLogout = () => {
     logout();
@@ -105,6 +123,7 @@ const handleNextItem = async () => {
   // 如果有任务但没有布局，先获取布局
   if (hasTaskButNoLayout && selectedTaskId) {
     await fetchTaskLayout(selectedTaskId);
+
     return; // 布局获取后，用户需要再次点击Next
   }
   
@@ -113,12 +132,12 @@ const handleNextItem = async () => {
     const currentIndex = packingProgress.current;
     if (currentIndex < transformedData.length) {
       const item = transformedData[currentIndex]; 
-
+      const scale = 0.1;
       threeSceneRef.current.addItem({
-        width: item.width,
-        height: item.height,
-        depth: item.depth,
-        position: item.position,
+        width: item.width * scale,
+        height: item.height * scale,
+        depth: item.depth * scale,
+        position: item.position.map(p => p * scale) as [number, number, number],
       });
 
       setCurrentItem({

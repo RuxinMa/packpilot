@@ -141,6 +141,8 @@ function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
   });
 
   const roomGroup = new THREE.Group(); // create group for room
+  roomGroup.name = 'roomGroup';
+  roomGroup.scale.set(0.1, 0.1, 0.1);
 
   // floor
   const floorGeometry = new THREE.PlaneGeometry(width, depth);
@@ -196,7 +198,7 @@ function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
   roomGroup.add(wall2Line);
 
   scene.add(roomGroup);
-  return { floor, wall1, wall2 };
+  return roomGroup;
 }
 
 
@@ -211,6 +213,8 @@ export interface ThreeSceneHandle {
 interface ThreeSceneProps {
   onItemClick?: (itemId: string) => void;
   onEmptyClick?: () => void; 
+  createRoom: (width: number, height: number, depth: number) => void;
+  resetScene: () => void;
 }
 
 const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) => {
@@ -232,18 +236,101 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       if (controlsRef.current && orthoCameraRef.current && sceneRef.current) {
         const box = new THREE.Box3().setFromObject(sceneRef.current);
         const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const aspect = rendererRef.current?.domElement.clientWidth! / rendererRef.current?.domElement.clientHeight!;
+        
+        const padding = 1.2; // 适当留白
+        const maxDim = Math.max(size.x, size.z) * padding;
+    
+        const frustumSize = maxDim;
+    
+        orthoCameraRef.current.left = -frustumSize * aspect / 2;
+        orthoCameraRef.current.right = frustumSize * aspect / 2;
+        orthoCameraRef.current.top = frustumSize / 2;
+        orthoCameraRef.current.bottom = -frustumSize / 2;
+        orthoCameraRef.current.updateProjectionMatrix();
     
         orthoCameraRef.current.position.set(center.x, center.y + 50, center.z);
-        orthoCameraRef.current.up.set(0, 0, -1);  
+        orthoCameraRef.current.up.set(0, 0, -1);
         orthoCameraRef.current.lookAt(center);
     
         activeCameraRef.current = orthoCameraRef.current;
         controlsRef.current.object = orthoCameraRef.current;
-        controlsRef.current.target.copy(center); 
+        controlsRef.current.target.copy(center);
         controlsRef.current.enableRotate = false;
         controlsRef.current.enablePan = true;
         controlsRef.current.enableZoom = true;
         controlsRef.current.update();
+      }
+    },
+    
+    resetScene: () => {
+      if (!sceneRef.current) return;
+    
+      // 删除 Room
+      const roomGroup = sceneRef.current.getObjectByName('roomGroup');
+      if (roomGroup) {
+        sceneRef.current.remove(roomGroup);
+        roomGroup.traverse((child) => {
+          if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+      }
+    
+      // 删除所有 items
+      itemsRef.current.forEach((group) => {
+        sceneRef.current?.remove(group);
+        group.traverse((child) => {
+          if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+            child.geometry.dispose();
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
+          }
+        });
+      });
+      itemsRef.current = [];
+    },
+    
+    
+
+    // create room
+    createRoom: (width: number, height: number, depth: number) => {
+      if (sceneRef.current && activeCameraRef.current && controlsRef.current) {
+        // 删除已有 Room
+        const oldRoom = sceneRef.current.getObjectByName('roomGroup');
+        if (oldRoom) {
+          sceneRef.current.remove(oldRoom);
+          oldRoom.traverse((child) => {
+            if (child instanceof THREE.Mesh || child instanceof THREE.LineSegments) {
+              child.geometry.dispose();
+              if (Array.isArray(child.material)) {
+                child.material.forEach(m => m.dispose());
+              } else {
+                child.material.dispose();
+              }
+            }
+          });
+        }
+    
+        const roomGroup = createRoom(sceneRef.current, {
+          width,
+          height,
+          depth,
+          color: 0xE8FFE8,
+        });
+  
+        sceneRef.current.add(roomGroup);
+    
+        fitCameraToScene(sceneRef.current, activeCameraRef.current, controlsRef.current);
       }
     },
     
@@ -530,16 +617,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       const controls = new OrbitControls(perspectiveCameraRef.current, renderer.domElement);
       controlsRef.current = controls;
     }
-    
-
-    const roomin = roomDatabase[0]
-    const room = createRoom(scene, {
-      width: roomin.width,   // X轴方向长度
-      height: roomin.height,   // Y轴方向高度
-      depth: roomin.depth,    // Z轴方向深度
-      color: 0xE8FFE8, 
-    });
-    fitCameraToScene(scene, activeCameraRef.current!, controlsRef.current);
 
     // back light 
     const ambientLight = new THREE.AmbientLight(0x404040);
