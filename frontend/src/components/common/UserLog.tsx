@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import LogoutConfirmModal from './LogoutModal';
+import Button from './Button';
 
 interface UserLogProps {
   username: string;
@@ -25,8 +26,8 @@ const UserLog: React.FC<UserLogProps> = ({
   
   return (
     <>
-      <div className="mt-auto border-t border-gray-200 p-5 pt-6">
-        <div className="flex items-center gap-3 mb-6">
+      <div className="mt-auto border-t border-gray-200 p-5 pt-5">
+        <div className="flex items-center gap-3 mb-4">
           <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
             {loading ? (
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600"></div>
@@ -42,20 +43,24 @@ const UserLog: React.FC<UserLogProps> = ({
                 <div className="h-5 bg-gray-200 rounded w-20"></div>
               </div>
             ) : (
-              <div className="font-medium text-2xl text-gray-900" title={username}>
+              <div className="font-medium text-xl text-gray-900" title={username}>
                 {username}
               </div>
             )}
           </div>
         </div>
         <div className='mx-7'>
-          <button 
+          <Button
+            variant="secondary"
+            size="md"
+            fullWidth={true}
             onClick={handleLogoutClick}
             disabled={loading}
-            className="w-full py-2 px-4 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            isLoading={loading}
+            className="h-10"
           >
-            {loading ? 'Loading...' : 'Log out'}
-          </button>
+            Log out
+          </Button>
         </div>
       </div>
       
