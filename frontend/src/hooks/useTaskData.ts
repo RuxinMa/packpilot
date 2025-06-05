@@ -152,6 +152,69 @@ export const useTaskData = () => {
     }
   }, [isAuthenticated]);
 
+// 完成任务
+const completeTask = async (taskId: number) => {
+  const token = authService.getToken();
+  if (!token) {
+    throw new Error('No authentication token');
+  }
+
+  console.log('completeTask called with taskId:', taskId);
+  console.log('API_BASE_URL:', API_BASE_URL);
+
+  setLoading(true);
+  setError(null);
+  try {
+    console.log(`Completing task ${taskId}...`);
+    const url = `${API_BASE_URL}/api/worker/complete_task/${taskId}`;
+    console.log('API URL:', url);
+    
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Task completed successfully:', data);
+      
+      // 更新本地状态
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.task_id === taskId 
+            ? { ...task, status: 'Completed' }
+            : task
+        )
+      );
+      
+      return { success: true, message: data.message };
+    } else {
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: `HTTP ${response.status}` };
+      }
+      console.error('Error completing task:', errorData);
+      setError(`Failed to complete task: ${errorData.message || 'Unknown error'}`);
+      return { success: false, message: errorData.message || 'Failed to complete task' };
+    }
+  } catch (err) {
+    console.error('Network error completing task:', err);
+    const errorMessage = 'Network error: Unable to complete task';
+    setError(errorMessage);
+    return { success: false, message: errorMessage };
+  } finally {
+    setLoading(false);
+  }
+};
+
   return {
     tasks,
     selectedTaskId,
@@ -159,7 +222,8 @@ export const useTaskData = () => {
     aiOutput,
     loading,
     error,
-    fetchTaskLayout, // 导出方法供手动调用
+    fetchTaskLayout,
+    completeTask,
     refetch: () => selectedTaskId && fetchTaskLayout(selectedTaskId),
   };
 };
