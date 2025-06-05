@@ -1,7 +1,7 @@
 from app.AI.optimizer.sa_optimizer import simulated_annealing
 from app.AI.optimizer.box import Box
 
-def run_ai_optimizer(container, boxes_raw, runs=5):
+def run_ai_optimizer(container, boxes_raw, runs=2):
 
     container = {
         "width": float(container["width"] / 100),  # 转换为米
