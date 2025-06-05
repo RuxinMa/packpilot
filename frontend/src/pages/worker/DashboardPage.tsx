@@ -76,6 +76,23 @@ const WorkerDashboardPage: React.FC = () => {
     setCurrentItem(null);
     setIsLastItem(false);
   }, [transformedData.length]);
+  
+  React.useEffect(() => {
+    const container = aiOutput?.task_info?.container;
+    if (container && threeSceneRef.current?.createRoom) {
+      threeSceneRef.current.createRoom(
+        container.width,
+        container.height,
+        container.depth
+      );
+    }
+  }, [aiOutput?.task_info?.container]);
+  
+  React.useEffect(() => {
+    if (threeSceneRef.current) {
+      threeSceneRef.current.resetScene();
+    }
+  }, [selectedTaskId]);
 
   const handleLogout = () => {
     logout();
@@ -105,6 +122,7 @@ const handleNextItem = async () => {
   // 如果有任务但没有布局，先获取布局
   if (hasTaskButNoLayout && selectedTaskId) {
     await fetchTaskLayout(selectedTaskId);
+
     return; // 布局获取后，用户需要再次点击Next
   }
   
