@@ -97,8 +97,19 @@ def is_touching(box, others):
             if overlap_on_xy(box, other): return True
     return False
 
+# 检查箱子是否在易碎箱子上方
+def is_on_top_of_fragile(box, placed_boxes):
+    for other in placed_boxes:
+        if other.is_fragile:
+            if (
+                overlap_on_xy(box, other) and
+                box.y >= other.y + other.height - 1e-3
+            ):
+                return True
+    return False
 
-def try_place_stack_style(box, placed_boxes, container, greedy=False, bias_to_corner=False):
+def try_place_with_contact_priority(box, placed_boxes, container, greedy=False, bias_to_corner=False):
+    eps = 1e-6
     best_score = float('inf')
     best_position = None
 
@@ -118,6 +129,12 @@ def try_place_stack_style(box, placed_boxes, container, greedy=False, bias_to_co
     corner_positions = [(0.0, 0.0, 0.0)]
     for (x, y, z) in corner_positions:
         box.x, box.y, box.z = x, y, z
+        if is_on_top_of_fragile(box, placed_boxes):
+            continue
+        if (box.x + box.width > container['width'] + eps or
+            box.y + box.height > container['height'] + eps or
+            box.z + box.depth > container['depth'] + eps):
+            continue  # ❌ 越界，跳过这个位置
         if any(overlap(box, other) for other in placed_boxes):
             continue
         if greedy:
@@ -137,6 +154,12 @@ def try_place_stack_style(box, placed_boxes, container, greedy=False, bias_to_co
         ]
         for (x, y, z) in offsets:
             box.x, box.y, box.z = x, y, z
+            if is_on_top_of_fragile(box, placed_boxes):
+                continue
+            if (box.x + box.width > container['width'] + eps or
+                box.y + box.height > container['height'] + eps or
+                box.z + box.depth > container['depth'] + eps):
+                continue  # ❌ 越界，跳过这个位置
             if any(overlap(box, other) for other in placed_boxes):
                 continue
             if y > 0 and support_area_ratio(box, placed_boxes) < 1.0:
@@ -158,6 +181,8 @@ def try_place_stack_style(box, placed_boxes, container, greedy=False, bias_to_co
         for z in z_range:
             for x in x_range:
                 box.x, box.y, box.z = x, y, z
+                if is_on_top_of_fragile(box, placed_boxes):
+                    continue
                 if any(overlap(box, other) for other in placed_boxes):
                     continue
                 if y > 0 and support_area_ratio(box, placed_boxes) < 1.0:
@@ -224,7 +249,7 @@ def advanced_cost_function(order, container):
         placed = False
         for orientation in range(6):
             box.rotate(orientation)
-            if try_place_stack_style(box, placed_boxes, container, greedy=True):  # ✅ 开启 greedy
+            if try_place_with_contact_priority(box, placed_boxes, container, greedy=True):  # ✅ 开启 greedy
                 placed_boxes.append(box)
                 total_volume += box.width * box.height * box.depth
                 total_x += box.x + box.width / 2
@@ -297,7 +322,7 @@ def advanced_cost_function(order, container):
 
     placed_boxes.sort(key=lambda b: (b.y, b.z, b.x))
 
-    return (
+    final_cost = (
         base_bias_penalty * 1.0 +
         slope_penalty_total * 2.0 +
         touching_bonus +
@@ -308,3 +333,9 @@ def advanced_cost_function(order, container):
         center_penalty +
         position_bonus
     )
+
+    # 若因逻辑失误导致返回 nan 或负数，强制补救
+    if not np.isfinite(final_cost) or final_cost < 0:
+        return 1e12
+
+    return final_cost
