@@ -142,6 +142,7 @@ function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
 
   const roomGroup = new THREE.Group(); // create group for room
   roomGroup.name = 'roomGroup';
+  roomGroup.scale.set(0.1, 0.1, 0.1);
 
   // floor
   const floorGeometry = new THREE.PlaneGeometry(width, depth);
