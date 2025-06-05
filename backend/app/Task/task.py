@@ -371,3 +371,42 @@ def optimize_task_placement(token_data, task_id):
         return jsonify({"status": "error", "message": str(e)}), 400
     finally:
         db.close()
+
+@bp.route("/api/worker/complete_task/<int:task_id>", methods=["PUT"])
+@token_required
+def complete_task(token_data, task_id):
+    """Worker 完成任务"""
+    if token_data.role != UserRole.Worker:
+        return jsonify({"status": "error", "message": "Forbidden"}), 403
+    
+    db: Session = SessionLocal()
+    try:
+        # 检查任务是否存在且分配给当前worker
+        task = db.query(Task).filter(
+            Task.task_id == task_id,
+            Task.assigned_to == token_data.sub
+        ).first()
+        
+        if not task:
+            return jsonify({"status": "error", "message": "Task not found or not assigned to you"}), 404
+        
+        # 检查任务是否已经完成
+        if task.status == TaskStatus.Completed:
+            return jsonify({"status": "error", "message": "Task is already completed"}), 400
+        
+        # 更新任务状态为完成
+        task.status = TaskStatus.Completed
+        db.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Task completed successfully",
+            "task_id": task.task_id,
+            "task_name": task.task_name
+        }), 200
+        
+    except Exception as e:
+        db.rollback()
+        return jsonify({"status": "error", "message": str(e)}), 400
+    finally:
+        db.close()

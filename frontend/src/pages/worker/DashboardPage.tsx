@@ -32,8 +32,7 @@ const WorkerDashboardPage: React.FC = () => {
   const { logout, username, isLoading: authLoading } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
   
-  // 使用API数据替换静态数据
-  const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout } = useTaskData();
+  const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout, completeTask } = useTaskData();
 
   // 根据产品文档的状态逻辑
   const hasNoTasks = tasks.length === 0;
@@ -188,11 +187,19 @@ const handlePreviousTask = () => {
   }
 };
 
-const handleFinish = () => {
-  alert("Congrats！You have finished the task");
+const handleFinish = async () => {
+  if (selectedTaskId) {
+    const result = await completeTask(selectedTaskId);
+    if (result.success) {
+      alert("Congrats！You have finished the task");
+    } else {
+      alert(`Failed to complete task: ${result.message}`);
+    }
+  } else {
+    alert("No task selected");
+  }
 };
-  
-  
+
 return (
   <div className="min-h-screen">
     {/* Header */}
@@ -264,7 +271,7 @@ return (
                     ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
-                onClick={isLastItem ? handleFinish : handleNextItem}  
+                onClick={isLastItem ? handleFinish : handleNextItem}
                 disabled={hasNoTasks}
               >
                 {hasTaskButNoLayout ? "Start Task" : (isLastItem ? "Finish" : "Next Item")}
