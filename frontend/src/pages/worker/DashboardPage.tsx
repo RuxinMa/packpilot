@@ -7,25 +7,8 @@ import { useTaskData } from '../../hooks/useTaskData';
 import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
-import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 import Button from '../../components/common/Button';
-
-interface AIBox {
-  item_id: number;
-  width: number;
-  height: number;
-  depth: number;
-  is_fragile: boolean;
-  x: number;
-  y: number;
-  z: number;
-}
-
-interface AIOutput {
-  cost: number;
-  results: AIBox[];
-  status: string;
-}
+import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
@@ -191,6 +174,16 @@ const handleFinish = async () => {
   if (selectedTaskId) {
     const result = await completeTask(selectedTaskId);
     if (result.success) {
+      // completeTask 内部已经处理了任务移除，这里只需要重置状态
+      setPackingProgress({ current: 0, total: 0 });
+      setCurrentItem(null);
+      setIsLastItem(false);
+      
+      // 重置3D场景
+      if (threeSceneRef.current) {
+        threeSceneRef.current.resetScene();
+      }
+      
       alert("Congrats！You have finished the task");
     } else {
       alert(`Failed to complete task: ${result.message}`);
@@ -211,7 +204,8 @@ return (
         {/* Left Sidebar - Control Panel */}
         <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
           <div className="p-8 flex-auto">
-            {/* 根据产品文档显示状态 */}
+            
+            {/* display tasks */}
             {loading && (
               <div className="mb-4 p-3 bg-yellow-50 rounded-md">
                 <p className="text-sm text-yellow-800">Loading tasks...</p>

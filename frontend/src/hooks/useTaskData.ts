@@ -73,10 +73,12 @@ export const useTaskData = () => {
       if (response.ok) {
         const data = await response.json();
         console.log('Tasks data:', data);
-        setTasks(data.tasks || []);
+        // 只显示非完成状态的任务
+        const incompleteTasks = (data.tasks || []).filter((task: Task) => task.status !== 'Completed');
+        setTasks(incompleteTasks);
         // 自动选择第一个任务，但不获取布局
-        if (data.tasks && data.tasks.length > 0) {
-          setSelectedTaskId(data.tasks[0].task_id);
+        if (incompleteTasks.length > 0) {
+          setSelectedTaskId(incompleteTasks[0].task_id);
         } else {
           setSelectedTaskId(null);
         }
@@ -184,14 +186,8 @@ const completeTask = async (taskId: number) => {
       const data = await response.json();
       console.log('Task completed successfully:', data);
       
-      // 更新本地状态
-      setTasks(prevTasks => 
-        prevTasks.map(task => 
-          task.task_id === taskId 
-            ? { ...task, status: 'Completed' }
-            : task
-        )
-      );
+      // 成功完成任务后，直接从列表中移除
+      removeCompletedTask(taskId);
       
       return { success: true, message: data.message };
     } else {
@@ -202,6 +198,14 @@ const completeTask = async (taskId: number) => {
         errorData = { message: `HTTP ${response.status}` };
       }
       console.error('Error completing task:', errorData);
+      
+      // 检查是否是"任务已完成"的错误
+      if (errorData.message === 'Task is already completed') {
+        console.log('Task already completed, removing from list...');
+        removeCompletedTask(taskId);
+        return { success: true, message: 'Task was already completed' };
+      }
+      
       setError(`Failed to complete task: ${errorData.message || 'Unknown error'}`);
       return { success: false, message: errorData.message || 'Failed to complete task' };
     }
@@ -215,6 +219,30 @@ const completeTask = async (taskId: number) => {
   }
 };
 
+// 从任务列表中移除已完成的任务
+const removeCompletedTask = (taskId: number) => {
+  console.log(`Removing completed task ${taskId} from list...`);
+  
+  // 先获取当前任务列表
+  const currentTasks = tasks.filter(task => task.task_id !== taskId);
+  console.log('Filtered tasks:', currentTasks);
+  
+  // 更新任务列表
+  setTasks(currentTasks);
+  
+  // 如果被删除的是当前选中的任务，需要重新选择
+  if (selectedTaskId === taskId) {
+    if (currentTasks.length > 0) {
+      console.log('Selecting next task:', currentTasks[0].task_id);
+      setSelectedTaskId(currentTasks[0].task_id);
+    } else {
+      console.log('No remaining tasks');
+      setSelectedTaskId(null);
+      setAiOutput(null);
+    }
+  }
+};
+
   return {
     tasks,
     selectedTaskId,
@@ -224,6 +252,7 @@ const completeTask = async (taskId: number) => {
     error,
     fetchTaskLayout,
     completeTask,
+    removeCompletedTask,
     refetch: () => selectedTaskId && fetchTaskLayout(selectedTaskId),
   };
 };
