@@ -117,9 +117,6 @@ const ManagerDashboardPage: React.FC = () => {
   const handleLogout = () => {
     logout();
     console.log('User logged out');
-    // navigate('/login'); // 如果不使用路由，注释掉这行
-    // 或者使用 window.location.href = '/login'; 
-    // 或者刷新页面 window.location.reload();
   };
 
   // Get display username - fallback if not available
@@ -145,7 +142,7 @@ const ManagerDashboardPage: React.FC = () => {
         <div className="flex h-[calc(100vh-160px)]">
           
           {/* Left Sidebar - Control Panel */}
-          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
+          <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-3">
 
             {/* Action buttons */}
             <div className="p-6 flex-auto">

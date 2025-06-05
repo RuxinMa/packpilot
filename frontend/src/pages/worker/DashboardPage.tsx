@@ -14,6 +14,7 @@ const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout, username, isLoading: authLoading } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
+  const [isTaskStarted, setIsTaskStarted] = useState(false); // 新增：跟踪任务是否已开始
   
   const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout, completeTask } = useTaskData();
 
@@ -37,7 +38,7 @@ const WorkerDashboardPage: React.FC = () => {
     if (loading) return "Loading...";
     if (error) return `Error: ${error}`;
     if (hasNoTasks) return "You don't have tasks";
-    if (hasNoLayout) return "Click Next to start task";
+    if (hasNoLayout) return "Click Start Task to begin";
     return "Ready to start";
   };
 
@@ -75,6 +76,8 @@ const WorkerDashboardPage: React.FC = () => {
     if (threeSceneRef.current) {
       threeSceneRef.current.resetScene();
     }
+    // 当选中的任务改变时，重置任务开始状态
+    setIsTaskStarted(false);
   }, [selectedTaskId]);
 
   const handleLogout = () => {
@@ -105,7 +108,7 @@ const handleNextItem = async () => {
   // 如果有任务但没有布局，先获取布局
   if (hasTaskButNoLayout && selectedTaskId) {
     await fetchTaskLayout(selectedTaskId);
-
+    setIsTaskStarted(true); // 标记任务已开始
     return; // 布局获取后，用户需要再次点击Next
   }
   
@@ -178,6 +181,7 @@ const handleFinish = async () => {
       setPackingProgress({ current: 0, total: 0 });
       setCurrentItem(null);
       setIsLastItem(false);
+      setIsTaskStarted(false); // 重置任务开始状态
       
       // 重置3D场景
       if (threeSceneRef.current) {
@@ -194,18 +198,19 @@ const handleFinish = async () => {
 };
 
 return (
-  <div className="min-h-screen">
+  <div className="min-h-screen bg-gray-50">
     {/* Header */}
     <Header title="Warehouse Worker Dashboard" viewType="Worker" />
 
     {/* Main Content */}
     <div className="max-w-7xl mx-auto px-4 py-6">
       <div className="flex h-[calc(100vh-160px)]">
+
         {/* Left Sidebar - Control Panel */}
-        <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-4">
-          <div className="p-8 flex-auto">
-            
-            {/* display tasks */}
+        <div className="w-64 bg-white shadow-md rounded-lg flex-shrink-0 border border-gray-200 flex flex-col py-2">
+          <div className="p-6 flex-auto">
+
+            {/* task states */}
             {loading && (
               <div className="mb-4 p-3 bg-yellow-50 rounded-md">
                 <p className="text-sm text-yellow-800">Loading tasks...</p>
@@ -224,16 +229,16 @@ return (
               </div>
             )}
 
-            {/* 任务选择 - 只在有多个任务时显示 */}
-            {tasks.length > 1 && (
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+            {/* 任务选择 - 只在有多个任务且任务未开始时显示 */}
+            {tasks.length > 1 && !isTaskStarted && (
+              <div className="mb-4">
+                <label className="block text-xs font-medium text-gray-700 mb-2">
                   Select Task:
                 </label>
                 <select
                   value={selectedTaskId || ''}
                   onChange={(e) => setSelectedTaskId(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="w-full px-3 py-2 border text-sm border-gray-300 rounded-md"
                 >
                   {tasks.map((task) => (
                     <option key={task.task_id} value={task.task_id}>
@@ -244,20 +249,20 @@ return (
               </div>
             )}
 
-            {/* 显示当前任务信息 */}
-            {aiOutput?.task_info && (
-              <div className="mb-4 p-3 bg-blue-50 rounded-md">
+            {/* 显示当前任务信息 - 只在任务开始后显示 */}
+            {isTaskStarted && aiOutput?.task_info && (
+              <div className="mb-4 p-2 bg-blue-50 rounded-md">
                 <p className="text-sm font-medium text-blue-800">
-                  Task: {aiOutput.task_info.task_name}
+                  {aiOutput.task_info.task_name}
                 </p>
-                <p className="text-xs text-blue-600">
+                <p className="text-xs text-blue-800">
                   Container: {aiOutput.task_info.container.width}×{aiOutput.task_info.container.height}×{aiOutput.task_info.container.depth}
                 </p>
               </div>
             )}
 
             {/* actions */}
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* 根据状态禁用/启用按钮 */}
               <button 
                 className={`w-full py-3 px-4 rounded-md ${
@@ -273,33 +278,33 @@ return (
 
               <button 
                 className={`w-full py-3 px-4 rounded-md ${
-                  hasNoTasks || hasNoLayout
+                  hasNoTasks || hasNoLayout || !isTaskStarted
                     ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
                 onClick={handlePreviousTask}
-                disabled={hasNoTasks || hasNoLayout}
+                disabled={hasNoTasks || hasNoLayout || !isTaskStarted}
               >
                 Previous Item
               </button>
 
-              {/* progress bar - 根据状态显示 */}
+              {/* progress bar */}
               <ProgressBar 
-                current={hasNoTasks || hasNoLayout ? 0 : packingProgress.current} 
-                total={hasNoTasks || hasNoLayout ? 0 : packingProgress.total} 
+                current={hasNoTasks || hasNoLayout || !isTaskStarted ? 0 : packingProgress.current} 
+                total={hasNoTasks || hasNoLayout || !isTaskStarted ? 0 : packingProgress.total} 
               />
             </div>
 
             {/* Item Description */}
-            <div className='mt-10 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
-              <div className="flex flex-col justify-start h-40 p-2 text-gray-600 space-y-1">
+            <div className='mt-6 p-2 border-2 rounded-md bg-gray-50 min-h-20'>
+              <div className="flex flex-col justify-start h-[140px] p-2 text-gray-600 space-y-1 text-sm">
                 {currentItem ? (
                   <>
                     <p><strong>Name:</strong> {currentItem.item_id}</p>
-                    <p><strong>Fragile:</strong> {currentItem.is_fragile ? 'Yes' : 'No'}</p>
-                    <p><strong>Width:</strong> {currentItem.width}</p>
-                    <p><strong>Height:</strong> {currentItem.height}</p>
-                    <p><strong>Depth:</strong> {currentItem.depth}</p>
+                    <p><strong>Fragile:</strong> <span className={currentItem.is_fragile ? 'text-red-600 font-bold bg-red-100 px-2 py-1 rounded' : ''}>{currentItem.is_fragile ? 'Yes' : 'No'}</span></p>
+                    <p><strong>Width:</strong> {parseFloat(currentItem.width.toString()).toFixed(2)} cm</p>
+                    <p><strong>Height:</strong> {parseFloat(currentItem.height.toString()).toFixed(2)} cm</p>
+                    <p><strong>Depth:</strong> {parseFloat(currentItem.depth.toString()).toFixed(2)} cm</p>
                   </>
                 ) : (
                   <p>{getInitialDisplay()}</p>
