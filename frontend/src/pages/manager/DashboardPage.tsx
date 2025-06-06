@@ -223,12 +223,13 @@ const ManagerDashboardPage: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Modal components */}
       <AddItem
         isOpen={openModal === 'addItem'}
         onClose={() => setOpenModal(null)}
         onItemAdded={handleItemAdded}
+        items={items}
       />
       
       <EditItem
