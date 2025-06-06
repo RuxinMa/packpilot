@@ -1,8 +1,6 @@
 import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { roomDatabase } from '../../mocks/data';
-import aiOutput from '../../mocks/sample_ai_output.json'; // 导入新的数据源
 
 interface AIBox {
   item_id: number;
@@ -20,15 +18,6 @@ interface AIOutput {
   results: AIBox[];
   status: string;
 }
-  // 转换AI输出数据
-const transformedData = (aiOutput as AIOutput).results.map(box => ({
-  item_id: `Box-${box.item_id}`,
-  is_fragile: box.is_fragile,
-  width: box.width,
-  height: box.height,
-  depth: box.depth,
-  position: [box.x, box.y, box.z] as [number, number, number]
-  }));
 
 // Define types for the cube creation parameters
 interface CubeParams {
@@ -211,15 +200,24 @@ export interface ThreeSceneHandle {
 }
 //new info item 
 interface ThreeSceneProps {
+  items: {
+    item_id: string;
+    is_fragile: boolean;
+    width: number;
+    height: number;
+    depth: number;
+    position: [number, number, number];
+  }[];
   onItemClick?: (itemId: string) => void;
-  onEmptyClick?: () => void; 
+  onEmptyClick?: () => void;
   createRoom: (width: number, height: number, depth: number) => void;
   resetScene: () => void;
 }
 
+
 const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) => {
   //end here
-  
+  const transformedData = props.items;
   const mountRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
@@ -229,6 +227,13 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
   const orthoCameraRef = useRef<THREE.OrthographicCamera | null>(null);
   const activeCameraRef = useRef<THREE.Camera | null>(null);
   const selectedMesh = useRef<THREE.Mesh | null>(null);
+  const itemsDataRef = useRef(props.items);
+  const onItemClickRef = useRef(props.onItemClick);
+  
+  useEffect(() => {
+    itemsDataRef.current = props.items;         // 每次 props.items 变化时更新
+    onItemClickRef.current = props.onItemClick; // 同步最新回调
+  }, [props.items, props.onItemClick]);
 
   //expose to parent
   useImperativeHandle(ref, () => ({
@@ -580,9 +585,10 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         const group = picked.parent as THREE.Group;
         const index = itemsRef.current.findIndex(item => item === group);
         if (index !== -1) {
-          const item = transformedData[index];
-          if (item) {
-            props.onItemClick(item.item_id); // 传回id
+          const currentItems = itemsDataRef.current;
+          const item = currentItems[index];
+          if (item && onItemClickRef.current) {
+            onItemClickRef.current(item.item_id);
           }
         }
       }

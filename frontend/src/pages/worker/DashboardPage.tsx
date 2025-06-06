@@ -42,6 +42,7 @@ const WorkerDashboardPage: React.FC = () => {
     return "Ready to start";
   };
 
+  const [selectedByClick, setSelectedByClick] = useState(false);
   const [packingProgress, setPackingProgress] = useState({ current: 0, total: transformedData.length });
   const [is2DView, setIs2DView] = useState(false);
   const threeSceneRef = useRef<ThreeSceneHandle>(null);
@@ -125,19 +126,22 @@ const handleNextItem = async () => {
         position: item.position.map(p => p * scale) as [number, number, number],
       });
 
-      setCurrentItem({
-        item_id: item.item_id,
-        is_fragile: item.is_fragile,
-        width: item.width,
-        height: item.height,
-        depth: item.depth,
-      });
+      if (!selectedByClick) {
+        setCurrentItem({
+          item_id: item.item_id,
+          is_fragile: item.is_fragile,
+          width: item.width,
+          height: item.height,
+          depth: item.depth,
+        });
+      };
 
       const newCurrent = currentIndex + 1;
       setPackingProgress((prev) => ({
         ...prev,
         current: newCurrent,
       }));
+      setSelectedByClick(false);
       setIsLastItem(newCurrent === transformedData.length);
     }
   }
@@ -331,6 +335,7 @@ return (
           <div className='flex flex-1 p-4 items-center justify-center'>
             <ThreeScene 
               ref={threeSceneRef}
+              items={transformedData}
               onItemClick={(itemId) => {
                 const item = transformedData.find(item => item.item_id === itemId);
                 if (item) {
@@ -341,10 +346,12 @@ return (
                     height: item.height,
                     depth: item.depth,
                   });
+                  setSelectedByClick(true); // 设置为手动点击
                 }
               }}
               onEmptyClick={() => {
-                console.log('点击了空白区域');
+                setCurrentItem(null);
+                setSelectedByClick(false); // 清除点击标志
               }}
             />
             <div className="absolute bottom-8 right-8 flex space-x-4">
