@@ -7,7 +7,7 @@ Location: Online
 
 Supervisor: Lia Song
 
-Chair: Xuren Chen
+Chair: Xuran Chen
 
 Secretary: Ruxin Ma
 
