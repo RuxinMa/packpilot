@@ -51,9 +51,9 @@ const AssignTask: React.FC<AssignTaskProps> = ({
       // Pre-set container size
       setFormData({
         worker: '',
-        container_length: '800',
-        container_width: '800',
-        container_height: '800'
+        container_length: '400',
+        container_width: '300',
+        container_height: '300'
       });
     }
   }, [isOpen]);

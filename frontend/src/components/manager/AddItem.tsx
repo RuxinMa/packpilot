@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Modal from '../common/Modal';
 import ItemConfirmation from './ItemConfirmation';
 import Button from '../common/Button';
-import { ItemInput } from '../../types';
+import { ItemInput, Item } from '../../types';
 
 interface AddItemProps {
   isOpen: boolean;
   onClose: () => void;
   onItemAdded: (newItemData: ItemInput & { name: string }) => void; // Include name in the data passed to parent
+  items: Item[]; // 
 }
 
-const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
+const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded, items }) => {
   // Form state (pure UI state)
   const [formData, setFormData] = useState({
     length: '',
@@ -34,21 +35,41 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [generatedName, setGeneratedName] = useState(''); // Frontend generates the name
   
-  // Generate item name when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !showConfirmation) {
       resetForm();
-      // Generate sequential name based on localStorage counter
-      const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
-      let paddedCount: string;
-      if (count < 1000) {
-        paddedCount = count.toString().padStart(3, '0');
-      } else {
-        paddedCount = count.toString();
-      }
-      setGeneratedName(`ITEM-${paddedCount}`);
     }
   }, [isOpen]);
+
+  // Generate item name when modal opens
+  useEffect(() => {
+    console.log('AddItem useEffect triggered:', { 
+      isOpen, 
+      itemsLength: items.length, 
+      items: items.map(item => ({ id: item.id, name: item.name }))
+    });
+    
+    if (isOpen) {
+      // 使用最大ID而不是数组长度
+      let nextNumber = 1; // 默认从1开始
+      
+      if (items.length > 0) {
+        const maxId = Math.max(...items.map(item => item.id));
+        nextNumber = maxId + 1;
+        console.log('Max ID found:', maxId);
+      }
+      
+      let paddedCount: string;
+      if (nextNumber < 1000) {
+        paddedCount = nextNumber.toString().padStart(3, '0');
+      } else {
+        paddedCount = nextNumber.toString();
+      }
+      const newName = `ITEM-${paddedCount}`;
+      console.log('Generated name based on max ID:', newName);
+      setGeneratedName(newName);
+    }
+  }, [isOpen, items]);
 
   // Form configuration
   const orientationOptions = [
@@ -157,10 +178,6 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
       // Parent component handles the API call and will receive backend-generated ID
       await onItemAdded(newItemData);
       
-      // Update localStorage counter only after successful creation
-      const currentCount = parseInt(localStorage.getItem('item_counter') || '0');
-      localStorage.setItem('item_counter', (currentCount + 1).toString());
-      
     } catch (error) {
       console.error('Error adding item:', error);
     } finally {
@@ -173,20 +190,11 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded }) => {
     handleModalClose();
   };
 
-  const handleConfirmAndAddNext = async () => {
-    await saveItem();
-    setShowConfirmation(false);
-    resetForm();
-    // Generate next sequential name
-    const count = parseInt(localStorage.getItem('item_counter') || '0') + 1;
-    let paddedCount: string;
-    if (count < 1000) {
-      paddedCount = count.toString().padStart(3, '0');
-    } else {
-      paddedCount = count.toString();
-    }
-    setGeneratedName(`ITEM-${paddedCount}`);
-  };
+const handleConfirmAndAddNext = async () => {
+  await saveItem();
+  setShowConfirmation(false);
+  resetForm();
+};
 
   return (
     <>
