@@ -3,12 +3,16 @@ import numpy as np
 
 # 检查两个箱子是否重叠
 def overlap(box1, box2):
-    return not (box1.x + box1.width <= box2.x or
-                box2.x + box2.width <= box1.x or
-                box1.y + box1.height <= box2.y or
-                box2.y + box2.height <= box1.y or
-                box1.z + box1.depth <= box2.z or
-                box2.z + box2.depth <= box1.z)
+    eps = 1e-6
+    return not (
+        box1.x + box1.width <= box2.x + eps or
+        box2.x + box2.width <= box1.x + eps or
+        box1.y + box1.height <= box2.y + eps or
+        box2.y + box2.height <= box1.y + eps or
+        box1.z + box1.depth <= box2.z + eps or
+        box2.z + box2.depth <= box1.z + eps
+    )
+
 
 def overlap_on_yz(b1, b2):
     return not (
@@ -49,7 +53,7 @@ def is_gap_too_large(box, placed_boxes, threshold=1.5):
 def support_area_ratio(box, placed_boxes, step=None):
     # 自动计算合适步长
     if step is None:
-        step = max(min(box.width, box.depth) / 4.0, 0.1)
+        step = max(min(box.width, box.height, box.depth) / 6.0, 0.05)
 
     supported = 0
     total = 0
@@ -78,18 +82,6 @@ def support_area_ratio(box, placed_boxes, step=None):
 
     return supported / total if total > 0 else 0
 
-
-
-# 尝试将箱子放置在容器中
-# def try_place(box, placed_boxes, container):
-#     for z in range(int(container['depth'] - box.depth + 1)):
-#         for y in range(int(container['height'] - box.height + 1)):
-#             for x in range(int(container['width'] - box.width + 1)):
-#                 box.x, box.y, box.z = x, y, z
-#                 if all(not overlap(box, other) for other in placed_boxes):
-#                     return True
-#     return False
-
 def is_touching(box, others):
     # 靠墙
     if box.x == 0 or box.y == 0 or box.z == 0:
@@ -105,20 +97,133 @@ def is_touching(box, others):
             if overlap_on_xy(box, other): return True
     return False
 
-
-def try_place_with_contact_priority(box, placed_boxes, container, min_support_ratio=0.9):
-    x_range = list(range(int(container['width'] - box.width + 1)))
-    y_range = list(range(int(container['height'] - box.height + 1)))
-    z_range = list(range(int(container['depth'] - box.depth + 1)))
-
-    positions = [(x, y, z) for y in y_range for z in z_range for x in x_range]
-    positions.sort(key=lambda pos: (pos[0] + pos[1] + pos[2]))
-
-    for x, y, z in positions:
-        box.x, box.y, box.z = x, y, z
-        if all(not overlap(box, other) for other in placed_boxes):
-            if support_area_ratio(box, placed_boxes) >= min_support_ratio:
+# 检查箱子是否在易碎箱子上方
+def is_on_top_of_fragile(box, placed_boxes):
+    for other in placed_boxes:
+        if other.is_fragile:
+            if (
+                overlap_on_xy(box, other) and
+                box.y >= other.y + other.height - 1e-3
+            ):
                 return True
+    return False
+
+def box_fits_in_container(box, container, eps=1e-6):
+    return (
+        box.width <= container['width'] + eps and
+        box.height <= container['height'] + eps and
+        box.depth <= container['depth'] + eps
+    )
+
+def try_place_with_contact_priority(box, placed_boxes, container, greedy=False, bias_to_corner=False):
+    if not box_fits_in_container(box, container):
+        return False
+    eps = 1e-6
+    best_score = float('inf')
+    best_position = None
+
+    def get_candidates(placed_boxes, axis_len, dim, bias_corner=False):
+        candidates = set()
+        if bias_corner:
+            candidates.add(0.0)
+        for b in placed_boxes:
+            end = getattr(b, dim) + getattr(b, 'width' if dim == 'x' else 'height' if dim == 'y' else 'depth')
+            if end < axis_len:
+                candidates.add(round(end, 6))
+                candidates.add(round(end + 0.01, 6))
+                candidates.add(round(end - 0.01, 6))
+        return sorted(candidates)
+
+    # Step 0: 初始角落
+    corner_positions = [(0.0, 0.0, 0.0)]
+    for (x, y, z) in corner_positions:
+        box.x, box.y, box.z = x, y, z
+        if is_on_top_of_fragile(box, placed_boxes):
+            continue
+        if (box.x + box.width > container['width'] + eps or
+            box.y + box.height > container['height'] + eps or
+            box.z + box.depth > container['depth'] + eps):
+            continue  # ❌ 越界，跳过这个位置
+        if any(overlap(box, other) for other in placed_boxes):
+            continue
+        if greedy:
+            return True
+        else:
+            score = x + y + z
+            if score < best_score:
+                best_score = score
+                best_position = (x, y, z)
+
+    # Step 1: 基于已有箱子向外扩展
+    for anchor in placed_boxes:
+        offsets = [
+            (anchor.x + anchor.width, anchor.y, anchor.z),
+            (anchor.x, anchor.y + anchor.height, anchor.z),
+            (anchor.x, anchor.y, anchor.z + anchor.depth),
+        ]
+        for (x, y, z) in offsets:
+            box.x, box.y, box.z = x, y, z
+            if is_on_top_of_fragile(box, placed_boxes):
+                continue
+            if (box.x + box.width > container['width'] + eps or
+                box.y + box.height > container['height'] + eps or
+                box.z + box.depth > container['depth'] + eps):
+                continue  # ❌ 越界，跳过这个位置
+            if any(overlap(box, other) for other in placed_boxes):
+                continue
+            if y > 0 and support_area_ratio(box, placed_boxes) < 1.0:
+                continue
+            if greedy:
+                return True
+            else:
+                score = x + y + z
+                if score < best_score:
+                    best_score = score
+                    best_position = (x, y, z)
+
+    # Step 2: 全面尝试 y-x-z 排列
+    y_range = sorted(set([0.0] + [b.y + b.height for b in placed_boxes]))
+    x_range = get_candidates(placed_boxes, container['width'], 'x', bias_to_corner)
+    z_range = get_candidates(placed_boxes, container['depth'], 'z', bias_to_corner)
+
+    for y in y_range:
+        for z in z_range:
+            for x in x_range:
+                box.x, box.y, box.z = x, y, z
+                if is_on_top_of_fragile(box, placed_boxes):
+                    continue
+                if any(overlap(box, other) for other in placed_boxes):
+                    continue
+                if y > 0 and support_area_ratio(box, placed_boxes) < 1.0:
+                    continue
+                if greedy:
+                    return True
+                else:
+                    score = x + y + z
+                    if score < best_score:
+                        best_score = score
+                        best_position = (x, y, z)
+
+    # Step 3: fallback，贴地角落
+    for x in [0.0]:
+        for y in [0.0]:
+            for z in [0.0]:
+                box.x, box.y, box.z = x, y, z
+                if any(overlap(box, other) for other in placed_boxes):
+                    continue
+                if greedy:
+                    return True
+                else:
+                    score = x + y + z
+                    if score < best_score:
+                        best_score = score
+                        best_position = (x, y, z)
+
+    if best_position:
+        box.x, box.y, box.z = best_position
+        return True
+
+    print(f"❌ Failed to place box {box}")
     return False
 
 
@@ -137,7 +242,6 @@ def is_on_edge(box, container, margin=1.0):
 
 # 计算成本函数
 def advanced_cost_function(order, container):
-    # 按照体积从大到小排序箱子
     order = sorted(order, key=lambda b: b.width * b.height * b.depth, reverse=True)
 
     placed_boxes = []
@@ -146,15 +250,15 @@ def advanced_cost_function(order, container):
     fragile_penalty = 0
     edge_penalty = 0
     base_bias_penalty = 0
-    wall_bonus = 0
     slope_penalty_total = 0
     max_z = 0
+    position_bonus = 0
 
     for box in order:
         placed = False
         for orientation in range(6):
             box.rotate(orientation)
-            if try_place_with_contact_priority(box, placed_boxes, container):
+            if try_place_with_contact_priority(box, placed_boxes, container, greedy=True):  # ✅ 开启 greedy
                 placed_boxes.append(box)
                 total_volume += box.width * box.height * box.depth
                 total_x += box.x + box.width / 2
@@ -162,41 +266,46 @@ def advanced_cost_function(order, container):
                 total_z += box.z + box.depth / 2
                 max_z = max(max_z, box.z + box.depth)
 
-                # 控制斜率（不希望太陡）
+                # 斜率惩罚（越斜越差）
                 slope_penalty_total += max(0, box.y - 0.5 * (box.x + box.z))
 
-                # 计算易碎箱子的惩罚
+                # 易碎箱子惩罚（上方不能有重物）
                 if box.is_fragile:
-                    if any(overlap(other, box) and other.z > box.z for other in placed_boxes if other != box):
-                        fragile_penalty += 1e6
+                    top = box.y + box.height
+                    for other in placed_boxes:
+                        if other == box:
+                            continue
+                        if overlap_on_xy(box, other) and other.y >= top - 1e-3:
+                            fragile_penalty += 1e6
+                            break
 
-                # 计算小箱子在边缘的惩罚
+                # 小箱子放边缘惩罚
                 if is_small_box(box) and is_on_edge(box, container):
                     edge_penalty += 1e6
 
-                # 计算基础偏差惩罚 （越靠近原点惩罚越小）
+                # 缝隙偏差惩罚
                 if is_gap_too_large(box, placed_boxes):
                     base_bias_penalty += 10
                 else:
                     base_bias_penalty -= 5
 
-                # 如果箱子放在墙边，给予奖励
-                if box.x == 0 or box.y == 0 or box.z == 0:
-                    wall_bonus -= 1.0
-                else:
-                    wall_bonus += 2.0
+                # 靠近原点 + 靠墙奖励
+                center_dist = math.sqrt(box.x**2 + box.y**2 + box.z**2)
+                position_bonus -= center_dist * 0.5
+                if np.isclose(box.x, 0.0, atol=1e-3): position_bonus += 1.0
+                if np.isclose(box.y, 0.0, atol=1e-3): position_bonus += 1.0
+                if np.isclose(box.z, 0.0, atol=1e-3): position_bonus += 1.0
 
                 placed = True
                 break
 
-        # 如果没有找到合适的放置位置，则返回一个很大的惩罚值
         if not placed:
-            return 1e12  # hard penalty
+            return 1e12  # 无法放置，重罚
 
     if not placed_boxes:
         return 1e12
 
-    # 计算中心惩罚
+    # 中心偏移惩罚
     center_x = container['width'] / 2
     center_y = container['height'] / 2
     center_z = container['depth'] / 2
@@ -205,15 +314,15 @@ def advanced_cost_function(order, container):
     avg_z = total_z / len(placed_boxes)
     center_penalty = math.sqrt((avg_x - center_x)**2 + (avg_y - center_y)**2 + (avg_z - center_z)**2)
 
+    # 体积使用惩罚
     container_volume = container['width'] * container['height'] * container['depth']
-    # 计算未使用的体积
     unused_volume = container_volume - total_volume
-    # 计算体积惩罚
     volume_penalty = unused_volume / container_volume
-    # 计算高度惩罚
+
+    # 高度惩罚
     height_penalty = max_z / container['depth']
 
-    # 计算接触奖励
+    # 接触奖励
     touching_bonus = 0
     for i, box in enumerate(placed_boxes):
         for j, other in enumerate(placed_boxes):
@@ -222,15 +331,20 @@ def advanced_cost_function(order, container):
 
     placed_boxes.sort(key=lambda b: (b.y, b.z, b.x))
 
-    # 计算总惩罚
-    return (
+    final_cost = (
         base_bias_penalty * 1.0 +
         slope_penalty_total * 2.0 +
-        wall_bonus -
         touching_bonus +
         5.0 * fragile_penalty +
         1.0 * edge_penalty +
         2.0 * volume_penalty +
         3.0 * height_penalty +
-        center_penalty
+        center_penalty +
+        position_bonus
     )
+
+    # 若因逻辑失误导致返回 nan 或负数，强制补救
+    if not np.isfinite(final_cost) or final_cost < 0:
+        return 1e12
+
+    return final_cost
