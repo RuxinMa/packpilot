@@ -108,7 +108,16 @@ def is_on_top_of_fragile(box, placed_boxes):
                 return True
     return False
 
+def box_fits_in_container(box, container, eps=1e-6):
+    return (
+        box.width <= container['width'] + eps and
+        box.height <= container['height'] + eps and
+        box.depth <= container['depth'] + eps
+    )
+
 def try_place_with_contact_priority(box, placed_boxes, container, greedy=False, bias_to_corner=False):
+    if not box_fits_in_container(box, container):
+        return False
     eps = 1e-6
     best_score = float('inf')
     best_position = None
