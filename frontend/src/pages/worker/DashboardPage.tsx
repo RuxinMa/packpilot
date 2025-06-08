@@ -306,9 +306,9 @@ return (
                   <>
                     <p><strong>Name:</strong> {currentItem.item_id}</p>
                     <p><strong>Fragile:</strong> <span className={currentItem.is_fragile ? 'text-red-600 font-bold bg-red-100 px-2 py-1 rounded' : ''}>{currentItem.is_fragile ? 'Yes' : 'No'}</span></p>
+                    <p><strong>Length:</strong> {parseFloat(currentItem.depth.toString()).toFixed(2)} cm</p>
                     <p><strong>Width:</strong> {parseFloat(currentItem.width.toString()).toFixed(2)} cm</p>
                     <p><strong>Height:</strong> {parseFloat(currentItem.height.toString()).toFixed(2)} cm</p>
-                    <p><strong>Depth:</strong> {parseFloat(currentItem.depth.toString()).toFixed(2)} cm</p>
                   </>
                 ) : (
                   <p>{getInitialDisplay()}</p>
