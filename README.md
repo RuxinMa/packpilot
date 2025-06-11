@@ -17,11 +17,11 @@
 
 | Category | Technologies |
 |----------|--------------|
-| **Frontend** | Language: TypeScript<br>Framework: React<br>CSS: Tailwind CSS<br>Build Tool: Vite|
+| **Frontend** | Language: TypeScript<br>Framework: React<br>CSS: Tailwind CSS|
 | **Backend** | Language: Python<br>Framework: Flask<br>API: RESTful API |
 | **Database** | MySQL |
-| **Visualization** | Blender |
-| **Deployment** | Deploy: Netlify<br>CI/CD: GitHub Actions<br>Containerization: Docker |
+| **Visualization** | three.js |
+| **Deployment** | CI/CD: GitHub Actions<br>Containerization: Docker |
 | **Version Control** | Git with GitHub |
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
 
@@ -29,12 +29,16 @@
 ## Development Workflow
 
 ### Branch Structure
-- **main**: Production branch containing stable releases, project overview, and official documentation (project docs, meeting minutes, and timesheets)
-- **dev-frontend**: Main development branch for all frontend components and UI features
-- **dev-backend**: Main development branch for all backend services and API endpoints
-- **feature/[feature-name]**: Short-lived branches for developing specific features
-- **bugfix/[bug-name]**: Short-lived branches for addressing specific issues
-- **release/[version]**: Release preparation
+
+**Final Deliverable Branches:**
+- `main` - Project overview and official documentation (project docs, meeting minutes, timesheets)
+- `integration` - Final project code including frontend and backend, built with Docker
+
+**Development Branches** *(cleared at project end)*:
+- `dev-frontend` - Main development branch for frontend components and UI features
+- `dev-backend` - Main development branch for backend services and API endpoints
+- `feature/[feature-name]` - Short-lived branches for specific features
+- `bugfix/[bug-name]` - Short-lived branches for specific issues
 
 ### Pull Request Process
 1. Create a feature/bugfix branch from main
