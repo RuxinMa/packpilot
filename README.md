@@ -65,7 +65,7 @@ If you notice data is not saving or appears outdated:
 
 2. Remove the database file:
    ```bash
-   rm backend/app/db/app.dbs
+   rm backend/app/db/app.db
    ```
 
 3. Restart the application:
