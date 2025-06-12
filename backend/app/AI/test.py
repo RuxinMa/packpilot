@@ -2,14 +2,14 @@ from optimizer.box import Box
 from optimizer.sa_optimizer import simulated_annealing
 import time
 
-# 构造一个测试容器（单位：米）
+# Construct a test container (unit: meters)
 container = {
     "width": 10.0,
     "height": 10.0,
     "depth": 10.0
 }
 
-# 构造一组测试箱子（单位：米）
+# Construct a set of test boxes (unit: meters)
 boxes_raw = [
     # {"item_id": 1, "original_width": 4.0, "original_height": 4.0, "original_depth": 4.0, "is_fragile": False},
     # {"item_id": 2, "original_width": 2.0, "original_height": 2.0, "original_depth": 2.0, "is_fragile": True},

@@ -21,10 +21,10 @@ def assign_task(token_data):
     try:
         data = request.get_json()
 
-        # Generate task_name if not provided
+        # 如果没有提供 task_name，则自动生成
         task_name = data.get("task_name", f"Task-{datetime.utcnow().isoformat()}")
 
-        # 创建任务
+        # Create the task
         task = Task(
             task_name=task_name,
             container_id=data["container_id"],
@@ -34,9 +34,9 @@ def assign_task(token_data):
             status=TaskStatus.Assigned
         )
         db.add(task)
-        db.flush()  # 获取task_id但不提交
+        db.flush()  # Get task_id without committing
 
-        # 分配物品给任务（只标记，不删除记录）
+        # Assign items to task (only mark, do not delete records)
         assigned_items_count = 0
         
         if "item_ids" in data and data["item_ids"]:
@@ -49,7 +49,7 @@ def assign_task(token_data):
                     "message": "No items found with the provided IDs"
                 }), 404
             
-            # 检查是否有已分配的物品
+            # Check for already assigned items
             already_assigned = [item for item in items if item.is_assigned or item.task_id is not None]
             if already_assigned:
                 assigned_names = [item.item_name for item in already_assigned]
@@ -59,7 +59,7 @@ def assign_task(token_data):
                     "message": f"Cannot assign already assigned items: {', '.join(assigned_names)}"
                 }), 400
             
-            # 只标记分配，不删除记录
+            # Only mark as assigned, do not delete records
             for item in items:
                 item.task_id = task.task_id
                 item.is_assigned = True
@@ -126,13 +126,13 @@ def get_task_history(token_data):
 @bp.route("/api/manager/get_tasks", methods=["GET"])
 @token_required
 def get_tasks(token_data):
-    """Manager 获取所有任务"""
+    """Manager retrieves all tasks"""
     if token_data.role != UserRole.Manager:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
 
     db: Session = SessionLocal()
     try:
-        # 支持状态筛选
+        # Support status filter
         status_filter = request.args.get('status')
         assigned_to_filter = request.args.get('assigned_to')
         
@@ -177,7 +177,7 @@ def get_tasks(token_data):
 @bp.route("/api/manager/get_task/<int:task_id>", methods=["GET"])
 @token_required
 def get_task(token_data, task_id):
-    """Manager 获取单个任务详情"""
+    """Manager retrieves specific task detail"""
     if token_data.role != UserRole.Manager:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
 
@@ -229,13 +229,13 @@ def get_task(token_data, task_id):
 @bp.route("/api/worker/my_tasks", methods=["GET"])
 @token_required
 def get_my_tasks(token_data):
-    """Worker 获取分配给自己的任务"""
+    """Worker retrieves tasks assigned to them"""
     if token_data.role != UserRole.Worker:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
 
     db: Session = SessionLocal()
     try:
-        # Worker 只能看到分配给自己的任务
+        # Worker can only see their assigned tasks
         tasks = db.query(Task).filter(Task.assigned_to == token_data.sub).all()
         
         return jsonify({
@@ -263,7 +263,7 @@ def get_my_tasks(token_data):
 @bp.route("/api/worker/task/<int:task_id>", methods=["GET"])
 @token_required
 def get_worker_task(token_data, task_id):
-    """Worker 获取自己任务的详情"""
+    """Worker retrieves details of a task assigned to them"""
     if token_data.role != UserRole.Worker:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
 
@@ -271,7 +271,7 @@ def get_worker_task(token_data, task_id):
     try:
         task = db.query(Task).filter(
             Task.task_id == task_id,
-            Task.assigned_to == token_data.sub  # Worker 只能查看分配给自己的任务
+            Task.assigned_to == token_data.sub  # Worker can only view their own tasks
         ).first()
         
         if not task:
@@ -314,28 +314,28 @@ def get_worker_task(token_data, task_id):
 @bp.route("/api/manager/optimize_task/<int:task_id>", methods=["POST"])
 @token_required
 def optimize_task_placement(token_data, task_id):
-    """Manager优化任务中货物的摆放"""
+    """Manager optimizes item placement in task"""
     if token_data.role != UserRole.Manager:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
     
     db: Session = SessionLocal()
     try:
-        # 获取任务
+        # Get task
         task = db.query(Task).filter(Task.task_id == task_id).first()
         if not task:
             return jsonify({"status": "error", "message": "Task not found"}), 404
         
-        # 获取容器
+        # Get container
         container = db.query(Container).filter(Container.container_id == task.container_id).first()
         if not container:
             return jsonify({"status": "error", "message": "Container not found"}), 404
         
-        # 获取任务中的物品
+        # Get items in task
         items = db.query(Item).filter(Item.task_id == task_id).all()
         if not items:
             return jsonify({"status": "error", "message": "No items found for this task"}), 404
         
-        # 转换为AI API需要的格式
+        # Convert to format required by AI API
         container_data = {
             "width": float(container.width),
             "height": float(container.height), 
@@ -350,10 +350,10 @@ def optimize_task_placement(token_data, task_id):
             "is_fragile": item.is_fragile
         } for item in items]
         
-        # 直接调用AI优化函数（不用requests）
+        # Directly call AI optimization function (not via requests)
         result = run_ai_optimizer(container_data, boxes_data)
         
-        # 保存优化结果到数据库
+        # Save optimization result to database
         if result.get("status") == "success":
             for item_result in result["results"]:
                 item = db.query(Item).filter(Item.item_id == item_result["item_id"]).first()
@@ -375,13 +375,13 @@ def optimize_task_placement(token_data, task_id):
 @bp.route("/api/worker/complete_task/<int:task_id>", methods=["PUT"])
 @token_required
 def complete_task(token_data, task_id):
-    """Worker 完成任务"""
+    """Worker completes a task"""
     if token_data.role != UserRole.Worker:
         return jsonify({"status": "error", "message": "Forbidden"}), 403
     
     db: Session = SessionLocal()
     try:
-        # 检查任务是否存在且分配给当前worker
+        # Check if task exists and is assigned to current worker
         task = db.query(Task).filter(
             Task.task_id == task_id,
             Task.assigned_to == token_data.sub
@@ -390,11 +390,11 @@ def complete_task(token_data, task_id):
         if not task:
             return jsonify({"status": "error", "message": "Task not found or not assigned to you"}), 404
         
-        # 检查任务是否已经完成
+        # Check if task already completed
         if task.status == TaskStatus.Completed:
             return jsonify({"status": "error", "message": "Task is already completed"}), 400
         
-        # 更新任务状态为完成
+        # Update task status to completed
         task.status = TaskStatus.Completed
         db.commit()
         

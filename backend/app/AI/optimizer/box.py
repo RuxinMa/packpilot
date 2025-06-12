@@ -1,6 +1,6 @@
-# 这个文件定义了一个 Box 类，用于表示一个箱子。每个箱子有唯一的 ID、原始尺寸、当前尺寸、位置和是否易碎等属性。
-# 该类还提供了旋转箱子的方法和复制箱子的方法。箱子的 ID 是自动递增的，确保每个箱子都有唯一的标识符。
-# 该类的设计允许用户创建多个箱子实例，并对它们进行操作，如旋转和复制
+# This file defines a Box class to represent a container. Each box has a unique ID, original dimensions, current dimensions, position, and a fragile flag.
+# The class also provides methods for rotating and copying the box. The box ID is auto-incremented to ensure uniqueness.
+# The design of this class allows users to create multiple box instances and perform operations such as rotation and duplication.
 class Box:
     counter = 1
 
