@@ -1,5 +1,7 @@
 # LS1 Project - Quick Start Guide
 
+An AI-powered warehouse management platform -- PackPilot, featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualisation.
+
 ## Prerequisites
 
 ### Install Docker Desktop
@@ -42,26 +44,25 @@ This command will:
 Upon successful build, you will see output similar to:
 
 ```bash
-✔ backend               Built                                                                                                                                      0.0s 
-✔ frontend                 Built                                                                                                                                      0.0s 
-✔ Container vite-frontend  Started                                                                                                                                    1.2s 
+✔ backend                 Built                                                                                                                0.0s 
+✔ frontend                 Built                                                                                                                0.0s 
+✔ Container vite-frontend  Started                                                                                                              1.2s 
 ✔ Container flask-backend  Started  
 ```
 
-You should also see a container named "LS1" in your Docker Desktop.
+You should also see a container named "LS1" in your Docker Desktop, as shown in the following picture.
 
 ![Docker Desktop Containers](docker-containers.png)
 
 ### 2. Access the Application
 
-Open your browser and navigate to:
-- **[http://localhost:5173](http://localhost:5173)**
+Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
 
 Alternatively, click the port `5173:80` link in your Docker Desktop interface.
 
 ### 3. Explore the Application
 
-**Test Accounts:**
+**Test Accounts:** 
 - **Manager:** username: `manager1`, password: `password123`
 - **Worker:** username: `worker1`, password: `password123`
 
