@@ -14,16 +14,16 @@ const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout, username, isLoading: authLoading } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
-  const [isTaskStarted, setIsTaskStarted] = useState(false); // 新增：跟踪任务是否已开始
+  const [isTaskStarted, setIsTaskStarted] = useState(false); // New: track whether the task has started
   
   const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout, completeTask } = useTaskData();
 
-  // 根据产品文档的状态逻辑
+  // According to the state logic in the product documentation
   const hasNoTasks = tasks.length === 0;
   const hasNoLayout = !aiOutput || !aiOutput.results || aiOutput.results.length === 0;
-  const hasTaskButNoLayout = !hasNoTasks && hasNoLayout; // 新增：有任务但没有布局
+  const hasTaskButNoLayout = !hasNoTasks && hasNoLayout; 
   
-  // 数据转换逻辑保持不变，但添加空值检查
+  //  Keep the data transformation logic unchanged, but add null checks
   const transformedData = aiOutput?.results?.map(box => ({
     item_id: `Box-${box.item_id}`,
     is_fragile: box.is_fragile,
@@ -33,7 +33,7 @@ const WorkerDashboardPage: React.FC = () => {
     position: [box.x, box.y, box.z] as [number, number, number]
   })) || [];
 
-  // 状态显示逻辑
+  //Status display logic
   const getInitialDisplay = () => {
     if (loading) return "Loading...";
     if (error) return `Error: ${error}`;
@@ -54,7 +54,7 @@ const WorkerDashboardPage: React.FC = () => {
     depth: number;
   }>(null);
 
-  // 更新total当数据变化时
+  //  Update total when data changes
   React.useEffect(() => {
     setPackingProgress(prev => ({ ...prev, total: transformedData.length, current: 0 }));
     setCurrentItem(null);
@@ -77,7 +77,7 @@ const WorkerDashboardPage: React.FC = () => {
     if (threeSceneRef.current) {
       threeSceneRef.current.resetScene();
     }
-    // 当选中的任务改变时，重置任务开始状态
+    // When the selected task changes, reset the task started state
     setIsTaskStarted(false);
   }, [selectedTaskId]);
 
@@ -106,14 +106,14 @@ const switchTo3D = () => {
 
 
 const handleNextItem = async () => {
-  // 如果有任务但没有布局，先获取布局
+  // If there is a task but no layout, fetch the layout first
   if (hasTaskButNoLayout && selectedTaskId) {
     await fetchTaskLayout(selectedTaskId);
-    setIsTaskStarted(true); // 标记任务已开始
-    return; // 布局获取后，用户需要再次点击Next
+    setIsTaskStarted(true); // Mark the task as started
+    return; // After fetching the layout, the user needs to click Next again
   }
   
-  // 原来的逻辑
+  // Original logic
   if (threeSceneRef.current) {
     const currentIndex = packingProgress.current;
     if (currentIndex < transformedData.length) {
@@ -181,13 +181,13 @@ const handleFinish = async () => {
   if (selectedTaskId) {
     const result = await completeTask(selectedTaskId);
     if (result.success) {
-      // completeTask 内部已经处理了任务移除，这里只需要重置状态
+      // completeTask  Task removal is already handled inside completeTask, only reset the state here
       setPackingProgress({ current: 0, total: 0 });
       setCurrentItem(null);
       setIsLastItem(false);
-      setIsTaskStarted(false); // 重置任务开始状态
+      setIsTaskStarted(false); // Reset task started state
       
-      // 重置3D场景
+      //Reset the 3D scene
       if (threeSceneRef.current) {
         threeSceneRef.current.resetScene();
       }
@@ -233,7 +233,7 @@ return (
               </div>
             )}
 
-            {/* 任务选择 - 只在有多个任务且任务未开始时显示 */}
+            {/* Task selection - only shown when there are multiple tasks and the task has not started */}
             {tasks.length > 1 && !isTaskStarted && (
               <div className="mb-4">
                 <label className="block text-xs font-medium text-gray-700 mb-2">
@@ -253,7 +253,7 @@ return (
               </div>
             )}
 
-            {/* 显示当前任务信息 - 只在任务开始后显示 */}
+            {/* Display current task information - only shown after task starts */}
             {isTaskStarted && aiOutput?.task_info && (
               <div className="mb-4 p-2 bg-blue-50 rounded-md">
                 <p className="text-sm font-medium text-blue-800">
@@ -267,7 +267,7 @@ return (
 
             {/* actions */}
             <div className="space-y-4">
-              {/* 根据状态禁用/启用按钮 */}
+              {/* Enable/disable buttons based on status */}
               <button 
                 className={`w-full py-3 px-4 rounded-md ${
                   hasNoTasks
@@ -346,12 +346,12 @@ return (
                     height: item.height,
                     depth: item.depth,
                   });
-                  setSelectedByClick(true); // 设置为手动点击
+                  setSelectedByClick(true); // Set as manually clicked
                 }
               }}
               onEmptyClick={() => {
                 setCurrentItem(null);
-                setSelectedByClick(false); // 清除点击标志
+                setSelectedByClick(false); // Clear click flag
               }}
             />
             <div className="absolute bottom-8 right-8 flex space-x-4">
