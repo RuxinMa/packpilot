@@ -50,7 +50,7 @@ Upon successful build, you will see output similar to:
 ✔ Container flask-backend  Started  
 ```
 
-You should also see a container named "LS1" in your Docker Desktop, as shown in the following picture.
+You should also see a container named `ls1` in your Docker Desktop, as shown in the following picture.
 
 ![Docker Desktop Containers](docker-containers.png)
 
