@@ -19,7 +19,7 @@ const TaskHistory: React.FC<TaskHistoryProps> = ({
 }) => {
   const { refreshTasks } = useTaskContext();
 
-  // 当模态框打开时，主动刷新任务数据以确保最新状态
+  // When modal is opened, refresh task data to ensure it's up-to-date
   useEffect(() => {
     if (isOpen) {
       console.log('TaskHistory opened, refreshing tasks once...', { 

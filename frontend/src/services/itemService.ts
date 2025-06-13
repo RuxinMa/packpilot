@@ -7,10 +7,10 @@ interface ItemInputWithName extends ItemInput {
   name: string;
 }
 
-// API配置
+// API config
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// 获取auth token的辅助函数
+// Helper function to get auth token
 const getAuthHeaders = () => {
   return {
     'Content-Type': 'application/json',
@@ -67,24 +67,24 @@ export const apiPayloadToItem = (payload: ItemApiPayload): Item => ({
   created_at: new Date(payload.created_at)
 });
 
-// 数据转换：后端格式 -> 前端格式
+// Data transformation: backend format -> frontend format
 const backendToFrontend = (backendItem: any): Item => ({
-  id: backendItem.item_id,           // 后端item_id -> 前端id
-  name: backendItem.item_name,       // 后端item_name -> 前端name
-  length: parseFloat(backendItem.depth || 0),  // 后端depth -> 前端length
+  id: backendItem.item_id,           // backend item_id -> frontend id
+  name: backendItem.item_name,       // backend item_name -> frontend name
+  length: parseFloat(backendItem.depth || 0),  // backend depth -> frontend length
   width: parseFloat(backendItem.width || 0),
   height: parseFloat(backendItem.height || 0),
   orientation: backendItem.orientation || 'Face Up',
   remarks: backendItem.remarks || '',
   is_fragile: Boolean(backendItem.is_fragile),
-  created_at: new Date() // 后端没有created_at字段，使用当前时间
+  created_at: new Date() // backend has no created_at field, use current time
 });
 
-// 数据转换：前端格式 -> 后端格式
+// Data transformation: frontend format -> backend format
 const frontendToBackend = (frontendItem: ItemInput): any => ({
   width: frontendItem.width,
   height: frontendItem.height,
-  depth: frontendItem.length,        // 前端length -> 后端depth
+  depth: frontendItem.length,        // frontend length -> backend depth
   orientation: frontendItem.orientation || 'Face Up',
   remarks: frontendItem.remarks || '',
   is_fragile: Boolean(frontendItem.is_fragile)
@@ -92,10 +92,10 @@ const frontendToBackend = (frontendItem: ItemInput): any => ({
 
 // API Service class
 export class ItemApiService {
-  // 修改getAllItems方法，默认只获取未分配的物品
+  // Modify getAllItems to only fetch unassigned items by default
   static async getAllItems(): Promise<Item[]> {
     try {
-      // 为manager页面只获取未分配的物品
+      // Only fetch unassigned items for manager page
       const response = await fetch(`${API_BASE_URL}/api/manager/get_items?assigned=false`, {
         headers: getAuthHeaders()
       });
@@ -113,12 +113,12 @@ export class ItemApiService {
     }
   }
 
-  // 添加getItems作为getAllItems的别名，兼容现有代码
+  // Add getItems as an alias for getAllItems to support legacy code
   static async getItems(): Promise<Item[]> {
     return this.getAllItems();
   }
 
-  // 添加新item
+  // Add new item
   static async addItem(itemData: ItemInput): Promise<{ success: boolean; item: Item; message?: string }> {
     try {
       const backendPayload = frontendToBackend(itemData);
@@ -136,10 +136,10 @@ export class ItemApiService {
       const data = await response.json();
       
       if (data.status === 'success') {
-        // 构造前端格式的item对象
+        // Construct frontend-format item object
         const newItem: Item = {
-          id: data.item_id,           // 使用后端返回的ID
-          name: data.item_name,       // 使用后端生成的name
+          id: data.item_id,           // use backend returned ID
+          name: data.item_name,       // use backend generated name
           length: itemData.length,
           width: itemData.width,
           height: itemData.height,
@@ -166,7 +166,7 @@ export class ItemApiService {
     }
   }
 
-  // 更新existing item
+  // Update existing item
   static async updateItem(id: number, itemData: Partial<ItemInput>): Promise<{ success: boolean; message?: string }> {
     try {
       const backendPayload = frontendToBackend(itemData as ItemInput);
@@ -200,7 +200,7 @@ export class ItemApiService {
     }
   }
 
-  // 删除item
+  // Delete item
   static async deleteItem(id: number): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/manager/delete_item/${id}`, {
@@ -231,7 +231,7 @@ export class ItemApiService {
     }
   }
 
-  // 批量删除items
+  // Batch delete items
   static async batchDeleteItems(ids: number[]): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/manager/batch_delete_items`, {

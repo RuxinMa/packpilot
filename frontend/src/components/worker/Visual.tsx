@@ -57,9 +57,9 @@ function createCube(
   const cube = new THREE.Mesh(geometry, material);
   cube.name = 'cube'; 
   cube.position.set(
-    position[0] + width / 2,  // X轴向右移动半宽
-    position[1] + height / 2, // Y轴向上移动半高
-    position[2] + depth / 2   // Z轴向内移动半深
+    position[0] + width / 2,  
+    position[1] + height / 2, 
+    position[2] + depth / 2   
   );
 
   // create frame
@@ -67,7 +67,7 @@ function createCube(
   const lineMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
   const line = new THREE.LineSegments(edges, lineMaterial);
   line.name = 'edge'; 
-  line.position.copy(cube.position); // 保持与立方体相同的位置
+  line.position.copy(cube.position); // align with cube’s position
 
   // Group
   const group = new THREE.Group();
@@ -102,7 +102,7 @@ function fitCameraToScene(scene: THREE.Scene, camera: THREE.Camera, controls?: O
     camera.right = frustumSize * newAspect / 2;
     camera.top = frustumSize / 2;
     camera.bottom = -frustumSize / 2;
-    camera.position.set(center.x, center.y + 20, center.z); // 俯视图位置
+    camera.position.set(center.x, center.y + 20, center.z); // top-down view position
     camera.up.set(0, 0, -1);
     camera.lookAt(center);
   }
@@ -145,7 +145,7 @@ function createRoom(scene: THREE.Scene, options: RoomOptions): RoomMeshes {
   const floorEdges = new THREE.EdgesGeometry(floorGeometry);
   const floorLine = new THREE.LineSegments(
     floorEdges,
-    new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 }) // 把 linewidth 设置为3，明显加粗
+    new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 3 }) // set linewidth to 3 for visibly thicker lines
   );  
   floorLine.rotation.x = -Math.PI / 2;
   floorLine.position.set(width / 2, 0.01, depth / 2);
@@ -231,8 +231,8 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
   const onItemClickRef = useRef(props.onItemClick);
   
   useEffect(() => {
-    itemsDataRef.current = props.items;         // 每次 props.items 变化时更新
-    onItemClickRef.current = props.onItemClick; // 同步最新回调
+    itemsDataRef.current = props.items;         // update when props.items changes
+    onItemClickRef.current = props.onItemClick; 
   }, [props.items, props.onItemClick]);
 
   //expose to parent
@@ -244,7 +244,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         const size = box.getSize(new THREE.Vector3());
         const aspect = rendererRef.current?.domElement.clientWidth! / rendererRef.current?.domElement.clientHeight!;
         
-        const padding = 1.2; // 适当留白
+        const padding = 1.2; // add appropriate padding
         const maxDim = Math.max(size.x, size.z) * padding;
     
         const frustumSize = maxDim;
@@ -272,7 +272,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     resetScene: () => {
       if (!sceneRef.current) return;
     
-      // 删除 Room
+      // remove the room
       const roomGroup = sceneRef.current.getObjectByName('roomGroup');
       if (roomGroup) {
         sceneRef.current.remove(roomGroup);
@@ -288,7 +288,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         });
       }
     
-      // 删除所有 items
+      // remove all items
       itemsRef.current.forEach((group) => {
         sceneRef.current?.remove(group);
         group.traverse((child) => {
@@ -304,13 +304,11 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       });
       itemsRef.current = [];
     },
-    
-    
 
     // create room
     createRoom: (width: number, height: number, depth: number) => {
       if (sceneRef.current && activeCameraRef.current && controlsRef.current) {
-        // 删除已有 Room
+        // remove the room
         const oldRoom = sceneRef.current.getObjectByName('roomGroup');
         if (oldRoom) {
           sceneRef.current.remove(oldRoom);
@@ -366,8 +364,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       }
     },
     
-    
-    
     addItem: (params: CubeParams) => {
       if (sceneRef.current) {
         itemsRef.current.forEach(group => {
@@ -412,7 +408,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         itemsRef.current.push(group);
       }
     },
-    
     
     removeLastItem: () => {
       if (sceneRef.current && itemsRef.current.length > 0) {
@@ -485,7 +480,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
     // init
     const scene = new THREE.Scene();
     console.log('success load scene')
-    scene.background = new THREE.Color(0xf0f0f0); // 浅灰色背景
+    scene.background = new THREE.Color(0xf0f0f0); // light gray background
     sceneRef.current = scene;
     
     const width = mountRef.current.clientWidth;
@@ -538,12 +533,12 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       const pickable = intersects.filter(intersect => {
         const obj = intersect.object;
     
-        // 1. 跳过地板和三面墙
+        // 1. skip floor and three walls
         if (obj.name === 'floor' || obj.name === 'wall1' || obj.name === 'wall2') {
           return false;
         }
     
-        // 2. 跳过所有边框线（LineSegments）
+        // 2. skip all edge frames (LineSegments)
         if (obj instanceof THREE.LineSegments) {
           return false;
         }
@@ -551,17 +546,17 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         return true;
       });
       if (pickable.length === 0) {
-        // 如果没有选中任何物体，同时需要把之前选中的物体恢复颜色
+        //  if no object is selected, revert color of previous selection
         if (selectedMesh.current) {
           const prevMaterial = selectedMesh.current.material as THREE.MeshBasicMaterial;
           const lastGroup = itemsRef.current[itemsRef.current.length - 1];
           const lastCube = lastGroup?.getObjectByName('cube') as THREE.Mesh;
       
           if (selectedMesh.current === lastCube) {
-            // 是最新物体 → 恢复浅蓝色
+            // if it's the latest object → revert to light blue
             prevMaterial.color.set(0xadd8e6);
           } else {
-            // 是旧物体 → 恢复灰色
+            //  if it's an older object → revert to gray
             prevMaterial.color.set(0x999999);
           }
       
@@ -572,13 +567,13 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
           props.onEmptyClick();
         }
 
-        console.log('未点击到有效物体');
+        console.log('No valid object clicked');
 
         return;
       }
       
       const picked = pickable[0].object as THREE.Mesh;
-      console.log('拾取到：', picked);
+      console.log('Picked object：', picked);
       
       // item info click
       if (picked && props.onItemClick) {
@@ -594,7 +589,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       }
       
     
-      // 如果有上一个选中的物体，恢复它的颜色
+      // If there was a previously selected object, restore its color
       if (selectedMesh.current && selectedMesh.current !== picked) {
         const prevMaterial = selectedMesh.current.material as THREE.MeshBasicMaterial;
 
@@ -602,17 +597,17 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         const lastCube = lastGroup?.getObjectByName('cube') as THREE.Mesh;
 
         if (selectedMesh.current === lastCube) {
-          prevMaterial.color.set(0xadd8e6); // 浅蓝色
+          prevMaterial.color.set(0xadd8e6); 
         } else {
-          prevMaterial.color.set(0x999999); // 灰色
+          prevMaterial.color.set(0x999999); 
         }
       }
     
-      // 给当前选中的物体上色
+      // Apply color to the currently selected object
       const material = picked.material as THREE.MeshBasicMaterial;
-      material.color.set(0xffff00); // 高亮成黄色
+      material.color.set(0xffff00); 
     
-      // 更新保存
+      // Update and save the selected object
       selectedMesh.current = picked;
 
     });
@@ -644,7 +639,7 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         rendererRef.current.render(sceneRef.current, activeCameraRef.current);
       }
     };
-    // 自动初始化为 3D 斜上视角
+    // Automatically initialize to 3D oblique top-down view
     if (ref && typeof ref !== 'function' && ref.current && ref.current.switchToDefaultView) {
       ref.current.switchToDefaultView();
     }

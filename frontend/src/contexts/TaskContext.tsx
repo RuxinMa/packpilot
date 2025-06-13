@@ -89,7 +89,7 @@ interface TaskProviderProps {
 export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(taskReducer, initialState);
 
-  // 刷新所有任务
+  // Refresh all tasks
   const refreshTasks = async () => {
     // Check authentication status before making API calls
     if (!authService.isAuthenticated()) {
@@ -113,7 +113,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 根据管理员刷新任务
+  // Refresh tasks by manager
   const refreshTasksByManager = async (managerId: string) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -131,7 +131,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 分配任务
+  // Assign task
   const assignTask = async (taskData: TaskInput) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -155,7 +155,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 更新任务状态
+  // Update task status
   const updateTaskStatus = async (taskId: number, status: Task['status']) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -188,7 +188,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 删除任务
+  // Delete task
   const deleteTask = async (taskId: number) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
@@ -212,7 +212,7 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 获取任务历史
+  // Get task history
   const getTaskHistory = async (): Promise<TaskHistoryItem[]> => {
     try {
       return await TaskApiService.getTaskHistory();
@@ -222,30 +222,30 @@ export const TaskProvider: React.FC<TaskProviderProps> = ({ children }) => {
     }
   };
 
-  // 工具函数：根据ID获取任务
+  // Utility: get task by ID
   const getTaskById = (taskId: number): Task | undefined => {
     return state.tasks.find(task => task.id === taskId);
   };
 
-  // 工具函数：根据worker获取任务
+  // Utility: get tasks by worker
   const getTasksByWorker = (worker: string): Task[] => {
     return state.tasks.filter(task => task.worker === worker);
   };
 
-  // 工具函数：根据状态获取任务
+  // Utility: get tasks by status
   const getTasksByStatus = (status: Task['status']): Task[] => {
     return state.tasks.filter(task => task.status === status);
   };
 
-  // 获取当前管理员ID
+  // Get current manager ID
   const getCurrentManagerId = (): string => {
-    // 从认证服务获取当前用户名
+    // Get current username from auth service
     const currentUser = authService.getUsername();
     console.log('Current manager ID:', currentUser);
-    return currentUser || 'manager1'; // 使用manager1作为fallback
+    return currentUser || 'manager1'; // Use 'manager1' as fallback
   };
 
-  // 在组件挂载时自动加载任务 - wait for authentication
+  // Automatically load tasks on component mount - wait for authentication
   useEffect(() => {
     const loadInitialTasks = () => {
       // Check authentication status

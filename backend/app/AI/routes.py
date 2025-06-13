@@ -21,7 +21,7 @@ def optimize():
 
         result = run_ai_optimizer(container, boxes)
 
-        # 检查优化结果
+        # Check optimization result
         if result.get("cost", float("inf")) > 1e12:
             return jsonify({
                 "status": "error",
@@ -37,10 +37,10 @@ def optimize():
 @bp.route("/optimize_task/<int:task_id>", methods=["POST"])
 @token_required
 def optimize_task(token_data, task_id):
-    """基于任务ID的优化API - 供前端可视化调用"""
+    """Optimization API based on task ID - for frontend visualization usage"""
     db = SessionLocal()
     try:
-        # 获取任务
+        # Get task
         task = db.query(Task).filter(Task.task_id == task_id).first()
         if not task:
             return jsonify({"status": "error", "message": "Task not found"}), 404
@@ -49,11 +49,11 @@ def optimize_task(token_data, task_id):
         print(f"Task found: ID={task.task_id}, name='{task.task_name}'")
         print(f"Task.container_id = {task.container_id}")
         
-        # 检查权限：Manager可以看所有任务，Worker只能看分配给自己的任务
+        # Permission check: Manager can view all tasks; Worker can only view their assigned tasks
         if token_data.role.value == "Worker" and task.assigned_to != token_data.sub:
             return jsonify({"status": "error", "message": "Access denied"}), 403
         
-        # 获取容器 - 添加详细验证
+        # Get container - with detailed validation
         container = db.query(Container).filter(Container.container_id == task.container_id).first()
         if not container:
             print(f"❌ Container NOT FOUND for container_id = {task.container_id}")
@@ -65,7 +65,7 @@ def optimize_task(token_data, task_id):
         print(f"  Raw dimensions (from DB): width={container.width}, height={container.height}, depth={container.depth}")
         print(f"  Data types: width={type(container.width)}, height={type(container.height)}, depth={type(container.depth)}")
         
-        # 获取任务中的物品
+        # Get items in the task
         items = db.query(Item).filter(Item.task_id == task_id).all()
         if not items:
             print(f"❌ No items found for task {task_id}")
@@ -73,7 +73,7 @@ def optimize_task(token_data, task_id):
         
         print(f"✅ Found {len(items)} items for task {task_id}")
         
-        # 转换为AI API需要的格式 - 验证转换过程
+        # Convert to format required by AI API - validate the conversion process
         print("📊 Converting container data:")
         container_data = {
             "width": float(container.width),
@@ -83,7 +83,7 @@ def optimize_task(token_data, task_id):
         print(f"  Before conversion (cm): {float(container.width)} x {float(container.height)} x {float(container.depth)}")
         print(f"  After conversion (m):   {container_data['width']} x {container_data['height']} x {container_data['depth']}")
         
-        # 验证转换后的数据
+        # Validate converted data
         if container_data['width'] <= 0 or container_data['height'] <= 0 or container_data['depth'] <= 0:
             print(f"❌ Invalid container dimensions after conversion: {container_data}")
             return jsonify({"status": "error", "message": "Invalid container dimensions"}), 400
@@ -101,7 +101,7 @@ def optimize_task(token_data, task_id):
             original_item = items[i]
             print(f"  Item {box['item_id']}: {float(original_item.width)}x{float(original_item.height)}x{float(original_item.depth)}cm -> {box['width']:.3f}x{box['height']:.3f}x{box['depth']:.3f}m")
         
-        # 计算总体积 - 验证数据合理性
+        # Calculate total volume - validate data consistency
         container_volume = container_data["width"] * container_data["height"] * container_data["depth"]
         items_volume = sum(box["width"] * box["height"] * box["depth"] for box in boxes_data)
         print(f"📐 Volume analysis:")
@@ -114,7 +114,7 @@ def optimize_task(token_data, task_id):
         print(f"  Number of boxes: {len(boxes_data)}")
         print("=" * 60)
         
-        # 调用AI优化算法
+        # Call AI optimization algorithm
         result = run_ai_optimizer(container_data, boxes_data)
         
         print(f"🎯 AI optimizer returned:")
@@ -123,14 +123,14 @@ def optimize_task(token_data, task_id):
         print(f"  Results count: {len(result.get('results', []))}")
         print("=" * 60)
 
-        # 检查优化结果
+        # Check optimization result
         if result.get("cost", float("inf")) > 1e12:
             return jsonify({
                 "status": "error",
                 "message": f"Optimization failed: unable to pack all boxes into container. Container: {container_data}, Items: {len(boxes_data)}, Total volume ratio: {items_volume/container_volume:.2%}"
             }), 400
         
-        # 可选：保存优化结果到数据库
+        # Optional: save optimization result to database
         save_to_db = request.args.get('save', 'false').lower() == 'true'
         if save_to_db and result.get("status") == "success":
             for item_result in result["results"]:
@@ -142,13 +142,13 @@ def optimize_task(token_data, task_id):
                     item.placement_order = item_result["placement_order"]
             db.commit()
             
-        # 添加任务和容器信息到返回结果中，便于前端使用
+        # Add task and container info to response result for frontend use
         result["task_info"] = {
             "task_id": task.task_id,
             "task_name": task.task_name,
             "container": {
                 "container_id": container.container_id,
-                "width": float(container.width),  # 单位 cm
+                "width": float(container.width),  # Unit: cm
                 "height": float(container.height),
                 "depth": float(container.depth),
                 "label": container.label
@@ -166,24 +166,24 @@ def optimize_task(token_data, task_id):
 @bp.route("/get_task_layout/<int:task_id>", methods=["GET"])
 @token_required  
 def get_task_layout(token_data, task_id):
-    """获取任务的当前摆放布局 - 如果已经优化过的话"""
+    """Get current layout of a task - if it has been optimized"""
     db = SessionLocal()
     try:
-        # 获取任务
+        # Get task
         task = db.query(Task).filter(Task.task_id == task_id).first()
         if not task:
             return jsonify({"status": "error", "message": "Task not found"}), 404
             
-        # 检查权限
+        # Permission check
         if token_data.role.value == "Worker" and task.assigned_to != token_data.sub:
             return jsonify({"status": "error", "message": "Access denied"}), 403
         
-        # 获取容器
+        # Get container
         container = db.query(Container).filter(Container.container_id == task.container_id).first()
         if not container:
             return jsonify({"status": "error", "message": "Container not found"}), 404
             
-        # 获取有布局信息的物品
+        # Get items with layout info
         items = db.query(Item).filter(
             Item.task_id == task_id,
             Item.placement_order.isnot(None)
@@ -195,7 +195,7 @@ def get_task_layout(token_data, task_id):
                 "message": "No layout found. Please run optimization first."
             }), 404
         
-        # 构造与优化结果相同格式的返回数据
+        # Construct result in the same format as optimization output
         results = [{
             "item_id": item.item_id,
             "placement_order": item.placement_order,
@@ -210,7 +210,7 @@ def get_task_layout(token_data, task_id):
         
         return jsonify({
             "status": "success",
-            "cost": None,  # 历史数据没有cost信息
+            "cost": None,  # Historical data has no cost info
             "results": results,
             "task_info": {
                 "task_id": task.task_id,

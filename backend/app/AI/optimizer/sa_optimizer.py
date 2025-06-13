@@ -21,7 +21,7 @@ def perturb(solution):
 
     return new_solution
 
-# 这个文件实现了模拟退火算法，用于优化箱子的放置。它使用了一个成本函数来评估当前的放置方案，并通过随机扰动来寻找更好的解决方案。
+# This file implements the simulated annealing algorithm for optimizing box placement. It uses a cost function to evaluate the current placement and searches for better solutions via random perturbations.
 def simulated_annealing(boxes, container, initial_temp=1000, cooling_rate=0.99, stop_T=1, max_iter=10000):
     current_solution = [b.copy() for b in boxes]
     current_cost = advanced_cost_function(current_solution, container)

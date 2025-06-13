@@ -11,25 +11,25 @@ interface AuthContextType {
   error: string | null;
 }
 
-// 创建模拟的 AuthContext
+// Create a mock AuthContext
 const MockAuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// 模拟提供者组件
+// Mock provider component
 export const MockAuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [role, setRole] = useState<UserRole | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 模拟登录函数
+  // Simulated login function
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     setError(null);
     
-    // 模拟 API 调用延迟
+    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    // 模拟登录验证逻辑
+    // Simulated login verification logic
     if (username === 'test_worker' && password === 'password') {
       setIsAuthenticated(true);
       setRole('Worker');
@@ -43,12 +43,12 @@ export const MockAuthProvider: React.FC<{ children: ReactNode }> = ({ children }
       return;
     }
     
-    // 模拟登录失败
+    // Simulated login failure
     setError('Invalid username or password');
     setIsLoading(false);
   };
 
-  // 模拟注销函数
+  // Simulated logout function
   const logout = () => {
     setIsAuthenticated(false);
     setRole(null);
@@ -68,7 +68,7 @@ export const MockAuthProvider: React.FC<{ children: ReactNode }> = ({ children }
   );
 };
 
-// 使用模拟 AuthContext 的自定义 hook
+// Custom hook to use mock AuthContext
 export const useMockAuthContext = () => {
   const context = useContext(MockAuthContext);
   if (context === undefined) {

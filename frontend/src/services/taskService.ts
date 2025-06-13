@@ -1,10 +1,10 @@
 import { Task, TaskInput, TaskHistoryItem } from '../types';
 import { authService } from './authService';
 
-// API配置
+// API configuration
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-// 获取认证token的辅助函数
+// Helper function to get auth token
 const getAuthHeaders = () => {
   const token = authService.getToken();
   return {
@@ -15,7 +15,7 @@ const getAuthHeaders = () => {
 
 // Task API Service class
 export class TaskApiService {
-  // 获取所有任务
+  // Get all tasks
   static async getTasks(): Promise<Task[]> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/manager/get_tasks`, {
@@ -30,7 +30,7 @@ export class TaskApiService {
       const data = await response.json();
       console.log('Tasks from API:', data);
 
-      // 转换API响应为前端Task格式
+      // Convert API response to frontend Task format
       const tasks: Task[] = (data.tasks || []).map((apiTask: any) => ({
         id: apiTask.task_id || apiTask.id,
         task_name: apiTask.task_name,
@@ -51,14 +51,14 @@ export class TaskApiService {
     }
   }
 
-  // 根据管理员ID获取任务
+  // Get tasks by manager ID
   static async getTasksByManager(managerId: string): Promise<Task[]> {
     try {
-      // 获取所有任务，然后筛选当前管理员的任务
+      // Get all tasks and filter by current manager
       const allTasks = await this.getTasks();
       const currentUsername = authService.getUsername();
       
-      // 根据当前登录的用户筛选任务
+      // Filter tasks by current logged-in user
       const managerTasks = allTasks.filter(task => 
         task.manager === currentUsername || 
         task.manager === managerId
@@ -72,15 +72,15 @@ export class TaskApiService {
     }
   }
 
-  // 分配任务
+  // Assign task
   static async assignTask(taskData: TaskInput): Promise<{ success: boolean; task?: Task; message?: string }> {
     try {
       console.log('Assigning task:', taskData);
 
-      // 首先找到或创建容器
+      // First, find or create container
       const containerId = await this.findOrCreateContainer(taskData.container);
 
-      // 创建任务并分配物品
+      // Create task and assign items
       const response = await fetch(`${API_BASE_URL}/api/manager/assign_task`, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -100,7 +100,7 @@ export class TaskApiService {
       const result = await response.json();
       console.log('Task assigned successfully:', result);
 
-      // 构造前端需要的Task对象格式
+      // Construct frontend Task object
       const newTask: Task = {
         id: result.task_id,
         task_name: taskData.task_name,
@@ -108,7 +108,7 @@ export class TaskApiService {
         worker: taskData.worker,
         workload: taskData.item_ids.length,
         status: 'in_progress',
-        items: [], // 可以从API获取详细信息
+        items: [], // Get details from API if needed
         container: taskData.container,
         created_at: new Date()
       };
@@ -127,7 +127,7 @@ export class TaskApiService {
     }
   }
 
-  // 更新任务状态
+  // Update task status
   static async updateTaskStatus(taskId: number, status: Task['status']): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/manager/update_task_status`, {
@@ -158,7 +158,7 @@ export class TaskApiService {
     }
   }
 
-  // 删除任务
+  // Delete task
   static async deleteTask(taskId: number): Promise<{ success: boolean; message?: string }> {
     try {
       const response = await fetch(`${API_BASE_URL}/api/manager/delete_task`, {
@@ -188,7 +188,7 @@ export class TaskApiService {
     }
   }
 
-  // 获取任务历史
+  // Get task history
   static async getTaskHistory(): Promise<TaskHistoryItem[]> {
     try {
       const tasks = await this.getTasks();
@@ -204,7 +204,7 @@ export class TaskApiService {
     }
   }
 
-  // 根据worker获取任务
+  // Get tasks by worker
   static async getTasksByWorker(worker: string): Promise<Task[]> {
     try {
       const tasks = await this.getTasks();
@@ -215,7 +215,7 @@ export class TaskApiService {
     }
   }
 
-  // 根据状态获取任务
+  // Get tasks by status
   static async getTasksByStatus(status: Task['status']): Promise<Task[]> {
     try {
       const tasks = await this.getTasks();
@@ -226,7 +226,7 @@ export class TaskApiService {
     }
   }
 
-  // 获取任务统计
+  // Get task statistics
   static async getTaskStats(): Promise<{
     total: number;
     completed: number;
@@ -257,10 +257,10 @@ export class TaskApiService {
     }
   }
 
-  // 辅助方法：查找或创建容器
+  // Helper method: find or create container
   private static async findOrCreateContainer(containerDimensions: { length: number; width: number; height: number }): Promise<number> {
     try {
-      // 获取所有容器
+      // Get all containers
       const response = await fetch(`${API_BASE_URL}/api/manager/get_containers`, {
         headers: getAuthHeaders()
       });
@@ -269,7 +269,7 @@ export class TaskApiService {
         const data = await response.json();
         const containers = data.containers || [];
 
-        // 查找匹配尺寸的容器
+        // Find container with matching dimensions
         const matchingContainer = containers.find((container: any) => 
           Math.abs(container.width - containerDimensions.width) < 0.01 &&
           Math.abs(container.height - containerDimensions.height) < 0.01 &&
@@ -282,7 +282,7 @@ export class TaskApiService {
         }
       }
 
-      // 如果没找到匹配的容器，创建新的
+      // If no matching container found, create a new one
       const createResponse = await fetch(`${API_BASE_URL}/api/manager/add_container`, {
         method: 'POST',
         headers: getAuthHeaders(),
@@ -308,7 +308,7 @@ export class TaskApiService {
     }
   }
 
-  // 状态映射：API状态 -> 前端状态
+  // Status mapping: API status -> frontend status
   private static mapApiStatusToTaskStatus(apiStatus: string): Task['status'] {
     switch (apiStatus?.toLowerCase()) {
       case 'completed':
@@ -325,7 +325,7 @@ export class TaskApiService {
     }
   }
 
-  // 状态映射：前端状态 -> API状态
+  // Status mapping: frontend status -> API status
   private static mapTaskStatusToApiStatus(taskStatus: Task['status']): string {
     switch (taskStatus) {
       case 'completed':

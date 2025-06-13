@@ -5,7 +5,6 @@ from app.auth.auth import token_required
 from app.Item.models import Item
 from app.Item.schemas import ItemCreate
 
-
 bp = Blueprint('item', __name__)
 
 @bp.route("/api/manager/add_item", methods=["POST"])
@@ -55,7 +54,7 @@ def add_item(token_data):
 def get_items(token_data):
     db: Session = SessionLocal()
     try:
-        # can filter items by assigned or not
+        # Optionally filter items by assignment status
         show_assigned = request.args.get('assigned', default=None)
         
         query = db.query(Item)
@@ -133,13 +132,13 @@ def update_item(token_data, item_id):
         
         item_data = request.get_json()
         
-        # 更新字段（注意前端length对应后端depth）
+        # Update fields (note: frontend's 'length' corresponds to backend's 'depth')
         if 'width' in item_data:
             item.width = item_data['width']
         if 'height' in item_data:
             item.height = item_data['height']
-        if 'length' in item_data:  # 前端传length
-            item.depth = item_data['length']  # 后端存depth
+        if 'length' in item_data:  # frontend sends 'length'
+            item.depth = item_data['length']  # backend uses 'depth'
         if 'orientation' in item_data:
             item.orientation = item_data['orientation']
         if 'remarks' in item_data:
@@ -193,18 +192,18 @@ def batch_delete_items(token_data):
         if not isinstance(item_ids, list) or not item_ids:
             return jsonify({"status": "error", "message": "item_ids must be a non-empty list"}), 400
         
-        # 查询要删除的items
+        # Query items to delete
         items_to_delete = db.query(Item).filter(Item.item_id.in_(item_ids)).all()
         
         if not items_to_delete:
             return jsonify({"status": "error", "message": "No items found with the provided IDs"}), 404
         
-        # 允许删除已分配的物品（因为manager想让它们从列表中消失）
-        # 删除所有items
+        # Allow deletion of assigned items (managers may want them removed from the list)
+        # Delete all items
         deleted_items = []
         for item in items_to_delete:
             deleted_items.append(item.item_name)
-            # 确保清空外键引用
+            # Clear foreign key references
             item.task_id = None
             item.is_assigned = False
             db.delete(item)
