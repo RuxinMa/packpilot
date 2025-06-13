@@ -21,7 +21,7 @@ def assign_task(token_data):
     try:
         data = request.get_json()
 
-        # 如果没有提供 task_name，则自动生成
+        # If no task_name is provided, it will be automatically generated
         task_name = data.get("task_name", f"Task-{datetime.utcnow().isoformat()}")
 
         # Create the task

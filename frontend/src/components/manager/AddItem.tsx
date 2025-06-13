@@ -50,8 +50,7 @@ const AddItem: React.FC<AddItemProps> = ({ isOpen, onClose, onItemAdded, items }
     });
     
     if (isOpen) {
-      // 使用最大ID而不是数组长度
-      let nextNumber = 1; // 默认从1开始
+      let nextNumber = 1;
       
       if (items.length > 0) {
         const maxId = Math.max(...items.map(item => item.id));

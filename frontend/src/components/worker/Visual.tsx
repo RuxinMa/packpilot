@@ -304,8 +304,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       });
       itemsRef.current = [];
     },
-    
-    
 
     // create room
     createRoom: (width: number, height: number, depth: number) => {
@@ -366,8 +364,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
       }
     },
     
-    
-    
     addItem: (params: CubeParams) => {
       if (sceneRef.current) {
         itemsRef.current.forEach(group => {
@@ -412,7 +408,6 @@ const ThreeScene = forwardRef<ThreeSceneHandle, ThreeSceneProps>((props, ref) =>
         itemsRef.current.push(group);
       }
     },
-    
     
     removeLastItem: () => {
       if (sceneRef.current && itemsRef.current.length > 0) {
