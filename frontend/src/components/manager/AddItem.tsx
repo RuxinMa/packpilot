@@ -206,21 +206,9 @@ const handleConfirmAndAddNext = async () => {
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Auto-generated preview */}
           <div className="bg-blue-50 p-4 rounded-md mb-4">
-            <div className="space-y-2">
-              <p className="text-base text-blue-700 font-medium">Auto-generated Item Details</p>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div>
-                  {/* Name: Frontend generated sequential identifier */}
-                  <span className="text-xs text-blue-700 font-medium">Name: </span>
-                  <span className="text-xs text-blue-700">{generatedName}</span>
-                </div>
-                <div>
-                  {/* ID: Backend will generate unique database key */}
-                  <span className="text-xs text-blue-700 font-medium">ID: </span>
-                  <span className="text-xs text-blue-700 ">Auto-assigned on save</span>
-                </div>
-              </div>
-            </div>
+            <p className="text-[14px] text-blue-700">
+              An ID will be automatically assigned to this item upon creation.
+              </p>
           </div>
           
           {/* Dimensions */}
