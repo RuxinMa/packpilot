@@ -19,7 +19,7 @@
 |----------|--------------|
 | **Frontend** | Language: TypeScript<br>Framework: React<br>CSS: Tailwind CSS|
 | **Backend** | Language: Python<br>Framework: Flask<br>API: RESTful API |
-| **Database** | MySQL |
+| **Database** | SQLite |
 | **Visualization** | three.js |
 | **Deployment** | CI/CD: GitHub Actions<br>Containerization: Docker |
 | **Version Control** | Git with GitHub |
