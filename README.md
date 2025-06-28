@@ -53,9 +53,7 @@ This command will:
 - Build and start both frontend (React + Vite) and backend (Flask) services
 - Run containers in the background
 
-You should also see a container named `packpilot` in your Docker Desktop, as shown in the following picture.
-
-![Docker Desktop Containers](docker-containers.png)
+You should also see a container named `packpilot` in your Docker Desktop.
 
 ### 2. Access the Application
 
