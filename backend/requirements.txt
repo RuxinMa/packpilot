@@ -8,4 +8,5 @@ bcrypt==4.0.1
 python-multipart==0.0.6
 python-dotenv==1.0.0
 flask-cors==4.0.0
+psycopg2-binary==2.9.9
 numpy
