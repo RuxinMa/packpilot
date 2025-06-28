@@ -1,19 +1,9 @@
-# LS1 Warehouse Packing Project Overview
+# PackPilot
 
-- The project addresses the gap between AI optimization solutions and practical implementation
-- We'll be developing a web application to guide workers in following AI-recommended packing arrangements
+An AI-powered warehouse management platform -- PackPilot, featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualisation.
 
-## Team Structure
-- **Supervisor:** Lia Song
-- **Team Members:**
-  - Feinan Guo
-  - Jiahui Huang
-  - Ruxin Ma
-  - Shiyu Zhao 
-  - Xuran Chen 
-  - Jiabao Ye (External)
 
-## Technology Stack
+## Technologies
 
 | Category | Technologies |
 |----------|--------------|
@@ -25,36 +15,85 @@
 | **Version Control** | Git with GitHub |
 | **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
 
+## Prerequisites
 
-## Development Workflow
+### Install Docker Desktop
 
-### Branch Structure
+Ensure **Docker Desktop** is installed on your system:
+- Download from: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+- Docker Compose is included with Docker Desktop
 
-**Final Deliverable Branches:**
-- `main` - Project overview and official documentation (project docs, meeting minutes, timesheets)
-- `integration` - Final project code including frontend and backend, built with Docker
+### Verify Installation
 
-**Development Branches** *(cleared at project end)*:
-- `dev-frontend` - Main development branch for frontend components and UI features
-- `dev-backend` - Main development branch for backend services and API endpoints
-- `feature/[feature-name]` - Short-lived branches for specific features
-- `bugfix/[bug-name]` - Short-lived branches for specific issues
+After installation, verify Docker is working properly:
 
-### Pull Request Process
-1. Create a feature/bugfix branch from main
-2. Implement your changes with appropriate tests
-3. Submit a PR to the develop main branch
-4. Request review from at least one team member
-5. Merge after approval and passing CI checks
+```bash
+docker --version
+docker compose version
+```
 
-## Commmunication Plan
+You should see output similar to:
+```
+Docker version 24.0.x, build xxxxx
+Docker Compose version v2.x.x
+```
+**If commands are not recognized:** Ensure Docker Desktop is installed and running, then restart your terminal.
 
-### Meeting Schedule
-- Client Meetings: Every two weeks, on Friday 16:15-17:00 (Sprint review & Next Sprint planning) 
-- Team Meetings: Every week, on Friday 17:00-18:00 (Additional meetings as needed) 
+## How to Run the Project
 
-### Communication Channels
-- Project management: GitHub-Kanban
-- Code repository: GitHub
-- Client meetings: Microsoft Teams
-- Team communication: Teams & WeChat
+### 1. Start the Application
+
+Navigate to the project root directory and run the following command in the `integration/` folder:
+
+```bash
+docker compose up --build -d
+```
+
+This command will:
+- Build and start both frontend (React + Vite) and backend (Flask) services
+- Run containers in the background
+
+You should also see a container named `packpilot` in your Docker Desktop, as shown in the following picture.
+
+![Docker Desktop Containers](docker-containers.png)
+
+### 2. Access the Application
+
+Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
+
+Alternatively, click the port `5173:80` link in your Docker Desktop interface.
+
+### 3. Explore the Application
+
+**Test Accounts:** 
+- **Manager:** username: `manager1`, password: `password123`
+- **Worker:** username: `worker1`, password: `password123`
+
+### 4. Stop the Application
+
+To stop all services:
+
+```bash
+docker compose down
+```
+
+## Troubleshooting
+
+### Database Issues
+
+If data is not saving or appears outdated:
+
+1. Stop the application:
+   ```bash
+   docker compose down
+   ```
+
+2. Remove the database file:
+   ```bash
+   rm backend/app/db/app.db
+   ```
+
+3. Restart the application:
+   ```bash
+   docker compose up --build -d
+   ```
