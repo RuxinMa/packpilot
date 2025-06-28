@@ -62,7 +62,7 @@ def create_app():
     app = Flask(__name__)
     
     # Enable CORS for all routes
-    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173"], 
+    CORS(app, origins=["http://localhost:5173", "http://127.0.0.1:5173", "https://packpilot-frontend.vercel.app"], 
          allow_headers=["Content-Type", "Authorization"], 
          methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"])
     
@@ -84,6 +84,10 @@ def create_app():
                 "ai_get_layout": "/api/ai/get_task_layout/<task_id>"
             }
         })
+    
+    @app.route('/health')
+    def health():
+        return jsonify({"status": "healthy", "service": "PackPilot API"})
 
     # Register blueprints
     app.register_blueprint(auth_bp)
