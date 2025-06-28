@@ -109,10 +109,10 @@ for rule in app.url_map.iter_rules():
     print(f"{rule.methods} {rule.rule}")
 
 # Create DB tables after app is created
-# with app.app_context():
-#     Base.metadata.create_all(bind=engine)
-#     # automatically create default users
-#     create_default_users()
+with app.app_context():
+    Base.metadata.create_all(bind=engine)
+    # automatically create default users
+    create_default_users()
 
 # For direct local runs (optional)
 if __name__ == "__main__":
