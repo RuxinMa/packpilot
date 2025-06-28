@@ -1,97 +1,144 @@
-# PackPilot
+# PackPilot 📦
 
-An AI-powered warehouse management platform -- PackPilot, featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualisation.
+An AI-powered warehouse management platform featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualization.
 
+## 🌐 Live Demo
 
-## Technologies
+**Frontend (Vercel):** [https://packpilot-frontend.vercel.app](https://packpilot-frontend.vercel.app)  
+**Backend API (Railway):** [https://packpilot-production.up.railway.app](https://packpilot-production.up.railway.app)
 
-| Category | Technologies |
-|----------|--------------|
-| **Frontend** | Language: TypeScript<br>Framework: React<br>CSS: Tailwind CSS|
-| **Backend** | Language: Python<br>Framework: Flask<br>API: RESTful API |
-| **Database** | SQLite |
-| **Visualization** | three.js |
-| **Deployment** | CI/CD: GitHub Actions<br>Containerization: Docker |
-| **Version Control** | Git with GitHub |
-| **Testing** | Frontend: React Testing Library <br>Backend: Pytest|
-
-## Prerequisites
-
-### Install Docker Desktop
-
-Ensure **Docker Desktop** is installed on your system:
-- Download from: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
-- Docker Compose is included with Docker Desktop
-
-### Verify Installation
-
-After installation, verify Docker is working properly:
-
-```bash
-docker --version
-docker compose version
-```
-
-You should see output similar to:
-```
-Docker version 24.0.x, build xxxxx
-Docker Compose version v2.x.x
-```
-**If commands are not recognized:** Ensure Docker Desktop is installed and running, then restart your terminal.
-
-## How to Run the Project
-
-### 1. Start the Application
-
-Navigate to the project root directory and run the following command in the `integration/` folder:
-
-```bash
-docker compose up --build -d
-```
-
-This command will:
-- Build and start both frontend (React + Vite) and backend (Flask) services
-- Run containers in the background
-
-You should also see a container named `packpilot` in your Docker Desktop.
-
-### 2. Access the Application
-
-Open your browser and navigate to: **[http://localhost:5173](http://localhost:5173)**
-
-Alternatively, click the port `5173:80` link in your Docker Desktop interface.
-
-### 3. Explore the Application
-
-**Test Accounts:** 
+### Test Accounts
 - **Manager:** username: `manager1`, password: `password123`
 - **Worker:** username: `worker1`, password: `password123`
 
-### 4. Stop the Application
+## 👥 Team Members
 
-To stop all services:
+| Name | Role | GitHub |
+|------|------|--------|
+| Ruxin Ma| Team Lead, Frontend Developer | [@RuxinMa] |
+| Feinan Guo | Backend Developer | [@username2] |
+| Jiahui Huang | 3D Visualization Engineer | [@username3] |
+| Jiabao Ye | Algorithm Engineer | [@username4] |
+| Xuran Chen | Backend Developer | [@username4] |
+| Shiyu Zhao | Frontend Developer | [@username4] |
 
-```bash
-docker compose down
-```
+## 🚀 Project Overview
 
-## Troubleshooting
+PackPilot is a comprehensive warehouse management solution that streamlines inventory operations through:
 
-### Database Issues
+- **Dual User Interfaces**: Separate dashboards for managers and workers
+- **Real-time Synchronization**: Live updates across all user sessions
+- **AI-Powered Optimization**: Intelligent packing algorithms
+- **3D/2D Visualization**: Interactive container and item visualization
+- **Task Management**: Assign, track, and complete warehouse tasks
+- **Inventory Control**: Add, update, and manage items and containers
 
-If data is not saving or appears outdated:
+## 🛠️ Technology Stack
 
-1. Stop the application:
+| Category | Technologies |
+|----------|--------------|
+| **Frontend** | TypeScript, React, Tailwind CSS, Three.js |
+| **Backend** | Python, Flask, SQLAlchemy, RESTful API |
+| **Database** | SQLite (Development), PostgreSQL (Production) |
+| **Authentication** | JWT, bcrypt |
+| **Deployment** | Vercel (Frontend), Railway (Backend), Docker |
+| **Version Control** | Git, GitHub |
+| **Testing** | React Testing Library, Pytest |
+
+
+## 🐳 Development Setup (Docker)
+
+### Prerequisites
+
+1. **Docker Desktop** installed and running
+   - Download: [https://www.docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop)
+   - Verify installation:
+     ```bash
+     docker --version
+     docker compose version
+     ```
+
+### Quick Start
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd PackPilot
+   ```
+
+2. **Start the application**
+   ```bash
+   cd integration/
+   docker compose up --build -d
+   ```
+
+3. **Access the application**
+   - **Frontend:** [http://localhost:5173](http://localhost:5173)
+   - **Backend API:** [http://localhost:5000](http://localhost:5000)
+
+4. **Stop the application**
    ```bash
    docker compose down
    ```
 
-2. Remove the database file:
-   ```bash
-   rm backend/app/db/app.db
-   ```
+### Development Workflow
 
-3. Restart the application:
-   ```bash
-   docker compose up --build -d
-   ```
+- **Live Reload**: Both frontend and backend support hot reloading
+- **Database Persistence**: Data persists between container restarts
+- **Logs**: View logs with `docker compose logs -f`
+- **Reset Database**: 
+  ```bash
+  docker compose down
+  rm backend/app/db/app.db
+  docker compose up --build -d
+  ```
+
+## 🌟 Key Features
+
+### For Managers
+- **Dashboard Overview**: Real-time statistics and insights
+- **Inventory Management**: Add, edit, and delete items and containers
+- **Task Assignment**: Create and assign tasks to workers
+- **AI Optimization**: Optimize packing strategies
+- **Analytics**: Track performance metrics
+
+### For Workers
+- **Task Queue**: View assigned tasks
+- **Item Scanning**: Quick item lookup and updates
+- **Task Completion**: Mark tasks as completed
+- **Real-time Updates**: See live inventory changes
+
+### Technical Features
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Real-time Sync**: WebSocket-like behavior for live updates
+- **3D Visualization**: Interactive container packing views
+- **RESTful API**: Clean, documented API endpoints
+- **Authentication**: Secure JWT-based auth system
+
+## 🚀 Deployment
+
+### Production URLs
+- **Frontend**: Deployed on Vercel with automatic CI/CD from GitHub
+- **Backend**: Deployed on Railway with PostgreSQL database
+- **Domain**: Custom domains configured for both services
+
+### Environment Variables
+```bash
+# Backend (Railway)
+DATABASE_URL=postgresql://...
+JWT_SECRET_KEY=your-secret-key
+
+# Frontend (Vercel)
+VITE_API_BASE_URL=https://packpilot-production.up.railway.app
+```
+
+## 🆘 Support
+
+For questions or issues:
+- Create an issue on GitHub
+- Contact the development team
+- Check the documentation in `/packpilot_docs/`
+
+---
+
+**Built with ❤️ by the PackPilot Team**
