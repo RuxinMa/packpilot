@@ -2,7 +2,7 @@ import { Task, TaskInput, TaskHistoryItem } from '../types';
 import { authService } from './authService';
 
 // API configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 // Helper function to get auth token
 const getAuthHeaders = () => {
