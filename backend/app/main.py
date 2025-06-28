@@ -89,6 +89,7 @@ def create_app():
     def health():
         return jsonify({"status": "healthy", "service": "PackPilot API"})
 
+
     # Register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(item_bp)
@@ -108,10 +109,10 @@ for rule in app.url_map.iter_rules():
     print(f"{rule.methods} {rule.rule}")
 
 # Create DB tables after app is created
-with app.app_context():
-    Base.metadata.create_all(bind=engine)
-    # automatically create default users
-    create_default_users()
+# with app.app_context():
+#     Base.metadata.create_all(bind=engine)
+#     # automatically create default users
+#     create_default_users()
 
 # For direct local runs (optional)
 if __name__ == "__main__":
