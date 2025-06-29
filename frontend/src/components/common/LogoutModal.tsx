@@ -23,8 +23,6 @@ const LogoutConfirmModal: React.FC<LogoutConfirmModalProps> = ({
         <p className="text-gray-700 text-xl text-center mb-4">
           Are you sure you want to log out?
         </p>
-
-
         <div className="flex justify-center space-x-16">
           <Button onClick={onClose} variant="secondary">
             Cancel
