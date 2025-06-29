@@ -63,12 +63,11 @@ PackPilot is a comprehensive warehouse management solution that streamlines inve
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd PackPilot
+   cd packpilot/
    ```
 
 2. **Start the application**
    ```bash
-   cd integration/
    docker compose up --build -d
    ```
 

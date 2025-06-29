@@ -77,7 +77,14 @@ const backendToFrontend = (backendItem: any): Item => ({
   orientation: backendItem.orientation || 'Face Up',
   remarks: backendItem.remarks || '',
   is_fragile: Boolean(backendItem.is_fragile),
-  created_at: new Date() // backend has no created_at field, use current time
+  // 修复：正确处理创建时间
+  created_at: backendItem.created_at 
+    ? new Date(backendItem.created_at) 
+    : backendItem.created_time 
+    ? new Date(backendItem.created_time)
+    : backendItem.create_time
+    ? new Date(backendItem.create_time)
+    : new Date() // 只有当后端完全没有时间字段时才使用当前时间
 });
 
 // Data transformation: frontend format -> backend format
@@ -102,6 +109,7 @@ export class ItemApiService {
       
       if (response.ok) {
         const data = await response.json();
+        console.log('Backend response:', data); // 调试日志：查看后端返回的数据结构
         return (data.items || []).map(backendToFrontend);
       } else {
         const errorData = await response.json();
@@ -134,26 +142,42 @@ export class ItemApiService {
       }
 
       const data = await response.json();
+      console.log('Add item response:', data); 
       
       if (data.status === 'success') {
-        // Construct frontend-format item object
-        const newItem: Item = {
-          id: data.item_id,           // use backend returned ID
-          name: data.item_name,       // use backend generated name
-          length: itemData.length,
-          width: itemData.width,
-          height: itemData.height,
-          orientation: itemData.orientation,
-          remarks: itemData.remarks,
-          is_fragile: itemData.is_fragile,
-          created_at: new Date()
-        };
-        
-        return {
-          success: true,
-          item: newItem,
-          message: data.message || 'Item added successfully'
-        };
+        if (data.item) {
+          const newItem = backendToFrontend(data.item);
+          return {
+            success: true,
+            item: newItem,
+            message: data.message || 'Item added successfully'
+          };
+        } else {
+          const newItem: Item = {
+            id: data.item_id,           // use backend returned ID
+            name: data.item_name,       // use backend generated name
+            length: itemData.length,
+            width: itemData.width,
+            height: itemData.height,
+            orientation: itemData.orientation || 'Face Up',
+            remarks: itemData.remarks || '',
+            is_fragile: itemData.is_fragile,
+            // Using the created time returned by the backend
+            created_at: data.created_at 
+              ? new Date(data.created_at)
+              : data.created_time
+              ? new Date(data.created_time)
+              : data.create_time
+              ? new Date(data.create_time)
+              : new Date() // backup
+          };
+          
+          return {
+            success: true,
+            item: newItem,
+            message: data.message || 'Item added successfully'
+          };
+        }
       } else {
         throw new Error(data.message || 'Failed to add item');
       }

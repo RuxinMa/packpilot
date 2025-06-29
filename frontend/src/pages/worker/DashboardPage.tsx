@@ -8,13 +8,16 @@ import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
+import TaskCompletionModal from '../../components/worker/TaskCompletion';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 
 const WorkerDashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const { logout, username, isLoading: authLoading } = useAuthContext();
   const [isLastItem, setIsLastItem] = useState(false);
-  const [isTaskStarted, setIsTaskStarted] = useState(false); // New: track whether the task has started
+  const [isTaskStarted, setIsTaskStarted] = useState(false); // Track whether the task has started
+  const [showCompletionModal, setShowCompletionModal] = useState(false); // Control completion modal
+  const [isCompletingTask, setIsCompletingTask] = useState(false); // New: track completion process
   
   const { tasks, selectedTaskId, setSelectedTaskId, aiOutput, loading, error, fetchTaskLayout, completeTask } = useTaskData();
 
@@ -104,7 +107,6 @@ const switchTo3D = () => {
   }
 };
 
-
 const handleNextItem = async () => {
   // If there is a task but no layout, fetch the layout first
   if (hasTaskButNoLayout && selectedTaskId) {
@@ -177,27 +179,49 @@ const handlePreviousTask = () => {
   }
 };
 
-const handleFinish = async () => {
+// Show confirmation modal instead of directly completing task
+const handleFinishClick = () => {
+  setShowCompletionModal(true);
+};
+
+// Handle actual task completion after confirmation
+const handleConfirmCompletion = async () => {
   if (selectedTaskId) {
-    const result = await completeTask(selectedTaskId);
-    if (result.success) {
-      // completeTask  Task removal is already handled inside completeTask, only reset the state here
-      setPackingProgress({ current: 0, total: 0 });
-      setCurrentItem(null);
-      setIsLastItem(false);
-      setIsTaskStarted(false); // Reset task started state
-      
-      //Reset the 3D scene
-      if (threeSceneRef.current) {
-        threeSceneRef.current.resetScene();
+    setIsCompletingTask(true);
+    try {
+      const result = await completeTask(selectedTaskId);
+      if (result.success) {
+        // Reset all states
+        setPackingProgress({ current: 0, total: 0 });
+        setCurrentItem(null);
+        setIsLastItem(false);
+        setIsTaskStarted(false);
+        setShowCompletionModal(false);
+        
+        // Reset the 3D scene
+        if (threeSceneRef.current) {
+          threeSceneRef.current.resetScene();
+        }
+        
+        alert("Congrats! You have finished the task");
+      } else {
+        alert(`Failed to complete task: ${result.message}`);
       }
-      
-      alert("Congrats！You have finished the task");
-    } else {
-      alert(`Failed to complete task: ${result.message}`);
+    } catch (error) {
+      alert(`Error completing task: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsCompletingTask(false);
     }
   } else {
     alert("No task selected");
+    setShowCompletionModal(false);
+  }
+};
+
+// New: Handle modal close
+const handleCloseCompletionModal = () => {
+  if (!isCompletingTask) {
+    setShowCompletionModal(false);
   }
 };
 
@@ -274,7 +298,7 @@ return (
                     ? 'bg-gray-400 text-gray-300 cursor-not-allowed'
                     : 'bg-blue-600 text-white hover:bg-blue-700'
                 }`}
-                onClick={isLastItem ? handleFinish : handleNextItem}
+                onClick={isLastItem ? handleFinishClick : handleNextItem}
                 disabled={hasNoTasks}
               >
                 {hasTaskButNoLayout ? "Start Task" : (isLastItem ? "Finish" : "Next Item")}
@@ -374,6 +398,16 @@ return (
         </div>
       </div>
     </div>
+
+    {/* Task Completion Modal */}
+    <TaskCompletionModal
+      isOpen={showCompletionModal}
+      onClose={handleCloseCompletionModal}
+      onConfirm={handleConfirmCompletion}
+      taskName={aiOutput?.task_info?.task_name}
+      itemCount={packingProgress.total}
+      isSubmitting={isCompletingTask}
+    />
   </div>
 );
 };
