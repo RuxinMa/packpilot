@@ -26,7 +26,7 @@ def create_default_users():
         # create default users
         test_users = [
             {
-                "username": "manager1",
+                "username": "manager",
                 "password": "password123", 
                 "role": UserRole.Manager
             },
@@ -34,7 +34,17 @@ def create_default_users():
                 "username": "worker1",
                 "password": "password123",
                 "role": UserRole.Worker
-            }
+            },
+            {
+                "username": "worker2",
+                "password": "password123",
+                "role": UserRole.Worker
+            },
+            {
+                "username": "worker3",
+                "password": "password123",
+                "role": UserRole.Worker
+            },
         ]
         
         for user_data in test_users:

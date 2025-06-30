@@ -1,6 +1,6 @@
 # PackPilot 📦
 
-An AI-powered warehouse management platform featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualization.
+An AI-powered warehouse management platform - `PackPilot`, featuring dual-user interfaces for managers and workers with real-time synchronization and 3D/2D packing visualization.
 
 ## 🌐 Live Demo
 
@@ -8,19 +8,19 @@ An AI-powered warehouse management platform featuring dual-user interfaces for m
 **Backend API (Railway):** [https://packpilot-production.up.railway.app](https://packpilot-production.up.railway.app)
 
 ### Test Accounts
-- **Manager:** username: `manager1`, password: `password123`
-- **Worker:** username: `worker1`, password: `password123`
+- **Manager:** username: `manager`, password: `password123`
+- **Worker:** username: `worker1`/`worker2`/`worker3`, password: `password123`
 
 ## 👥 Team Members
 
 | Name | Role | GitHub |
 |------|------|--------|
 | Ruxin Ma| Team Lead, Frontend Developer | [@RuxinMa] |
-| Feinan Guo | Backend Developer | [@username2] |
-| Jiahui Huang | 3D Visualization Engineer | [@username3] |
-| Jiabao Ye | Algorithm Engineer | [@username4] |
-| Xuran Chen | Backend Developer | [@username4] |
-| Shiyu Zhao | Frontend Developer | [@username4] |
+| Feinan Guo | Backend Developer | [@Richkwokkk] |
+| Jiahui Huang | 3D Visualization Engineer | [@Itsgreyya] |
+| Jiabao Ye | Algorithm Engineer | [@Jer233] |
+| Xuran Chen | Backend Developer | [@calvinjshaw] |
+| Shiyu Zhao | Frontend Developer | [@mangosherry] |
 
 ## 🚀 Project Overview
 
@@ -28,7 +28,7 @@ PackPilot is a comprehensive warehouse management solution that streamlines inve
 
 - **Dual User Interfaces**: Separate dashboards for managers and workers
 - **Real-time Synchronization**: Live updates across all user sessions
-- **AI-Powered Optimization**: Intelligent packing algorithms
+- **AI-Powered Optimization**: Intelligent AI-powered packing algorithms integration
 - **3D/2D Visualization**: Interactive container and item visualization
 - **Task Management**: Assign, track, and complete warehouse tasks
 - **Inventory Control**: Add, update, and manage items and containers
@@ -80,39 +80,25 @@ PackPilot is a comprehensive warehouse management solution that streamlines inve
    docker compose down
    ```
 
-### Development Workflow
-
-- **Live Reload**: Both frontend and backend support hot reloading
-- **Database Persistence**: Data persists between container restarts
-- **Logs**: View logs with `docker compose logs -f`
-- **Reset Database**: 
-  ```bash
-  docker compose down
-  rm backend/app/db/app.db
-  docker compose up --build -d
-  ```
-
 ## 🌟 Key Features
 
 ### For Managers
-- **Dashboard Overview**: Real-time statistics and insights
-- **Inventory Management**: Add, edit, and delete items and containers
+- **Login**: Secure authentication with role-based access
+- **Inventory Management**: Add, edit, and delete items with detailed specifications
 - **Task Assignment**: Create and assign tasks to workers
-- **AI Optimization**: Optimize packing strategies
-- **Analytics**: Track performance metrics
+- **Task Monitoring**: Track task history and completion status
 
 ### For Workers
-- **Task Queue**: View assigned tasks
-- **Item Scanning**: Quick item lookup and updates
-- **Task Completion**: Mark tasks as completed
-- **Real-time Updates**: See live inventory changes
+- **Login**: Quick and secure worker authentication
+- **Task Reception**: Streamlined task selection and acceptance
+- **Task Operation**: Next/previous navigation buttons with real-time progress tracking
+- **Visualisation and Guidance**: Intuitive 3D/2D packing guidance powered by AI optimization algorithms 
 
 ### Technical Features
-- **Responsive Design**: Works on desktop, tablet, and mobile
-- **Real-time Sync**: WebSocket-like behavior for live updates
-- **3D Visualization**: Interactive container packing views
-- **RESTful API**: Clean, documented API endpoints
-- **Authentication**: Secure JWT-based auth system
+- **Real-time Sync**: Live updates and synchronization across all connected clients
+- **3D Visualization**: Interactive container packing views with dual 2D/3D perspectives
+- **RESTful API**: Clean, well-documented API endpoints for seamless integration
+- **Authentication**: Secure JWT-based authentication system with role management
 
 ## 🚀 Deployment
 
