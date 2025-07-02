@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
+// import RegisterPage from '../pages/auth/RegisterPage';
 import ManagerDashboardPage from '../pages/manager/DashboardPage';
 import WorkerDashboardPage from '../pages/worker/DashboardPage';
 import NotFoundPage from '../pages/common/NotFoundPage';
@@ -17,10 +17,11 @@ const AppRoutes = () => {
         path="/login" 
         element={<LoginPage />} 
       />
-      <Route 
+      {/* /* Diasable register route for now */}
+      {/* <Route 
         path="/register" 
         element={<RegisterPage />} 
-      />
+      /> */} 
       <Route 
         path="/dashboard/manager" 
         element={
