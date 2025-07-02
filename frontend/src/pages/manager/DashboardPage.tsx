@@ -137,7 +137,7 @@ const ManagerDashboardPage: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-4 py-4">
         <div className="flex h-[calc(100vh-160px)]">
           
           {/* Left Sidebar - Control Panel */}
@@ -260,6 +260,14 @@ const ManagerDashboardPage: React.FC = () => {
         itemId={selectedItemId}
         onItemDeleted={handleItemDeleted}
       />
+
+      {/* Footer */}
+      <div className="text-center">
+        <p className="text-xs text-gray-400">
+          © 2025 PackPilot. All rights reserved.
+        </p>
+      </div>
+
     </div>
   );
 };

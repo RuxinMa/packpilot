@@ -231,7 +231,7 @@ return (
     <Header title="Warehouse Worker Dashboard" viewType="Worker" />
 
     {/* Main Content */}
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto px-4 py-4">
       <div className="flex h-[calc(100vh-160px)]">
 
         {/* Left Sidebar - Control Panel */}
@@ -408,6 +408,13 @@ return (
       itemCount={packingProgress.total}
       isSubmitting={isCompletingTask}
     />
+
+    {/* Footer */}
+    <div className="text-center">
+      <p className="text-xs text-gray-400">
+        © 2025 PackPilot. All rights reserved.
+      </p>
+    </div>
   </div>
 );
 };
