@@ -7,7 +7,7 @@ const Footer = () => {
         © 2025 PackPilot. All rights reserved.
       </p>
       <a
-        href="https://github.com/RuxinMa/tours-app"
+        href="https://github.com/RuxinMa/packpilot"
         target="_blank"
         rel="noopener noreferrer"
         className="flex items-center gap-4 text-gray-400 hover:text-blue-600 transition-colors duration-200 group"
