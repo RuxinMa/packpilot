@@ -8,6 +8,7 @@ import Header from '../../components/common/Header';
 import ProgressBar from '../../components/worker/ProgressBar';
 import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
+import Footer from '../../components/common/Footer';
 import TaskCompletionModal from '../../components/worker/TaskCompletion';
 import ThreeScene, { ThreeSceneHandle } from '../../components/worker/Visual';
 
@@ -408,13 +409,8 @@ return (
       itemCount={packingProgress.total}
       isSubmitting={isCompletingTask}
     />
-
     {/* Footer */}
-    <div className="text-center">
-      <p className="text-xs text-gray-400">
-        © 2025 PackPilot. All rights reserved.
-      </p>
-    </div>
+    <Footer />
   </div>
 );
 };

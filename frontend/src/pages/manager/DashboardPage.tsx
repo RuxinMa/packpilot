@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { useItemContext } from '../../contexts/ItemContext';
@@ -14,6 +15,7 @@ import TaskHistory from '../../components/manager/TaskHistory';
 import ItemList from '../../components/manager/ItemList';
 import UserLog from '../../components/common/UserLog';
 import Button from '../../components/common/Button';
+import Footer from '../../components/common/Footer';
 
 const ManagerDashboardPage: React.FC = () => {
   const { logout, username, isLoading: authLoading } = useAuthContext();
@@ -262,12 +264,7 @@ const ManagerDashboardPage: React.FC = () => {
       />
 
       {/* Footer */}
-      <div className="text-center">
-        <p className="text-xs text-gray-400">
-          © 2025 PackPilot. All rights reserved.
-        </p>
-      </div>
-
+      <Footer />
     </div>
   );
 };
