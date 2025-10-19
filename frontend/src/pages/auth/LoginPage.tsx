@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
+import Footer from '../../components/common/Footer';
 import { useAuthContext } from '../../contexts/AuthContext';
 import { FaUserShield, FaInfoCircle } from 'react-icons/fa';
 
@@ -41,7 +42,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center space-y-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center space-y-4 px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <div className="sm:mx-auto sm:w-full sm:max-w-lg"> 
         <div className="text-center">
@@ -94,11 +95,7 @@ const LoginPage: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="text-center">
-        <p className="text-xs text-gray-400">
-          © 2025 PackPilot. All rights reserved.
-        </p>
-      </div>
+      <Footer />
     </div>
   );
 };
